@@ -1,7 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.application
 
 import com.yourssu.ssugaeting.domain.Response
-import com.yourssu.ssugaeting.domain.profile.application.dto.NicknameCreatedRequest
+import com.yourssu.ssugaeting.domain.profile.application.dto.NicknameGeneratedRequest
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileCreatedRequest
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileFoundRequest
 import com.yourssu.ssugaeting.domain.profile.application.dto.TicketConsumedRequest
@@ -27,7 +27,7 @@ class ProfileController(
     }
 
     @PostMapping("/nickname")
-    fun createNickname(@Valid @RequestBody request: NicknameCreatedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {
+    fun generateNickname(@Valid @RequestBody request: NicknameGeneratedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {
         val response = profileService.createNickname(request.toCommand())
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Response(result = response))

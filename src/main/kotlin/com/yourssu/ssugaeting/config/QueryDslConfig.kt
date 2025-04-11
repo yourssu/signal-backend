@@ -1,4 +1,4 @@
-package com.yourssu.soongpt.common.config
+package com.yourssu.ssugaeting.config
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager

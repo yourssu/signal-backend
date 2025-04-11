@@ -1,6 +1,13 @@
 package com.yourssu.ssugaeting.domain.viewer.business.dto
 
+import com.yourssu.ssugaeting.domain.verification.implement.VerificationCode
+
 class VerificationResponse(
-   val verificationCode: String,
+   val verificationCode: Int,
 ) {
+   companion object {
+        fun from(verificationCode: VerificationCode): VerificationResponse {
+             return VerificationResponse(verificationCode.value)
+        }
+   }
 }

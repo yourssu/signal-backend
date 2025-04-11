@@ -1,13 +1,11 @@
 package com.yourssu.ssugaeting.domain.viewer.business
 
-import jakarta.validation.constraints.NotBlank
-
+import com.yourssu.ssugaeting.domain.common.implement.Uuid
 
 class VerificationCommand(
-    @field:NotBlank
     val uuid: String,
 ) {
-    fun toDomain(): String {
-        return uuid
+    fun toDomain(): Uuid {
+        return Uuid(uuid)
     }
 }

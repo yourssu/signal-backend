@@ -12,5 +12,4 @@ class ProfileService(
     fun createProfile(command: ProfileCreatedCommand): ProfileResponse {
         return ProfileResponse.from(profileRepository.save(command.toDomain()))
     }
-
 }

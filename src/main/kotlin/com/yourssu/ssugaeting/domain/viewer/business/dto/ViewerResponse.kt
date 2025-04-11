@@ -5,6 +5,6 @@ class ViewerResponse(
     val uuid: String,
     val ticket: Int,
     val usedTicket: Int,
-    val updatedDate: String,
+    val updatedTime: String,
 ) {
 }

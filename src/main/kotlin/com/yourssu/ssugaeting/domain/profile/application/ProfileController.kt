@@ -25,23 +25,23 @@ class ProfileController(
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Response(result = response))
     }
-
-    @PostMapping("/nickname")
-    fun generateNickname(@Valid @RequestBody request: NicknameGeneratedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {
-        val response = profileService.createNickname(request.toCommand())
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(Response(result = response))
-    }
-
-    @GetMapping
-    fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<ProfileResponse>> {
-        val response = profileService.getProfile(request.toCommand())
-        return ResponseEntity.ok(Response(result = response))
-    }
-
-    @PostMapping("/contact")
-    fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest): ResponseEntity<Response<ProfileContactResponse>> {
-        val response = profileService.consumeTicket(request.toCommand())
-        return ResponseEntity.ok(Response(result = response))
-    }
+//
+//    @PostMapping("/nickname")
+//    fun generateNickname(@Valid @RequestBody request: NicknameGeneratedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {
+//        val response = profileService.createNickname(request.toCommand())
+//        return ResponseEntity.status(HttpStatus.CREATED)
+//            .body(Response(result = response))
+//    }
+//
+//    @GetMapping
+//    fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<ProfileResponse>> {
+//        val response = profileService.getProfile(request.toCommand())
+//        return ResponseEntity.ok(Response(result = response))
+//    }
+//
+//    @PostMapping("/contact")
+//    fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest): ResponseEntity<Response<ProfileContactResponse>> {
+//        val response = profileService.consumeTicket(request.toCommand())
+//        return ResponseEntity.ok(Response(result = response))
+//    }
 }

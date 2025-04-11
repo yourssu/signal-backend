@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank
 
 class ViewersFoundRequest(
     @field:NotBlank
-    val uuid: String,
+    val secretKey: String,
 ) {
 }

@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank
 
 class NicknameGeneratedRequest(
     @field:NotBlank
-    val description: String,
+    val description: List<String>,
 ) {
 }

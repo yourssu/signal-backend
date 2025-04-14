@@ -6,6 +6,7 @@ import com.yourssu.ssugaeting.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.ssugaeting.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.ssugaeting.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.ssugaeting.domain.viewer.implement.VerificationReader
+import com.yourssu.ssugaeting.domain.viewer.implement.ViewerReader
 import com.yourssu.ssugaeting.domain.viewer.implement.ViewerWriter
 import org.springframework.stereotype.Service
 
@@ -14,6 +15,7 @@ class ViewerService(
     private val verificationWriter: VerificationWriter,
     private val verificationReader: VerificationReader,
     private val viewerWriter: ViewerWriter,
+    private val viewerReader: ViewerReader,
     private val adminAccessChecker: AdminAccessChecker,
 ) {
     fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
@@ -26,6 +28,11 @@ class ViewerService(
         val uuid = verificationReader.findByCode(command.toVerificationCode())
         val viewer = viewerWriter.issueTicket(uuid = uuid, ticket = command.ticket)
         verificationWriter.remove(uuid)
+        return ViewerResponse.from(viewer)
+    }
+
+    fun getViewer(command: ViewerFoundCommand): ViewerResponse {
+        val viewer = viewerReader.get(command.toDomain())
         return ViewerResponse.from(viewer)
     }
 }

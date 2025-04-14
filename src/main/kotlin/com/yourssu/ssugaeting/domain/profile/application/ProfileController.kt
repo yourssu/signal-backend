@@ -27,6 +27,7 @@ class ProfileController(
         val response = profileService.getProfile(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
+
 //
 //    @PostMapping("/nickname")
 //    fun generateNickname(@Valid @RequestBody request: NicknameGeneratedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {

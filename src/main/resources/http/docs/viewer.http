@@ -33,3 +33,10 @@ Content-Type: application/json
 
 ###
 // The verification code is able to be used only once.
+
+
+// Get a Viewer by uuid - 200 OK
+###
+GET {{host}}/api/viewers/uuid?uuid={{uuid}}
+
+###

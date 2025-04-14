@@ -1,6 +1,6 @@
 @host=localhost:8080
 
-// Create a new profile - 400 Bad Request
+// When the gender is blank, return 400 Bad Request
 ###
 POST {{host}}/api/profiles
 Content-Type: application/json
@@ -15,8 +15,52 @@ Content-Type: application/json
 
 ###
 
+// When the animal is blank, return 400 Bad Request
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
 
-// Create a new profile - 400 Bad Request
+{
+  "gender": "MALE",
+  "animal": "",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "Maximum length is 32 characters"
+}
+
+###
+
+// When the contact is blank, return 400 Bad Request
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "animal": "DOG",
+  "contact": "",
+  "mbti": "ISTJ",
+  "nickname": "Maximum length is 32 characters"
+}
+
+###
+
+// When the MBTI value is invalid, return 400 Bad Request
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "iiii",
+  "nickname": "Maximum length is 32 characters"
+}
+
+###
+
+// When the nickname exceeds the maximum length, return 400 Bad Request
 ###
 POST {{host}}/api/profiles
 Content-Type: application/json
@@ -28,5 +72,3 @@ Content-Type: application/json
   "mbti": "ISTJ",
   "nickname": "Maximum length is 32 characters. Maximum length is 32 characters. Maximum length is 32 characters."
 }
-
-###

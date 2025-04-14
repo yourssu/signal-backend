@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.domain.profile.application
 
-import com.yourssu.ssugaeting.domain.Response
+import com.yourssu.ssugaeting.domain.common.business.Response
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileCreatedRequest
 import com.yourssu.ssugaeting.domain.profile.business.ProfileService
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse

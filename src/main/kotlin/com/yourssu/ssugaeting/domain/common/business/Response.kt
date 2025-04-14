@@ -1,4 +1,4 @@
-package com.yourssu.ssugaeting.domain
+package com.yourssu.ssugaeting.domain.common.business
 
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter

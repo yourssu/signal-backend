@@ -14,27 +14,42 @@ class VerificationRepositoryImpl(
     private val verificationJpaRepository: VerificationJpaRepository,
     private val jpaQueryFactory: JPAQueryFactory,
 ) : VerificationRepository {
-    override fun issueVerificationCode(uuid: Uuid): VerificationCode {
-        val verificationEntity =
-            VerificationEntity.from(
-                uuid = uuid,
-                verificationCode = VerificationCode.generateRandom()
-            )
-        return verificationJpaRepository.save(verificationEntity).toDomain()
+    override fun issueVerificationCode(uuid: Uuid, verificationCode: VerificationCode): VerificationCode {
+        val verification = VerificationEntity.from(uuid, verificationCode)
+        return verificationJpaRepository.save(verification).toVerificationCode()
     }
 
-    override fun existsVerificationCode(uuid: Uuid): Boolean {
+    override fun existsByUuid(uuid: Uuid): Boolean {
         return jpaQueryFactory.select(verificationEntity)
             .where(verificationEntity.uuid.eq(uuid.value))
             .fetchFirst() != null
     }
 
-    override fun findVerificationCode(uuid: Uuid): VerificationCode {
+    override fun getVerificationCode(uuid: Uuid): VerificationCode {
         return jpaQueryFactory.select(verificationEntity)
             .where(verificationEntity.uuid.eq(uuid.value))
             .fetchFirst()
-            ?.toDomain()
+            ?.toVerificationCode()
             ?: throw VerificationCodeNotFoundException()
+    }
+
+    override fun getUuid(verificationCode: VerificationCode): Uuid {
+        return jpaQueryFactory.select(verificationEntity)
+            .where(verificationEntity.verificationCode.eq(verificationCode.value))
+            .fetchFirst()
+            ?.toUuid()
+            ?: throw VerificationCodeNotFoundException()
+    }
+
+    override fun existsByCode(code: VerificationCode): Boolean {
+        return jpaQueryFactory.select(verificationEntity)
+            .where(verificationEntity.verificationCode.eq(code.value))
+            .fetchFirst() != null
+    }
+
+    override fun removeByUuid(uuid: Uuid) {
+        jpaQueryFactory.delete(verificationEntity)
+            .where(verificationEntity.uuid.eq(uuid.value))
     }
 }
 

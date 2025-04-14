@@ -3,7 +3,10 @@ package com.yourssu.ssugaeting.domain.verification.implement
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 
 interface VerificationRepository {
-    fun issueVerificationCode(uuid: Uuid): VerificationCode
-    fun existsVerificationCode(uuid: Uuid): Boolean
-    fun findVerificationCode(uuid: Uuid): VerificationCode
+    fun issueVerificationCode(uuid: Uuid, verificationCode: VerificationCode): VerificationCode
+    fun existsByUuid(uuid: Uuid): Boolean
+    fun getVerificationCode(uuid: Uuid): VerificationCode
+    fun getUuid(verificationCode: VerificationCode): Uuid
+    fun existsByCode(code: VerificationCode): Boolean
+    fun removeByUuid(uuid: Uuid)
 }

@@ -12,19 +12,27 @@ class VerificationEntity(
     val id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    val verificationCode: Int,
+    val uuid: String,
 
     @Column(nullable = false, unique = true)
-    val uuid: String,
+    val verificationCode: Int,
+
 ) {
     companion object {
-        fun from(verificationCode: VerificationCode, uuid: Uuid) = VerificationEntity(
-            verificationCode = verificationCode.value,
+        fun from(
+            uuid: Uuid,
+            verificationCode: VerificationCode,
+        ) = VerificationEntity(
             uuid = uuid.value,
+            verificationCode = verificationCode.value,
         )
     }
 
-    fun toDomain() = VerificationCode(
+    fun toUuid() = Uuid(
+        value = uuid,
+    )
+
+    fun toVerificationCode() = VerificationCode(
         value = verificationCode,
     )
 }

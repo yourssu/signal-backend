@@ -1,0 +1,14 @@
+@host=localhost:8080
+@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
+
+// Issue a verification code for uuid - 200 OK
+###
+POST {{host}}/api/viewers/verification
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}"
+}
+###
+// If the uuid is not registered, then a new verification code will be created.
+// Otherwise the uuid is registered, then return the verification code for the uuid.

@@ -1,4 +1,4 @@
-package com.yourssu.soongpt.common.handler
+package com.yourssu.ssugaeting.handler
 
 import com.yourssu.soongpt.common.handler.dto.ErrorResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -9,15 +9,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
 
 private val logger = KotlinLogging.logger {}
 
-@ControllerAdvice
+@RestControllerAdvice
 class ControllerAdvice {
     companion object {
         private const val VALIDATION_DEFAULT_ERROR_MESSAGE = "Unknown validation error"

@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.domain.verification.storage.exception
 
-import com.yourssu.soongpt.common.handler.NotFoundException
+import com.yourssu.ssugaeting.handler.NotFoundException
 
 class VerificationCodeNotFoundException : NotFoundException(message = "A verification code not found for uuid") {
 }

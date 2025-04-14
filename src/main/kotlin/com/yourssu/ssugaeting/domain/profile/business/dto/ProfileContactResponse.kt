@@ -4,6 +4,7 @@ import com.yourssu.ssugaeting.domain.profile.implement.Profile
 
 class ProfileContactResponse(
     val profileId: Long? = null,
+    val uuid: String,
     val gender: String,
     val animal: String,
     val contact: String,
@@ -14,6 +15,7 @@ class ProfileContactResponse(
         fun from(profile: Profile): ProfileContactResponse {
             return ProfileContactResponse(
                 profileId = profile.id,
+                uuid = profile.uuid.value,
                 gender = profile.gender.name,
                 animal = profile.animal,
                 contact = profile.contact,

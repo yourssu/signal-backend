@@ -1,6 +1,6 @@
 package com.yourssu.soongpt.common.handler.dto
 
-import com.yourssu.soongpt.common.handler.Error
+import com.yourssu.ssugaeting.handler.Error
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

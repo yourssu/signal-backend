@@ -1,6 +1,7 @@
 package com.yourssu.soongpt.common.handler
 
 import com.yourssu.soongpt.common.handler.dto.ErrorResponse
+import com.yourssu.ssugaeting.handler.InternalServerError
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.http.HttpStatus

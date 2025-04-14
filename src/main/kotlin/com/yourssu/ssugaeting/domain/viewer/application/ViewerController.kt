@@ -1,10 +1,7 @@
 package com.yourssu.ssugaeting.domain.viewer.application
 
 import com.yourssu.ssugaeting.domain.common.business.Response
-import com.yourssu.ssugaeting.domain.viewer.application.dto.TicketIssuedRequest
-import com.yourssu.ssugaeting.domain.viewer.application.dto.VerificationRequest
-import com.yourssu.ssugaeting.domain.viewer.application.dto.ViewFoundRequest
-import com.yourssu.ssugaeting.domain.viewer.application.dto.ViewersFoundRequest
+import com.yourssu.ssugaeting.domain.viewer.application.dto.*
 import com.yourssu.ssugaeting.domain.viewer.business.ViewerService
 import com.yourssu.ssugaeting.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.ssugaeting.domain.viewer.business.dto.ViewerResponse
@@ -30,7 +27,7 @@ class ViewerController(
     }
 
     @GetMapping("/uuid")
-    fun getProfile(@Valid @ModelAttribute request: ViewFoundRequest): ResponseEntity<Response<ViewerResponse>> {
+    fun getViewer(@Valid @ModelAttribute request: ViewFoundRequest): ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.getViewer(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }

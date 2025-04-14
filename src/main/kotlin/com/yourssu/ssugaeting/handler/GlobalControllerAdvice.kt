@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.handler
 
-import com.yourssu.soongpt.common.handler.dto.ErrorResponse
+import com.yourssu.ssugaeting.handler.dto.ErrorResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException

@@ -1,11 +1,11 @@
-package com.yourssu.soongpt.common.handler.dto
+package com.yourssu.ssugaeting.handler.dto
 
 import com.yourssu.ssugaeting.handler.Error
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 data class ErrorResponse(
-    val timestamp: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")),
+    val timestamp: String = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
     val status: Int,
     val message: String,
 ) {

@@ -1,7 +1,6 @@
-package com.yourssu.soongpt.common.handler
+package com.yourssu.ssugaeting.handler
 
-import com.yourssu.soongpt.common.handler.dto.ErrorResponse
-import com.yourssu.ssugaeting.handler.InternalServerError
+import com.yourssu.ssugaeting.handler.dto.ErrorResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.http.HttpStatus

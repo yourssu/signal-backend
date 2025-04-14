@@ -13,10 +13,10 @@ class ProfileCreatedCommand(
 ) {
     fun toDomain(): Profile {
         return Profile(
-            gender = Gender.valueOf(gender),
+            gender = Gender.of(gender),
             animal = animal,
             contact = contact,
-            mbti = Mbti.valueOf(mbti),
+            mbti = Mbti.of(mbti),
             nickname = nickname,
         )
     }

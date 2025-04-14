@@ -1,6 +1,18 @@
 package com.yourssu.ssugaeting.domain.profile.implement
 
+import com.yourssu.ssugaeting.domain.profile.implement.exception.GenderNotFoundException
+
 enum class Gender {
     FEMALE,
-    MALE,
+    MALE
+    ;
+
+    companion object {
+        fun of(value: String): Gender {
+            return entries.stream()
+                .filter { it.name == value.uppercase() }
+                .findFirst()
+                .orElseThrow{ GenderNotFoundException() }
+        }
+    }
 }

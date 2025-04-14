@@ -1,5 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.implement
 
+import com.yourssu.ssugaeting.domain.profile.implement.exception.MbtiNotFoundException
+
 enum class Mbti {
     ISTJ,
     ISFJ,
@@ -16,11 +18,15 @@ enum class Mbti {
     ESTJ,
     ESFJ,
     ENFJ,
-    ENTJ;
+    ENTJ
+    ;
 
     companion object {
-        fun fromString(value: String): Mbti {
-            return valueOf(value.uppercase())
+        fun of(value: String): Mbti {
+            return entries.stream()
+                .filter { it.name == value.uppercase() }
+                .findFirst()
+                .orElseThrow{ MbtiNotFoundException() }
         }
     }
 }

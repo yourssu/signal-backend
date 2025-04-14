@@ -24,12 +24,19 @@ class ViewerRepositoryImpl(
             .fetchFirst() != null
     }
 
-    override fun findByUuid(uuid: Uuid): Viewer {
+    override fun getByUuid(uuid: Uuid): Viewer {
         return jpaQueryFactory.selectFrom(viewerEntity)
             .where(viewerEntity.uuid.eq(uuid.value))
             .fetchFirst()
             ?.toDomain()
             ?: throw ViewerNotFoundException()
+    }
+
+    override fun updateTicket(viewer: Viewer): Viewer {
+        val viewerEntity = viewerJpaRepository.findById(viewer.id!!)
+            .orElseThrow { ViewerNotFoundException() }
+        viewerEntity.updateTicket(viewer)
+        return viewerEntity.toDomain()
     }
 }
 

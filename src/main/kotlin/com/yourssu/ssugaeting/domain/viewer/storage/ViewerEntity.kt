@@ -3,7 +3,6 @@ package com.yourssu.ssugaeting.domain.viewer.storage
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.viewer.implement.Viewer
 import jakarta.persistence.*
-import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.ZonedDateTime
 
@@ -15,7 +14,7 @@ class ViewerEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     val uuid: String,
 
     @Column(nullable = false)
@@ -25,7 +24,6 @@ class ViewerEntity(
     var usedTicket: Int = 0,
 
     @Column(nullable = false)
-    @LastModifiedDate
     var updatedTime: ZonedDateTime,
 ) {
     companion object {
@@ -47,5 +45,10 @@ class ViewerEntity(
             usedTicket = usedTicket,
             updatedTime = updatedTime,
         )
+    }
+
+    fun updateTicket(viewer: Viewer) {
+        this.ticket = viewer.ticket
+        this.updatedTime = ZonedDateTime.now()
     }
 }

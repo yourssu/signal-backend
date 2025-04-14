@@ -5,5 +5,6 @@ import com.yourssu.ssugaeting.domain.common.implement.Uuid
 interface ViewerRepository {
     fun save(viewer: Viewer): Viewer
     fun existsByUuid(uuid: Uuid): Boolean
-    fun findByUuid(uuid: Uuid): Viewer
+    fun getByUuid(uuid: Uuid): Viewer
+    fun updateTicket(viewer: Viewer): Viewer
 }

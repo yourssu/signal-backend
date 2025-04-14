@@ -1,5 +1,6 @@
 package com.yourssu.ssugaeting.domain.profile.storage
 
+import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.profile.implement.Gender
 import com.yourssu.ssugaeting.domain.profile.implement.Mbti
 import com.yourssu.ssugaeting.domain.profile.implement.Profile
@@ -12,6 +13,9 @@ class ProfileEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
+
+    @Column(nullable = false, unique = true)
+    var uuid: String,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -35,6 +39,7 @@ class ProfileEntity(
             return ProfileEntity(
                 id = profile.id,
                 gender = profile.gender,
+                uuid = profile.uuid.value,
                 animal = profile.animal,
                 contact = profile.contact,
                 mbti = profile.mbti,
@@ -47,6 +52,7 @@ class ProfileEntity(
         return Profile(
             id = id,
             gender = gender,
+            uuid = Uuid(uuid),
             animal = animal,
             contact = contact,
             mbti = mbti,

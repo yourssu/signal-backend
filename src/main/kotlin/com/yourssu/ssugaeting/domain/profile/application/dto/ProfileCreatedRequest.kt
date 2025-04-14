@@ -18,9 +18,12 @@ class ProfileCreatedRequest(
 
     @field:NotBlank
     val nickname: String,
+
+    val uuid: String? = null,
 ) {
     fun toCommand(): ProfileCreatedCommand {
         return ProfileCreatedCommand(
+            uuid = uuid,
             gender = gender,
             animal = animal,
             contact = contact,

@@ -17,3 +17,7 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+permission:
+  admin:
+    secret-key: "DonaEmilyEatSteakLeopold"

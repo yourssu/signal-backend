@@ -113,7 +113,7 @@ class ControllerAdvice {
             .body(
                 ErrorResponse(
                     status = HttpStatus.CONFLICT.value(),
-                    message = "중복된 아이디가 존재합니다. {{ ${e.message} }}"
+                    message = "중복된 아이디가 존재합니다. {{ DataIntegrityViolationException }}"
                 )
             )
     }

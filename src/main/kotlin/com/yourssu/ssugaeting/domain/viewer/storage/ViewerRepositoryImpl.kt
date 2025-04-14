@@ -38,6 +38,11 @@ class ViewerRepositoryImpl(
         viewerEntity.updateTicket(viewer)
         return viewerEntity.toDomain()
     }
+
+    override fun findAll(): List<Viewer> {
+        return viewerJpaRepository.findAll()
+            .map { it.toDomain() }
+    }
 }
 
 interface ViewerJpaRepository : JpaRepository<ViewerEntity, Long> {

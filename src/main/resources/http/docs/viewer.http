@@ -40,3 +40,10 @@ Content-Type: application/json
 GET {{host}}/api/viewers/uuid?uuid={{uuid}}
 
 ###
+
+
+// Get All Viewers - 200 OK
+###
+GET {{host}}/api/viewers?secretKey={{secretKey}}
+
+###

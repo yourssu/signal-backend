@@ -35,4 +35,10 @@ class ViewerService(
         val viewer = viewerReader.get(command.toDomain())
         return ViewerResponse.from(viewer)
     }
+
+    fun findAllViewers(command: AllViewersFoundCommand): List<ViewerResponse> {
+        adminAccessChecker.validateAdminAccess(command.secretKey)
+        val viewers = viewerReader.findAll()
+        return viewers.map { ViewerResponse.from(it) }
+    }
 }

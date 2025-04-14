@@ -4,6 +4,7 @@ import com.yourssu.ssugaeting.domain.common.business.Response
 import com.yourssu.ssugaeting.domain.viewer.application.dto.TicketIssuedRequest
 import com.yourssu.ssugaeting.domain.viewer.application.dto.VerificationRequest
 import com.yourssu.ssugaeting.domain.viewer.application.dto.ViewFoundRequest
+import com.yourssu.ssugaeting.domain.viewer.application.dto.ViewersFoundRequest
 import com.yourssu.ssugaeting.domain.viewer.business.ViewerService
 import com.yourssu.ssugaeting.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.ssugaeting.domain.viewer.business.dto.ViewerResponse
@@ -33,10 +34,10 @@ class ViewerController(
         val response = viewerService.getViewer(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
-//
-//    @GetMapping
-//    fun findAllViewers(@Valid @ModelAttribute request: ViewersFoundRequest) : ResponseEntity<Response<List<ViewerResponse>>> {
-//        val response = viewerService.findAllViewers()
-//        return ResponseEntity.ok(Response(result = response))
-//    }
+
+    @GetMapping
+    fun findAllViewers(@Valid @ModelAttribute request: ViewersFoundRequest) : ResponseEntity<Response<List<ViewerResponse>>> {
+        val response = viewerService.findAllViewers(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
 }

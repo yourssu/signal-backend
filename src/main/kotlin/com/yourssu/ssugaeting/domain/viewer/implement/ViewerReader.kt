@@ -10,4 +10,8 @@ class ViewerReader(
     fun get(uuid: Uuid): Viewer {
         return viewerRepository.getByUuid(uuid)
     }
+
+    fun findAll(): List<Viewer> {
+        return viewerRepository.findAll()
+    }
 }

@@ -5,6 +5,8 @@ import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileCreatedReque
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileFoundRequest
 import com.yourssu.ssugaeting.domain.profile.business.ProfileService
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
+import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse
+import com.yourssu.ssugaeting.domain.viewer.application.dto.RandomProfileRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,6 +27,12 @@ class ProfileController(
     @GetMapping("/uuid")
     fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<ProfileContactResponse>> {
         val response = profileService.getProfile(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @GetMapping("/random")
+    fun getRandomProfile(@Valid @ModelAttribute request: RandomProfileRequest): ResponseEntity<Response<ProfileResponse>> {
+        val response = profileService.getRandomProfile(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
 

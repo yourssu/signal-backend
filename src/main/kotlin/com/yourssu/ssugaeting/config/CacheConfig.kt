@@ -15,8 +15,7 @@ class CacheConfig {
         val cacheManager = SimpleCacheManager()
         cacheManager.setCaches(
             listOf(
-                ConcurrentMapCache("courseCache"),
-                ConcurrentMapCache("timetableCache"),
+                ConcurrentMapCache("profileCache"),
             )
         )
         return cacheManager

@@ -50,6 +50,7 @@ class VerificationRepositoryImpl(
     override fun removeByUuid(uuid: Uuid) {
         jpaQueryFactory.delete(verificationEntity)
             .where(verificationEntity.uuid.eq(uuid.value))
+            .execute()
     }
 }
 

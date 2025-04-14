@@ -20,13 +20,13 @@ class VerificationRepositoryImpl(
     }
 
     override fun existsByUuid(uuid: Uuid): Boolean {
-        return jpaQueryFactory.select(verificationEntity)
+        return jpaQueryFactory.selectFrom(verificationEntity)
             .where(verificationEntity.uuid.eq(uuid.value))
             .fetchFirst() != null
     }
 
     override fun getVerificationCode(uuid: Uuid): VerificationCode {
-        return jpaQueryFactory.select(verificationEntity)
+        return jpaQueryFactory.selectFrom(verificationEntity)
             .where(verificationEntity.uuid.eq(uuid.value))
             .fetchFirst()
             ?.toVerificationCode()
@@ -34,7 +34,7 @@ class VerificationRepositoryImpl(
     }
 
     override fun getUuid(verificationCode: VerificationCode): Uuid {
-        return jpaQueryFactory.select(verificationEntity)
+        return jpaQueryFactory.selectFrom(verificationEntity)
             .where(verificationEntity.verificationCode.eq(verificationCode.value))
             .fetchFirst()
             ?.toUuid()
@@ -42,7 +42,7 @@ class VerificationRepositoryImpl(
     }
 
     override fun existsByCode(code: VerificationCode): Boolean {
-        return jpaQueryFactory.select(verificationEntity)
+        return jpaQueryFactory.selectFrom(verificationEntity)
             .where(verificationEntity.verificationCode.eq(code.value))
             .fetchFirst() != null
     }

@@ -1,0 +1,45 @@
+@host=localhost:8080
+@uuid=it-means-the-uuid-is-optional
+
+// Create a new profile with Uuid - 201 Created
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "FEMALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "leopold",
+  "uuid": "{{uuid}}"
+}
+
+###
+
+// Not Found Random Profile - 404 Not Found
+###
+GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=
+
+###
+
+// Create a new profile - 201 Created
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "leopold"
+}
+
+###
+
+// Not Found Random Profile - 404 Not Found
+###
+GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=2,3
+
+###

@@ -7,6 +7,7 @@
 - [x] 티켓 발급(관리자 기능)
 - [x] viewer 조회 - UUID
 - [x] 전체 viewer 조회(관리자 기능) 
+- [x] 랜덤 프로필 조회
 
 ## API Documentation
 - [프로필 API](src/main/resources/http/docs/profile.http)

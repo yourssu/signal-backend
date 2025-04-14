@@ -39,3 +39,10 @@ Content-Type: application/json
 GET {{host}}/api/profiles/uuid?uuid={{uuid}}
 
 ###
+
+
+// Get a ramdom profile - 200 OK
+###
+GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=
+
+###

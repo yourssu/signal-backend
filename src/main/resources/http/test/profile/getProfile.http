@@ -1,0 +1,7 @@
+@host=localhost:8080
+
+// Get a profile By Uuid - 404 Not Found
+###
+GET {{host}}/api/profiles/uuid?uuid=12345678-1234-5678-1234-123456789012
+
+###

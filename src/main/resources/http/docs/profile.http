@@ -1,0 +1,41 @@
+@host=localhost:8080
+@uuid=it-means-the-uuid-is-optional
+
+// Create a new profile - 201 Created
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "leopold"
+}
+
+###
+
+
+// Create a new profile with Uuid - 201 Created
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "FEMALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "leopold",
+  "uuid": "{{uuid}}"
+}
+
+###
+
+
+// Get a profile By Uuid - 200 OK
+###
+GET {{host}}/api/profiles/uuid?uuid={{uuid}}
+
+###

@@ -3,6 +3,7 @@ package com.yourssu.ssugaeting.domain.profile.application
 import com.yourssu.ssugaeting.domain.common.business.Response
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileCreatedRequest
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileFoundRequest
+import com.yourssu.ssugaeting.domain.profile.application.dto.TicketConsumedRequest
 import com.yourssu.ssugaeting.domain.profile.business.ProfileService
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse
@@ -36,6 +37,12 @@ class ProfileController(
         return ResponseEntity.ok(Response(result = response))
     }
 
+    @PostMapping("/contact")
+    fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest): ResponseEntity<Response<ProfileContactResponse>> {
+        val response = profileService.consumeTicket(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
 //
 //    @PostMapping("/nickname")
 //    fun generateNickname(@Valid @RequestBody request: NicknameGeneratedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {
@@ -44,10 +51,5 @@ class ProfileController(
 //            .body(Response(result = response))
 //    }
 //
-//
-//    @PostMapping("/contact")
-//    fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest): ResponseEntity<Response<ProfileContactResponse>> {
-//        val response = profileService.consumeTicket(request.toCommand())
-//        return ResponseEntity.ok(Response(result = response))
-//    }
+
 }

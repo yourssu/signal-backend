@@ -18,6 +18,9 @@ spring:
       enabled: true
       path: /h2-console
 
-permission:
-  admin:
-    secret-key: "DonaEmilyEatSteakLeopold"
+domain:
+  permission:
+    admin:
+      secret-key: "DonaEmilyEatSteakLeopold"
+  policy:
+    contact-price: 2

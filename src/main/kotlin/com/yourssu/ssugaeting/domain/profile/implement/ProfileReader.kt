@@ -10,4 +10,8 @@ class ProfileReader(
     fun getByUuid(uuid: Uuid): Profile {
         return profileRepository.getByUuid(uuid)
     }
+
+    fun getById(id: Long): Profile {
+        return profileRepository.getById(id)
+    }
 }

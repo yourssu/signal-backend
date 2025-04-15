@@ -2,7 +2,7 @@ package com.yourssu.ssugaeting.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
-@ConfigurationProperties(prefix = "permission.admin")
+@ConfigurationProperties(prefix = "domain.permission.admin")
 data class AdminConfigurationProperties(
     private val secretKey: String,
 ) {

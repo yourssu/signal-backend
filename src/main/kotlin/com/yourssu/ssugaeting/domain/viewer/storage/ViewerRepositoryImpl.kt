@@ -39,6 +39,13 @@ class ViewerRepositoryImpl(
         return viewerEntity.toDomain()
     }
 
+    override fun updateUsedTicket(viewer: Viewer): Viewer {
+        val viewerEntity = viewerJpaRepository.findById(viewer.id!!)
+            .orElseThrow { ViewerNotFoundException() }
+        viewerEntity.updateUsedTicket(viewer)
+        return viewerEntity.toDomain()
+    }
+
     override fun findAll(): List<Viewer> {
         return viewerJpaRepository.findAll()
             .map { it.toDomain() }

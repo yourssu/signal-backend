@@ -47,3 +47,15 @@ GET {{host}}/api/viewers/uuid?uuid={{uuid}}
 GET {{host}}/api/viewers?secretKey={{secretKey}}
 
 ###
+
+@profileId=1
+###
+POST {{host}}/api/profiles/contact
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}",
+  "profileId": {{profileId}}
+}
+
+###

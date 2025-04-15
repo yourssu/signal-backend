@@ -29,6 +29,12 @@ class ProfileRepositoryImpl(
             ?: throw ProfileNotFoundException()
     }
 
+    override fun getById(id: Long): Profile {
+        return profileJpaRepository.findById(id)
+            .orElseThrow { ProfileNotFoundException() }
+            .toDomain()
+    }
+
     override fun existsByUuid(uuid: Uuid): Boolean {
         return jpaQueryFactory.selectFrom(QProfileEntity.profileEntity)
             .where(QProfileEntity.profileEntity.uuid.eq(uuid.value))

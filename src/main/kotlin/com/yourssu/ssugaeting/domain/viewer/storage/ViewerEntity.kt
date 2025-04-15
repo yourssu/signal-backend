@@ -51,4 +51,9 @@ class ViewerEntity(
         this.ticket = viewer.ticket
         this.updatedTime = ZonedDateTime.now()
     }
+
+    fun updateUsedTicket(viewer: Viewer) {
+        this.usedTicket = viewer.usedTicket
+        this.updatedTime = ZonedDateTime.now()
+    }
 }

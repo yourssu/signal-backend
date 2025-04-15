@@ -1,4 +1,4 @@
-package com.yourssu.ssugaeting.domain.viewer.implement
+package com.yourssu.ssugaeting.domain.viewer.implement.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.viewer.implement.exception.ViolatedAddedTicketException

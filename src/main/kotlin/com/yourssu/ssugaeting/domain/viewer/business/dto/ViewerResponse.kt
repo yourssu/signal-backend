@@ -1,8 +1,8 @@
 package com.yourssu.ssugaeting.domain.viewer.business.dto
 
-import com.yourssu.ssugaeting.domain.viewer.implement.Viewer
+import com.yourssu.ssugaeting.domain.viewer.implement.domain.Viewer
 
-class ViewerResponse(
+data class ViewerResponse(
     val id: Long? = null,
     val uuid: String,
     val ticket: Int,

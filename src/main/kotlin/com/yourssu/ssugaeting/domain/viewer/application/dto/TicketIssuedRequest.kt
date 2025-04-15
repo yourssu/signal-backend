@@ -1,11 +1,11 @@
 package com.yourssu.ssugaeting.domain.viewer.application.dto
 
-import com.yourssu.ssugaeting.domain.viewer.business.dto.TicketIssuedCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.TicketIssuedCommand
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
 
-class TicketIssuedRequest(
+data class TicketIssuedRequest(
     @field:NotBlank
     val secretKey: String,
 

@@ -1,9 +1,9 @@
 package com.yourssu.ssugaeting.domain.viewer.application.dto
 
-import com.yourssu.ssugaeting.domain.viewer.business.ViewerFoundCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.ViewerFoundCommand
 import jakarta.validation.constraints.NotBlank
 
-class ViewFoundRequest(
+data class ViewFoundRequest(
     @field:NotBlank
     val uuid: String,
 ) {

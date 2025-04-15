@@ -1,7 +1,10 @@
 package com.yourssu.ssugaeting.domain.viewer.business
 
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationWriter
-import com.yourssu.ssugaeting.domain.viewer.business.dto.TicketIssuedCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.AllViewersFoundCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.TicketIssuedCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.VerificationCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.ViewerFoundCommand
 import com.yourssu.ssugaeting.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.ssugaeting.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.ssugaeting.domain.viewer.implement.AdminAccessChecker

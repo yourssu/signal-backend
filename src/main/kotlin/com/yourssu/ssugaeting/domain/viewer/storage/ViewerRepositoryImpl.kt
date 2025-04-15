@@ -2,9 +2,10 @@ package com.yourssu.ssugaeting.domain.viewer.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.viewer.implement.Viewer
+import com.yourssu.ssugaeting.domain.viewer.implement.domain.Viewer
 import com.yourssu.ssugaeting.domain.viewer.implement.ViewerRepository
 import com.yourssu.ssugaeting.domain.viewer.storage.QViewerEntity.viewerEntity
+import com.yourssu.ssugaeting.domain.viewer.storage.domain.ViewerEntity
 import com.yourssu.ssugaeting.domain.viewer.storage.exception.ViewerNotFoundException
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

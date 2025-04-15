@@ -2,7 +2,7 @@ package com.yourssu.ssugaeting.domain.profile.implement
 
 import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import com.yourssu.ssugaeting.domain.profile.implement.domain.PurchasedProfile
-import com.yourssu.ssugaeting.domain.viewer.implement.Viewer
+import com.yourssu.ssugaeting.domain.viewer.implement.domain.Viewer
 import com.yourssu.ssugaeting.domain.viewer.implement.ViewerRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

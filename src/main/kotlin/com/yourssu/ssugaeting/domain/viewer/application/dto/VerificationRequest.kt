@@ -1,9 +1,9 @@
 package com.yourssu.ssugaeting.domain.viewer.application.dto
 
-import com.yourssu.ssugaeting.domain.viewer.business.VerificationCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.VerificationCommand
 import jakarta.validation.constraints.NotBlank
 
-class VerificationRequest(
+data class VerificationRequest(
     @field:NotBlank
     val uuid: String,
 ) {

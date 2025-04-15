@@ -1,4 +1,4 @@
-package com.yourssu.ssugaeting.domain.viewer.business.dto
+package com.yourssu.ssugaeting.domain.viewer.business.command
 
 import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 

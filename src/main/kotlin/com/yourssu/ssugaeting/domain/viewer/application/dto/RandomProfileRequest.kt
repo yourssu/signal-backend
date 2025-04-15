@@ -3,7 +3,7 @@ package com.yourssu.ssugaeting.domain.viewer.application.dto
 import com.yourssu.ssugaeting.domain.profile.business.command.RandomProfileFoundCommand
 import jakarta.validation.constraints.NotBlank
 
-class RandomProfileRequest(
+data class RandomProfileRequest(
     @field:NotBlank
     val uuid: String,
 

@@ -1,9 +1,9 @@
 package com.yourssu.ssugaeting.domain.viewer.application.dto
 
-import com.yourssu.ssugaeting.domain.viewer.business.AllViewersFoundCommand
+import com.yourssu.ssugaeting.domain.viewer.business.command.AllViewersFoundCommand
 import jakarta.validation.constraints.NotBlank
 
-class ViewersFoundRequest(
+data class ViewersFoundRequest(
     @field:NotBlank
     val secretKey: String,
 ) {

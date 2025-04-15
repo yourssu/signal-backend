@@ -1,7 +1,7 @@
-package com.yourssu.ssugaeting.domain.viewer.storage
+package com.yourssu.ssugaeting.domain.viewer.storage.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.viewer.implement.Viewer
+import com.yourssu.ssugaeting.domain.viewer.implement.domain.Viewer
 import jakarta.persistence.*
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.ZonedDateTime

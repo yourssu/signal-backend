@@ -21,7 +21,7 @@ spring:
 domain:
   permission:
     admin:
-      secret-key: "ec5ea893-8540-42c5-958a-ce69ed7f9f88"
+      secret-key: "secret-key-value"
   policy:
     contact-price: 2
 

@@ -1,11 +1,14 @@
 package com.yourssu.ssugaeting.domain.viewer.business
 
+import com.yourssu.ssugaeting.domain.profile.business.dto.PurchasedProfileResponse
+import com.yourssu.ssugaeting.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationWriter
 import com.yourssu.ssugaeting.domain.viewer.business.command.AllViewersFoundCommand
 import com.yourssu.ssugaeting.domain.viewer.business.command.TicketIssuedCommand
 import com.yourssu.ssugaeting.domain.viewer.business.command.VerificationCommand
 import com.yourssu.ssugaeting.domain.viewer.business.command.ViewerFoundCommand
 import com.yourssu.ssugaeting.domain.viewer.business.dto.VerificationResponse
+import com.yourssu.ssugaeting.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.ssugaeting.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.ssugaeting.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.ssugaeting.domain.viewer.implement.VerificationReader
@@ -19,6 +22,7 @@ class ViewerService(
     private val verificationReader: VerificationReader,
     private val viewerWriter: ViewerWriter,
     private val viewerReader: ViewerReader,
+    private val purchasedProfileReader: PurchasedProfileReader,
     private val adminAccessChecker: AdminAccessChecker,
 ) {
     fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
@@ -34,9 +38,11 @@ class ViewerService(
         return ViewerResponse.from(viewer)
     }
 
-    fun getViewer(command: ViewerFoundCommand): ViewerResponse {
+    fun getViewer(command: ViewerFoundCommand): ViewerDetailResponse {
         val viewer = viewerReader.get(command.toDomain())
-        return ViewerResponse.from(viewer)
+        val purchasedProfiles = purchasedProfileReader.findByViewerId(viewer.id!!)
+            .map { PurchasedProfileResponse.from(it) }
+        return ViewerDetailResponse.from(viewer, purchasedProfiles)
     }
 
     fun findAllViewers(command: AllViewersFoundCommand): List<ViewerResponse> {

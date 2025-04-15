@@ -36,6 +36,7 @@ Content-Type: application/json
 
 
 // Get a Viewer by uuid - 200 OK
+// with purchased profiles info
 ###
 GET {{host}}/api/viewers/uuid?uuid={{uuid}}
 

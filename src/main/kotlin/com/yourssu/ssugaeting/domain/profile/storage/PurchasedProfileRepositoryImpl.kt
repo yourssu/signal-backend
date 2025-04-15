@@ -22,8 +22,13 @@ class PurchasedProfileRepositoryImpl(
         )
     }
 
+    override fun findByViewerId(viewerId: Long): List<PurchasedProfile> {
+        return purchasedProfileJpaRepository.findByViewerId(viewerId)
+            .map { it.toDomain() }
+    }
 }
 
 interface PurchasedProfileJpaRepository : JpaRepository<PurchasedProfileEntity, Long> {
     fun existsByProfileIdAndViewerId(profileId: Long, viewerId: Long): Boolean
+    fun findByViewerId(viewerId: Long): List<PurchasedProfileEntity>
 }

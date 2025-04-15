@@ -43,3 +43,11 @@ Content-Type: application/json
 GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=2,3
 
 ###
+
+###
+
+// Not Found My Profile - 404 Not Found
+###
+GET {{host}}/api/profiles/random?uuid=invalid-uuid&excludeProfiles=2,3
+
+###

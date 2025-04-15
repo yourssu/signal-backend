@@ -10,4 +10,5 @@ interface VerificationRepository {
     fun getUuid(verificationCode: VerificationCode): Uuid
     fun existsByCode(code: VerificationCode): Boolean
     fun removeByUuid(uuid: Uuid)
+    fun clear()
 }

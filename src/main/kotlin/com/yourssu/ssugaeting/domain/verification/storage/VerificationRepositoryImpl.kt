@@ -2,8 +2,8 @@ package com.yourssu.ssugaeting.domain.verification.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationRepository
+import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import com.yourssu.ssugaeting.domain.verification.storage.domain.QVerificationEntity.verificationEntity
 import com.yourssu.ssugaeting.domain.verification.storage.domain.VerificationEntity
 import com.yourssu.ssugaeting.domain.verification.storage.exception.VerificationCodeNotFoundException
@@ -52,6 +52,10 @@ class VerificationRepositoryImpl(
         jpaQueryFactory.delete(verificationEntity)
             .where(verificationEntity.uuid.eq(uuid.value))
             .execute()
+    }
+
+    override fun clear() {
+        verificationJpaRepository.deleteAll()
     }
 }
 

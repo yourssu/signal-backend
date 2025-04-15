@@ -1,4 +1,4 @@
-package com.yourssu.ssugaeting.config
+package com.yourssu.ssugaeting.config.properties
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.domain.profile.business
 
-import com.yourssu.ssugaeting.config.PolicyConfigurationProperties
+import com.yourssu.ssugaeting.config.properties.PolicyConfigurationProperties
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileCreatedCommand
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse

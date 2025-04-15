@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.domain.viewer.implement
 
-import com.yourssu.ssugaeting.config.AdminConfigurationProperties
+import com.yourssu.ssugaeting.config.properties.AdminConfigurationProperties
 import com.yourssu.ssugaeting.domain.viewer.implement.exception.AdminPermissionDeniedException
 import org.springframework.stereotype.Component
 

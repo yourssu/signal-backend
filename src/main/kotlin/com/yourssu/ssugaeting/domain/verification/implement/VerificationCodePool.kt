@@ -1,5 +1,6 @@
 package com.yourssu.ssugaeting.domain.verification.implement
 
+import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue

@@ -1,6 +1,7 @@
 package com.yourssu.ssugaeting.domain.verification.implement
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
+import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 
 interface VerificationRepository {
     fun issueVerificationCode(uuid: Uuid, verificationCode: VerificationCode): VerificationCode

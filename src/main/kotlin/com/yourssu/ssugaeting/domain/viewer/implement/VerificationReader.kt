@@ -1,7 +1,7 @@
 package com.yourssu.ssugaeting.domain.viewer.implement
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.verification.implement.VerificationCode
+import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationRepository
 import org.springframework.stereotype.Component
 

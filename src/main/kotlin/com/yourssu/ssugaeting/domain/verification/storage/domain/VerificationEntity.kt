@@ -1,7 +1,7 @@
-package com.yourssu.ssugaeting.domain.verification.storage
+package com.yourssu.ssugaeting.domain.verification.storage.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.verification.implement.VerificationCode
+import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import jakarta.persistence.*
 
 @Entity

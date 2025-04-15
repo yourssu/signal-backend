@@ -41,7 +41,7 @@ GET {{host}}/api/profiles/uuid?uuid={{uuid}}
 ###
 
 @secretKey=DonaEmilyEatSteakLeopold
-// Get All Profiles - 200 OK
+// Get All Profiles except contacts - 200 OK
 ###
 GET {{host}}/api/profiles?secretKey={{secretKey}}
 

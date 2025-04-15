@@ -1,4 +1,4 @@
-@host=localhost:8080
+@host=localhost:9001
 @uuid=it-means-the-uuid-is-optional
 
 // Create a new profile - 201 Created
@@ -61,9 +61,10 @@ Content-Type: application/json
 
 {
   "description": [
-    "statement1",
-    "statement2",
-    "statement3"
+    "나는 딸기를 좋아해",
+    "나는 포도도 좋아해",
+    "제일 좋아하는 음식은 치킨이야"
   ]
 }
 ###
+// Responses are cached

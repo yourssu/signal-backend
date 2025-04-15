@@ -1,0 +1,22 @@
+@host=localhost:9001
+
+// Suggest a nickname - 200 OK
+###
+POST {{host}}/api/profiles/nickname
+Content-Type: application/json
+
+{
+  "description": [
+    "나는 딸기를 좋아해",
+    "나는 포도도 좋아해",
+    "제일 좋아하는 음식은 치킨이야"
+  ]
+}
+###
+
+// Invalid RequestBody - 400 Bad Request
+###
+POST {{host}}/api/profiles/nickname
+Content-Type: application/json
+
+###

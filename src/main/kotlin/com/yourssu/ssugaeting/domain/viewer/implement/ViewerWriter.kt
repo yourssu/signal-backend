@@ -24,9 +24,4 @@ class ViewerWriter(
     private fun createViewer(uuid: Uuid, ticket: Int): Viewer {
         return viewerRepository.save(Viewer(uuid = uuid, ticket = ticket))
     }
-
-    @Transactional
-    fun consumeTicket(viewer: Viewer, ticket: Int): Viewer {
-        return viewerRepository.updateUsedTicket(viewer.consumeTicket(ticket))
-    }
 }

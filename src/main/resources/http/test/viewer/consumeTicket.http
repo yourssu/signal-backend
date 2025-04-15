@@ -1,0 +1,98 @@
+@host=localhost:8080
+@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
+
+// Issue a verification code for uuid - 200 OK
+###
+POST {{host}}/api/viewers/verification
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}"
+}
+
+> {%
+    client.global.set("verificationCode", response.body.result.verificationCode);
+%}
+
+###
+
+@secretKey=DonaEmilyEatSteakLeopold
+// Verify the uuid with the verification code - 200 OK
+###
+POST {{host}}/api/viewers
+Content-Type: application/json
+
+{
+  "secretKey": "{{secretKey}}",
+  "verificationCode": {{verificationCode}},
+  "ticket": 3
+}
+
+###
+
+// Create a new profile - 201 Created
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "leopold"
+}
+
+###
+
+// ConsumeTicket - 200 OK
+@profileId=1
+###
+POST {{host}}/api/profiles/contact
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}",
+  "profileId": {{profileId}}
+}
+
+###
+
+// Create a new profile - 201 Created
+###
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "leopold"
+}
+
+###
+
+//  When tickets are insufficient, return 400 Bad Request
+###
+POST {{host}}/api/profiles/contact
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}",
+  "profileId": 2
+}
+
+###
+
+//  When profile not found, return 404 Not Found
+###
+POST {{host}}/api/profiles/contact
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}",
+  "profileId": 9999
+}
+
+###

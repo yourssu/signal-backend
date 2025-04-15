@@ -48,6 +48,7 @@ GET {{host}}/api/viewers?secretKey={{secretKey}}
 
 ###
 
+// ConsumeTicket - 200 OK
 @profileId=1
 ###
 POST {{host}}/api/profiles/contact
@@ -59,3 +60,4 @@ Content-Type: application/json
 }
 
 ###
+// If this profile is already purchased, then does not consume tickets.

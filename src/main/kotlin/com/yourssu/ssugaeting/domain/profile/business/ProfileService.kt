@@ -7,8 +7,8 @@ import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse
 import com.yourssu.ssugaeting.domain.profile.implement.ProfilePriorityManager
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileReader
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileWriter
+import com.yourssu.ssugaeting.domain.profile.implement.UsedTicketManager
 import com.yourssu.ssugaeting.domain.viewer.implement.ViewerReader
-import com.yourssu.ssugaeting.domain.viewer.implement.ViewerWriter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,7 +17,7 @@ class ProfileService(
     private val profileWriter: ProfileWriter,
     private val profileReader: ProfileReader,
     private val viewerReader: ViewerReader,
-    private val viewerWriter: ViewerWriter,
+    private val usedTicketManager: UsedTicketManager,
     private val profilePriorityManager: ProfilePriorityManager,
     private val policy: PolicyConfigurationProperties,
 ) {
@@ -42,7 +42,11 @@ class ProfileService(
     fun consumeTicket(command: TicketConsumedCommand): ProfileContactResponse {
         val viewer = viewerReader.get(command.toUuid())
         val targetProfile = profileReader.getById(command.profileId)
-        viewerWriter.consumeTicket(viewer, policy.contactPrice)
+        usedTicketManager.consumeTicket(
+            viewer = viewer,
+            profile = targetProfile,
+            ticket = policy.contactPrice,
+        )
         return ProfileContactResponse.from(targetProfile)
     }
 }

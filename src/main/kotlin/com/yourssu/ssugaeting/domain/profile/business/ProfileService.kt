@@ -8,6 +8,7 @@ import com.yourssu.ssugaeting.domain.profile.implement.ProfilePriorityManager
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileReader
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileWriter
 import com.yourssu.ssugaeting.domain.profile.implement.UsedTicketManager
+import com.yourssu.ssugaeting.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.ssugaeting.domain.viewer.implement.ViewerReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,6 +21,7 @@ class ProfileService(
     private val usedTicketManager: UsedTicketManager,
     private val profilePriorityManager: ProfilePriorityManager,
     private val policy: PolicyConfigurationProperties,
+    private val adminAccessChecker: AdminAccessChecker,
 ) {
     fun createProfile(command: ProfileCreatedCommand): ProfileContactResponse {
         val profile = profileWriter.createProfile(command.toDomain())
@@ -48,5 +50,11 @@ class ProfileService(
             ticket = policy.contactPrice,
         )
         return ProfileContactResponse.from(targetProfile)
+    }
+
+    fun getAllProfiles(command: AllProfilesFoundCommand): List<ProfileResponse> {
+        adminAccessChecker.validateAdminAccess(command.secretKey)
+        return profileReader.getAll()
+            .map { ProfileResponse.from(it) }
     }
 }

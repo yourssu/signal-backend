@@ -3,6 +3,7 @@ package com.yourssu.ssugaeting.domain.profile.application
 import com.yourssu.ssugaeting.domain.common.business.Response
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileCreatedRequest
 import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileFoundRequest
+import com.yourssu.ssugaeting.domain.profile.application.dto.ProfilesFoundRequest
 import com.yourssu.ssugaeting.domain.profile.application.dto.TicketConsumedRequest
 import com.yourssu.ssugaeting.domain.profile.business.ProfileService
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
@@ -28,6 +29,12 @@ class ProfileController(
     @GetMapping("/uuid")
     fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<ProfileContactResponse>> {
         val response = profileService.getProfile(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @GetMapping
+    fun getAllProfiles(@Valid @ModelAttribute request: ProfilesFoundRequest): ResponseEntity<Response<List<ProfileResponse>>> {
+        val response = profileService.getAllProfiles(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
 

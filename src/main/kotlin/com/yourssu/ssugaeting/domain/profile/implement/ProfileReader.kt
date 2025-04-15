@@ -14,4 +14,8 @@ class ProfileReader(
     fun getById(id: Long): Profile {
         return profileRepository.getById(id)
     }
+
+    fun getAll(): List<Profile> {
+        return profileRepository.findAll()
+    }
 }

@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.domain.viewer.application
 
-import com.yourssu.ssugaeting.domain.common.business.Response
+import com.yourssu.ssugaeting.domain.common.business.dto.Response
 import com.yourssu.ssugaeting.domain.viewer.application.dto.*
 import com.yourssu.ssugaeting.domain.viewer.business.ViewerService
 import com.yourssu.ssugaeting.domain.viewer.business.dto.VerificationResponse

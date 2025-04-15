@@ -8,6 +8,8 @@
 - [x] viewer 조회 - UUID
 - [x] 전체 viewer 조회(관리자 기능) 
 - [x] 랜덤 프로필 조회
+- [x] 티켓 사용하여 연락처 조회
+  - [x] 이미 구매한 연락처이면 티켓을 소모하지 않음
 
 ## API Documentation
 - [프로필 API](src/main/resources/http/docs/profile.http)

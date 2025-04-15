@@ -48,8 +48,8 @@ GET {{host}}/api/viewers?secretKey={{secretKey}}
 
 ###
 
-// ConsumeTicket - 200 OK
 @profileId=1
+// ConsumeTicket - 200 OK
 ###
 POST {{host}}/api/profiles/contact
 Content-Type: application/json

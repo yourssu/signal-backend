@@ -25,6 +25,7 @@ val feignVersion = "4.2.0"
 val springCloudVersion = "2024.0.0"
 val mockitoKotlinVersion = "3.2.0"
 val loggingVersion = "7.0.3"
+val okhttpVersion = "5.0.0-alpha.14"
 
 java {
     toolchain {
@@ -78,6 +79,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:$junitPlatformVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")
+
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
 }
 
 kotlin {

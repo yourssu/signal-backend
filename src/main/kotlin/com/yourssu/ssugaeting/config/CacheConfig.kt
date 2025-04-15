@@ -16,6 +16,7 @@ class CacheConfig {
         cacheManager.setCaches(
             listOf(
                 ConcurrentMapCache("profileCache"),
+                ConcurrentMapCache("nicknameCache"),
             )
         )
         return cacheManager

@@ -1,6 +1,6 @@
-package com.yourssu.ssugaeting.domain.profile.storage
+package com.yourssu.ssugaeting.domain.profile.storage.domain
 
-import com.yourssu.ssugaeting.domain.profile.implement.PurchasedProfile
+import com.yourssu.ssugaeting.domain.profile.implement.domain.PurchasedProfile
 import jakarta.persistence.*
 
 @Entity

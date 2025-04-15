@@ -1,8 +1,12 @@
 package com.yourssu.ssugaeting.domain.profile.business
 
 import com.yourssu.ssugaeting.config.properties.PolicyConfigurationProperties
+import com.yourssu.ssugaeting.domain.profile.business.command.AllProfilesFoundCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.ProfileFoundCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.RandomProfileFoundCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.TicketConsumedCommand
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
-import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileCreatedCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.ProfileCreatedCommand
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse
 import com.yourssu.ssugaeting.domain.profile.implement.ProfilePriorityManager
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileReader

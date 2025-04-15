@@ -1,6 +1,6 @@
 package com.yourssu.ssugaeting.domain.profile.business.dto
 
-import com.yourssu.ssugaeting.domain.profile.implement.Profile
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 
 class ProfileContactResponse(
     val profileId: Long? = null,

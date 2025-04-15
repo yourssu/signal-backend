@@ -1,7 +1,8 @@
 package com.yourssu.ssugaeting.domain.profile.storage
 
-import com.yourssu.ssugaeting.domain.profile.implement.PurchasedProfile
+import com.yourssu.ssugaeting.domain.profile.implement.domain.PurchasedProfile
 import com.yourssu.ssugaeting.domain.profile.implement.PurchasedProfileRepository
+import com.yourssu.ssugaeting.domain.profile.storage.domain.PurchasedProfileEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

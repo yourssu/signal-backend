@@ -1,4 +1,4 @@
-package com.yourssu.ssugaeting.domain.profile.implement
+package com.yourssu.ssugaeting.domain.profile.implement.domain
 
 class PurchasedProfile(
     val id: Long? = null,

@@ -1,6 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.implement
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import org.springframework.stereotype.Component
 
 @Component

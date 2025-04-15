@@ -1,7 +1,8 @@
-package com.yourssu.ssugaeting.domain.profile.implement
+package com.yourssu.ssugaeting.domain.profile.implement.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.profile.implement.exception.NicknameLengthViolatedException
+
 
 private const val NICKNAME_MAXIMUM_LENGTH = 32
 

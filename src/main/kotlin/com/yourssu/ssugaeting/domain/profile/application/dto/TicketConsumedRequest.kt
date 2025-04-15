@@ -1,10 +1,10 @@
 package com.yourssu.ssugaeting.domain.profile.application.dto
 
-import com.yourssu.ssugaeting.domain.profile.business.TicketConsumedCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.TicketConsumedCommand
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 
-class TicketConsumedRequest(
+data class TicketConsumedRequest(
     @field:NotNull
     val profileId: Long,
 

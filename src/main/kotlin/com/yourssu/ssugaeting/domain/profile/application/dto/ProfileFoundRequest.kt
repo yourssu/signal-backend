@@ -1,9 +1,9 @@
 package com.yourssu.ssugaeting.domain.profile.application.dto
 
-import com.yourssu.ssugaeting.domain.profile.business.ProfileFoundCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.ProfileFoundCommand
 import jakarta.validation.constraints.NotBlank
 
-class ProfileFoundRequest(
+data class ProfileFoundRequest(
     @field:NotBlank
     val uuid: String,
 ) {

@@ -2,7 +2,7 @@ package com.yourssu.ssugaeting.domain.common.implement
 
 import java.util.*
 
-class Uuid(
+data class Uuid(
     val value: String,
 ) {
     companion object {

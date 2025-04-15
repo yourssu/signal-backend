@@ -1,9 +1,9 @@
 package com.yourssu.ssugaeting.domain.profile.application.dto
 
-import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileCreatedCommand
+import com.yourssu.ssugaeting.domain.profile.business.command.ProfileCreatedCommand
 import jakarta.validation.constraints.NotBlank
 
-class ProfileCreatedRequest(
+data class ProfileCreatedRequest(
     @field:NotBlank
     val gender: String,
 

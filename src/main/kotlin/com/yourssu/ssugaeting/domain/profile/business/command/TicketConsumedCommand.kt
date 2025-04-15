@@ -1,4 +1,4 @@
-package com.yourssu.ssugaeting.domain.profile.business
+package com.yourssu.ssugaeting.domain.profile.business.command
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 

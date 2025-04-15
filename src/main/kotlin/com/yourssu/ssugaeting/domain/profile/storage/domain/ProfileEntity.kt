@@ -1,9 +1,9 @@
-package com.yourssu.ssugaeting.domain.profile.storage
+package com.yourssu.ssugaeting.domain.profile.storage.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.profile.implement.Gender
-import com.yourssu.ssugaeting.domain.profile.implement.Mbti
-import com.yourssu.ssugaeting.domain.profile.implement.Profile
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Gender
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Mbti
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import jakarta.persistence.*
 
 

@@ -2,8 +2,9 @@ package com.yourssu.ssugaeting.domain.profile.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.profile.implement.Profile
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileRepository
+import com.yourssu.ssugaeting.domain.profile.storage.domain.ProfileEntity
 import com.yourssu.ssugaeting.domain.profile.storage.execption.ProfileNotFoundException
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable

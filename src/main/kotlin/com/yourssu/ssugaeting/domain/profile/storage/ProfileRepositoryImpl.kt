@@ -2,9 +2,10 @@ package com.yourssu.ssugaeting.domain.profile.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
-import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileRepository
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import com.yourssu.ssugaeting.domain.profile.storage.domain.ProfileEntity
+import com.yourssu.ssugaeting.domain.profile.storage.domain.QProfileEntity.profileEntity
 import com.yourssu.ssugaeting.domain.profile.storage.execption.ProfileNotFoundException
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
@@ -23,8 +24,8 @@ class ProfileRepositoryImpl(
     }
 
     override fun getByUuid(uuid: Uuid): Profile {
-        return jpaQueryFactory.selectFrom(QProfileEntity.profileEntity)
-            .where(QProfileEntity.profileEntity.uuid.eq(uuid.value))
+        return jpaQueryFactory.selectFrom(profileEntity)
+            .where(profileEntity.uuid.eq(uuid.value))
             .fetchFirst()
             ?.toDomain()
             ?: throw ProfileNotFoundException()
@@ -37,8 +38,8 @@ class ProfileRepositoryImpl(
     }
 
     override fun existsByUuid(uuid: Uuid): Boolean {
-        return jpaQueryFactory.selectFrom(QProfileEntity.profileEntity)
-            .where(QProfileEntity.profileEntity.uuid.eq(uuid.value))
+        return jpaQueryFactory.selectFrom(profileEntity)
+            .where(profileEntity.uuid.eq(uuid.value))
             .fetchFirst() != null
     }
 

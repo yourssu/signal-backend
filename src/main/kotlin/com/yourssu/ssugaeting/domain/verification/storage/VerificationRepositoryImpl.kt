@@ -4,7 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationRepository
-import com.yourssu.ssugaeting.domain.verification.storage.QVerificationEntity.verificationEntity
+import com.yourssu.ssugaeting.domain.verification.storage.domain.QVerificationEntity.verificationEntity
 import com.yourssu.ssugaeting.domain.verification.storage.domain.VerificationEntity
 import com.yourssu.ssugaeting.domain.verification.storage.exception.VerificationCodeNotFoundException
 import org.springframework.data.jpa.repository.JpaRepository

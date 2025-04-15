@@ -1,10 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.application
 
 import com.yourssu.ssugaeting.domain.common.business.dto.Response
-import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileCreatedRequest
-import com.yourssu.ssugaeting.domain.profile.application.dto.ProfileFoundRequest
-import com.yourssu.ssugaeting.domain.profile.application.dto.ProfilesFoundRequest
-import com.yourssu.ssugaeting.domain.profile.application.dto.TicketConsumedRequest
+import com.yourssu.ssugaeting.domain.profile.application.dto.*
 import com.yourssu.ssugaeting.domain.profile.business.ProfileService
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse
@@ -49,14 +46,4 @@ class ProfileController(
         val response = profileService.consumeTicket(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
-
-//
-//    @PostMapping("/nickname")
-//    fun generateNickname(@Valid @RequestBody request: NicknameGeneratedRequest): ResponseEntity<Response<NicknameCreatedResponse>> {
-//        val response = profileService.createNickname(request.toCommand())
-//        return ResponseEntity.status(HttpStatus.CREATED)
-//            .body(Response(result = response))
-//    }
-//
-
 }

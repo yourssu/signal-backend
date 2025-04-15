@@ -53,3 +53,17 @@ GET {{host}}/api/profiles?secretKey={{secretKey}}
 GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=
 
 ###
+
+// Suggest a nickname - 200 OK
+###
+POST {{host}}/api/profiles/nickname
+Content-Type: application/json
+
+{
+  "description": [
+    "statement1",
+    "statement2",
+    "statement3"
+  ]
+}
+###

@@ -11,6 +11,9 @@
 - [x] 랜덤 프로필 조회
 - [x] 티켓 사용하여 연락처 조회
   - [x] 이미 구매한 연락처이면 티켓을 소모하지 않음
+- [x] 닉네임 추천 기능 - 실행 환경 별로 분리
+  - [x] local 환경 LocalChatModel 사용
+  - [x] prod 환경 실제 AI 모델 사용
 
 ## API Documentation
 - [프로필 API](src/main/resources/http/docs/profile.http)

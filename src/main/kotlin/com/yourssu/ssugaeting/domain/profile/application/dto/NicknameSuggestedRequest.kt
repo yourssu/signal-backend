@@ -1,9 +1,9 @@
 package com.yourssu.ssugaeting.domain.profile.application.dto
 
-import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
-data class NicknameGeneratedRequest(
-    @field:NotBlank
+data class NicknameSuggestedRequest(
+    @field:NotNull
     val description: List<String>,
 ) {
 }

@@ -57,6 +57,11 @@ class VerificationRepositoryImpl(
     override fun clear() {
         verificationJpaRepository.deleteAll()
     }
+
+    override fun findAll(): List<Int> {
+        return verificationJpaRepository.findAll()
+            .map { it.verificationCode }
+    }
 }
 
 interface VerificationJpaRepository : JpaRepository<VerificationEntity, Long> {

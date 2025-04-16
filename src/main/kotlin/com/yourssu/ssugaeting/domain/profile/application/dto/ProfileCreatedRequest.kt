@@ -1,6 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.application.dto
 
 import com.yourssu.ssugaeting.domain.profile.business.command.ProfileCreatedCommand
+import com.yourssu.ssugaeting.domain.profile.support.ContactFormat
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
@@ -11,7 +12,7 @@ data class ProfileCreatedRequest(
     @field:NotBlank
     val animal: String,
 
-    @field:NotBlank
+    @field:ContactFormat
     val contact: String,
 
     @field:NotBlank
@@ -33,6 +34,7 @@ data class ProfileCreatedRequest(
             contact = contact,
             mbti = mbti,
             nickname = nickname,
+            introSentences = introSentences,
         )
     }
 

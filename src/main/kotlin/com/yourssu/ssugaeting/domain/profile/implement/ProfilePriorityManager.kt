@@ -9,7 +9,7 @@ class ProfilePriorityManager(
     private val profileRepository: ProfileRepository,
 ) {
     fun pickRandomProfile(
-        excludeProfileIds: Set<Long>,
+        excludeProfileIds: HashSet<Long>,
     ): Profile {
         return profileRepository.findAll()
             .shuffled()

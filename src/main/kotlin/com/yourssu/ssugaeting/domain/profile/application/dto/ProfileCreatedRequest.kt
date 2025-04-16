@@ -2,6 +2,7 @@ package com.yourssu.ssugaeting.domain.profile.application.dto
 
 import com.yourssu.ssugaeting.domain.profile.business.command.ProfileCreatedCommand
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 
 data class ProfileCreatedRequest(
     @field:NotBlank
@@ -16,8 +17,11 @@ data class ProfileCreatedRequest(
     @field:NotBlank
     val mbti: String,
 
-    @field:NotBlank
+    @field:Size(min = 1, max = 10)
     val nickname: String,
+
+    @field:Size(min = 0, max = 3)
+    val introSentences: List<@Size(min = 1, max = 23) String>,
 
     val uuid: String? = null,
 ) {

@@ -4,7 +4,7 @@ import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.profile.implement.exception.NicknameLengthViolatedException
 
 
-private const val NICKNAME_MAXIMUM_LENGTH = 32
+private const val NICKNAME_MAXIMUM_LENGTH = 10
 
 class Profile(
     val id: Long? = null,
@@ -16,7 +16,7 @@ class Profile(
     val nickname: String,
 ) {
     init {
-        if (nickname.length > NICKNAME_MAXIMUM_LENGTH) {
+        if (nickname.isEmpty() || nickname.length > NICKNAME_MAXIMUM_LENGTH) {
             throw NicknameLengthViolatedException()
         }
     }

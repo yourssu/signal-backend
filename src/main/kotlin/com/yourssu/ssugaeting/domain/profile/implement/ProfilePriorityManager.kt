@@ -11,9 +11,10 @@ class ProfilePriorityManager(
     fun pickRandomProfile(
         excludeProfileIds: HashSet<Long>,
     ): Profile {
-        return profileRepository.findAll()
+        val profileId = profileRepository.findAllIds()
             .shuffled()
-            .firstOrNull { profile -> profile.id !in excludeProfileIds }
+            .firstOrNull { it !in excludeProfileIds }
             ?: throw RandomProfileNotFoundException()
+        return profileRepository.getById(profileId)
     }
 }

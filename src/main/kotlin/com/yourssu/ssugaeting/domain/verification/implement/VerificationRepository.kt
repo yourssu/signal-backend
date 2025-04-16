@@ -11,5 +11,5 @@ interface VerificationRepository {
     fun existsByCode(code: VerificationCode): Boolean
     fun removeByUuid(uuid: Uuid)
     fun clear()
-    fun findAll(): List<Int>
+    fun findAllVerificationCodes(): List<Int>
 }

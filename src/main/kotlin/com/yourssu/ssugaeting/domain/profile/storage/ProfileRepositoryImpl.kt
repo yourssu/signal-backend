@@ -43,9 +43,15 @@ class ProfileRepositoryImpl(
             .fetchFirst() != null
     }
 
-    @Cacheable(cacheNames = ["profileCache"])
     override fun findAll(): List<Profile> {
         return profileJpaRepository.findAll().map { it.toDomain() }
+    }
+
+    @Cacheable(cacheNames = ["profileCache"])
+    override fun findAllIds(): List<Long> {
+        return jpaQueryFactory.select(profileEntity.id)
+            .from(profileEntity)
+            .fetch()
     }
 
     @Async

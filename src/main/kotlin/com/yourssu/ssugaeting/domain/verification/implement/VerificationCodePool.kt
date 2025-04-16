@@ -19,7 +19,7 @@ class VerificationCodePool(
     }
 
     private fun shuffledCandidates(): List<Int> {
-        val excludeCodes = verificationRepository.findAll()
+        val excludeCodes = verificationRepository.findAllVerificationCodes()
             .toHashSet()
         return (0 until MAXIMUM_VERIFICATION_CODE)
             .filter { it !in excludeCodes }

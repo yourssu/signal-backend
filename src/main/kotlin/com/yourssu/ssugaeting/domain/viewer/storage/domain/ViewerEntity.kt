@@ -30,6 +30,9 @@ class ViewerEntity(
 
     @Column(nullable = false)
     var updatedTime: ZonedDateTime,
+
+    @Version
+    var version: Long? = null,
 ) {
     companion object {
         fun from(viewer: Viewer): ViewerEntity {

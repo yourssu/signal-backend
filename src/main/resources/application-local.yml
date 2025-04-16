@@ -21,7 +21,7 @@ spring:
 domain:
   permission:
     admin:
-      secret-key: "secret-key-value"
+      secret-key: "DonaEmilyEatSteakLeopold"
   policy:
     contact-price: 2
 

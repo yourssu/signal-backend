@@ -1,6 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.implement
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Gender
 import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import org.springframework.stereotype.Component
 
@@ -25,7 +26,7 @@ class ProfileReader(
         return profileRepository.findAll()
     }
 
-    fun findAllIds(): List<Long> {
-        return profileRepository.findAllIds()
+    fun findAllOppositeGenderIds(myGender: Gender): List<Long> {
+        return profileRepository.findAllOppositeGenderIds(myGender)
     }
 }

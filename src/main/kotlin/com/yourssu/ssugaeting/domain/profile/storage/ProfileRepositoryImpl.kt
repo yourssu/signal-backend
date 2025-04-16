@@ -3,6 +3,7 @@ package com.yourssu.ssugaeting.domain.profile.storage
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.profile.implement.ProfileRepository
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Gender
 import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import com.yourssu.ssugaeting.domain.profile.storage.domain.ProfileEntity
 import com.yourssu.ssugaeting.domain.profile.storage.domain.QProfileEntity.profileEntity
@@ -48,9 +49,10 @@ class ProfileRepositoryImpl(
     }
 
     @Cacheable(cacheNames = ["profileCache"])
-    override fun findAllIds(): List<Long> {
+    override fun findAllOppositeGenderIds(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)
             .from(profileEntity)
+            .where(!profileEntity.gender.eq(gender))
             .fetch()
     }
 

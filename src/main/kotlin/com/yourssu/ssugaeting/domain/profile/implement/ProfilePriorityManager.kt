@@ -1,5 +1,6 @@
 package com.yourssu.ssugaeting.domain.profile.implement
 
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Gender
 import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import com.yourssu.ssugaeting.domain.profile.implement.exception.RandomProfileNotFoundException
 import org.springframework.stereotype.Component
@@ -10,8 +11,9 @@ class ProfilePriorityManager(
 ) {
     fun pickRandomProfile(
         excludeProfileIds: HashSet<Long>,
+        myGender: Gender,
     ): Profile {
-        val profileId = profileReader.findAllIds()
+        val profileId = profileReader.findAllOppositeGenderIds(myGender)
             .shuffled()
             .firstOrNull { it !in excludeProfileIds }
             ?: throw RandomProfileNotFoundException()

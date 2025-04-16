@@ -1,13 +1,17 @@
 @host=localhost:8080
 @uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
 
+
+#@gender=MALE
+@gender=FEMALE
+
 // Create a new profile - 201 Created
 ###
 POST {{host}}/api/profiles
 Content-Type: application/json
 
 {
-  "gender": "MALE",
+  "gender": "{{gender}}",
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
@@ -24,7 +28,7 @@ POST {{host}}/api/profiles
 Content-Type: application/json
 
 {
-  "gender": "FEMALE",
+  "gender": "{{gender}}",
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",

@@ -12,6 +12,7 @@ class ProfileCreatedCommand(
     val contact: String,
     val mbti: String,
     val nickname: String,
+    val introSentences: List<String>
 ) {
     fun toDomain(): Profile {
         if (uuid != null) {
@@ -22,6 +23,7 @@ class ProfileCreatedCommand(
                 contact = contact,
                 mbti = Mbti.of(mbti),
                 nickname = nickname,
+                introSentences = introSentences,
             )
         }
         return Profile.ofNewProfile(
@@ -30,6 +32,7 @@ class ProfileCreatedCommand(
             contact = contact,
             mbti = Mbti.of(mbti),
             nickname = nickname,
+            introSentences = introSentences,
         )
     }
 }

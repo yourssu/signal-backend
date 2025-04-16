@@ -1,4 +1,4 @@
-@host=localhost:9001
+@host=localhost:8080
 @uuid=it-means-the-uuid-is-optional
 
 // Create a new profile - 201 Created
@@ -11,7 +11,8 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
-  "nickname": "leopold"
+  "nickname": "leopold",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
@@ -28,7 +29,8 @@ Content-Type: application/json
   "contact": "@leo",
   "mbti": "ISTJ",
   "nickname": "leopold",
-  "uuid": "{{uuid}}"
+  "uuid": "{{uuid}}",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###

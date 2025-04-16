@@ -48,7 +48,7 @@ class ProfileEntity(
         }
     }
 
-    fun toDomain(): Profile {
+    fun toDomain(introSentences: List<String> = emptyList()): Profile {
         return Profile(
             id = id,
             gender = gender,
@@ -57,6 +57,7 @@ class ProfileEntity(
             contact = contact,
             mbti = mbti,
             nickname = nickname,
+            introSentences = introSentences,
         )
     }
 }

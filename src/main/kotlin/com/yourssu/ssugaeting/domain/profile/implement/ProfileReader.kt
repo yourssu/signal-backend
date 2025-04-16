@@ -7,16 +7,25 @@ import org.springframework.stereotype.Component
 @Component
 class ProfileReader(
     private val profileRepository: ProfileRepository,
+    private val introSentenceRepository: IntroSentenceRepository,
 ) {
     fun getByUuid(uuid: Uuid): Profile {
-        return profileRepository.getByUuid(uuid)
+        val profile = profileRepository.getByUuid(uuid)
+        val introSentences = introSentenceRepository.findAllByUuid(uuid)
+        return profile.copy(introSentences = introSentences)
     }
 
     fun getById(id: Long): Profile {
-        return profileRepository.getById(id)
+        val profile = profileRepository.getById(id)
+        val introSentences = introSentenceRepository.findAllByUuid(profile.uuid)
+        return profile.copy(introSentences = introSentences)
     }
 
     fun getAll(): List<Profile> {
         return profileRepository.findAll()
+    }
+
+    fun findAllIds(): List<Long> {
+        return profileRepository.findAllIds()
     }
 }

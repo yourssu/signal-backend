@@ -22,7 +22,7 @@ data class ProfileCreatedRequest(
     val nickname: String,
 
     @field:Size(min = 0, max = 3)
-    val introSentences: List<@Size(min = 1, max = 23) String>,
+    val introSentences: List<String>,
 
     val uuid: String? = null,
 ) {

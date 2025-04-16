@@ -10,7 +10,8 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
-  "nickname": "Maximum length is 32 characters"
+  "nickname": "nickname",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
@@ -25,7 +26,8 @@ Content-Type: application/json
   "animal": "",
   "contact": "@leo",
   "mbti": "ISTJ",
-  "nickname": "Maximum length is 32 characters"
+  "nickname": "nickname",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
@@ -40,7 +42,8 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "",
   "mbti": "ISTJ",
-  "nickname": "Maximum length is 32 characters"
+  "nickname": "nickname",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
@@ -55,7 +58,8 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "iiii",
-  "nickname": "Maximum length is 32 characters"
+  "nickname": "nickname",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
@@ -70,5 +74,21 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
-  "nickname": "Maximum length is 32 characters. Maximum length is 32 characters. Maximum length is 32 characters."
+  "nickname": "Maximum length is 10",
+  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
+}
+
+###
+
+// When any introSenteces exceeds the maximum length, return 400 Bad Request
+POST {{host}}/api/profiles
+Content-Type: application/json
+
+{
+  "gender": "FEMALE",
+  "animal": "DOG",
+  "contact": "@leo",
+  "mbti": "ISTJ",
+  "nickname": "nickname",
+  "introSentences" : ["제일 좋아하는 음식은 치킨이야 제일 좋아하는 음식은 치킨이야 제일 좋아하는 음식은 치킨이야 제일 좋아하는 음식은 치킨이야"]
 }

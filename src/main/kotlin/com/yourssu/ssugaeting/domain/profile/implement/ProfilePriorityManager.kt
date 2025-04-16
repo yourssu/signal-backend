@@ -6,15 +6,15 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProfilePriorityManager(
-    private val profileRepository: ProfileRepository,
+    private val profileReader: ProfileReader,
 ) {
     fun pickRandomProfile(
         excludeProfileIds: HashSet<Long>,
     ): Profile {
-        val profileId = profileRepository.findAllIds()
+        val profileId = profileReader.findAllIds()
             .shuffled()
             .firstOrNull { it !in excludeProfileIds }
             ?: throw RandomProfileNotFoundException()
-        return profileRepository.getById(profileId)
+        return profileReader.getById(profileId)
     }
 }

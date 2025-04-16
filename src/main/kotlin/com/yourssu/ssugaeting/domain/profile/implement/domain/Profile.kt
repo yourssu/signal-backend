@@ -22,7 +22,7 @@ class Profile(
     }
 
     companion object {
-        fun ofNewProfile(gender: Gender, animal: String, contact: String, mbti: Mbti, nickname: String): Profile {
+        fun ofNewProfile(gender: Gender, animal: String, contact: String, mbti: Mbti, nickname: String, introSentences: List<String>): Profile {
             return Profile(
                 uuid = Uuid.randomUUID(),
                 gender = gender,
@@ -30,7 +30,21 @@ class Profile(
                 contact = contact,
                 mbti = mbti,
                 nickname = nickname,
+                introSentences = introSentences,
             )
         }
+    }
+
+    fun copy(introSentences: List<String>): Profile {
+        return Profile(
+            id = id,
+            uuid = uuid,
+            gender = gender,
+            animal = animal,
+            contact = contact,
+            mbti = mbti,
+            nickname = nickname,
+            introSentences = introSentences
+        )
     }
 }

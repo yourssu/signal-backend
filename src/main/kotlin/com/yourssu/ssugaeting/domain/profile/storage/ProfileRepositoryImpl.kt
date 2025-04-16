@@ -20,7 +20,7 @@ class ProfileRepositoryImpl(
 ) : ProfileRepository {
     override fun save(profile: Profile): Profile {
         val saveProfile = profileJpaRepository.save(ProfileEntity.from(profile))
-        return saveProfile.toDomain()
+        return saveProfile.toDomain(introSentences = profile.introSentences)
     }
 
     override fun getByUuid(uuid: Uuid): Profile {
@@ -56,9 +56,10 @@ class ProfileRepositoryImpl(
 
     @Async
     @CachePut(cacheNames = ["profileCache"])
-    override fun updateCacheProfiles(): List<Profile> {
-        return profileJpaRepository.findAll()
-            .map { it.toDomain() }
+    override fun updateCacheProfiles(): List<Long> {
+        return jpaQueryFactory.select(profileEntity.id)
+            .from(profileEntity)
+            .fetch()
     }
 }
 

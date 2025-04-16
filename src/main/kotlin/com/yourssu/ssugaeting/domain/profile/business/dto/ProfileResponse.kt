@@ -8,6 +8,7 @@ class ProfileResponse(
     val animal: String,
     val mbti: String,
     val nickname: String,
+    val introSentences: List<String>,
 ) {
     companion object {
         fun from(profile: Profile): ProfileResponse {
@@ -17,6 +18,7 @@ class ProfileResponse(
                 animal = profile.animal,
                 mbti = profile.mbti.name,
                 nickname = profile.nickname,
+                introSentences = profile.introSentences,
             )
         }
     }

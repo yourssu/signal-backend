@@ -9,6 +9,6 @@ interface ProfileRepository {
     fun existsByUuid(uuid: Uuid): Boolean
     fun findAll(): List<Profile>
     fun findAllIds(): List<Long>
-    fun updateCacheProfiles(): List<Profile>
+    fun updateCacheProfiles(): List<Long>
     fun getById(id: Long): Profile
 }

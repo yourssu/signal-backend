@@ -1,10 +1,13 @@
 package com.yourssu.ssugaeting.domain.profile.implement.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
+import com.yourssu.ssugaeting.domain.profile.implement.exception.IntroSentenceLengthViolatedException
+import com.yourssu.ssugaeting.domain.profile.implement.exception.IntroSentenceSizeViolatedException
 import com.yourssu.ssugaeting.domain.profile.implement.exception.NicknameLengthViolatedException
 
-
-private const val NICKNAME_MAXIMUM_LENGTH = 10
+private const val MAXIMUM_NICKNAME_LENGTH = 10
+private const val MAXIMUM_INTRO_SENTENCES_SIZE = 3
+private const val MAXIMUM_INTRO_SENTENCE_LENGTH = 23
 
 class Profile(
     val id: Long? = null,
@@ -14,10 +17,19 @@ class Profile(
     val contact: String,
     val mbti: Mbti,
     val nickname: String,
+    val introSentences: List<String>,
 ) {
     init {
-        if (nickname.isEmpty() || nickname.length > NICKNAME_MAXIMUM_LENGTH) {
+        if (nickname.isEmpty() || nickname.length > MAXIMUM_NICKNAME_LENGTH) {
             throw NicknameLengthViolatedException()
+        }
+        if (introSentences.size > MAXIMUM_INTRO_SENTENCES_SIZE) {
+            throw IntroSentenceSizeViolatedException()
+        }
+        for (introSentence in introSentences) {
+            if (introSentence.length > MAXIMUM_INTRO_SENTENCE_LENGTH) {
+                throw IntroSentenceLengthViolatedException()
+            }
         }
     }
 

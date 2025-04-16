@@ -4,7 +4,7 @@ import com.yourssu.ssugaeting.infrastructure.dto.NicknameSuggestedResponse
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-private const val MAXIMUM_NICKNAME_LENGTH = 32
+private const val MAXIMUM_NICKNAME_LENGTH = 10
 private const val STATEMENT_SEPARATOR = "&"
 
 @Component

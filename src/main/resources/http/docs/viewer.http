@@ -7,7 +7,8 @@ POST {{host}}/api/viewers/verification
 Content-Type: application/json
 
 {
-  "uuid": "{{uuid}}"
+  "uuid": "{{uuid}}",
+  "gender" : "MALE"
 }
 
 > {%

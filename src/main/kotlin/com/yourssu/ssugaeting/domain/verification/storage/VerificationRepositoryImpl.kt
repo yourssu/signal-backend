@@ -3,6 +3,7 @@ package com.yourssu.ssugaeting.domain.verification.storage
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationRepository
+import com.yourssu.ssugaeting.domain.verification.implement.domain.Verification
 import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import com.yourssu.ssugaeting.domain.verification.storage.domain.QVerificationEntity.verificationEntity
 import com.yourssu.ssugaeting.domain.verification.storage.domain.VerificationEntity
@@ -15,9 +16,9 @@ class VerificationRepositoryImpl(
     private val verificationJpaRepository: VerificationJpaRepository,
     private val jpaQueryFactory: JPAQueryFactory,
 ) : VerificationRepository {
-    override fun issueVerificationCode(uuid: Uuid, verificationCode: VerificationCode): VerificationCode {
-        val verification = VerificationEntity.from(uuid, verificationCode)
-        return verificationJpaRepository.save(verification).toVerificationCode()
+    override fun issueVerificationCode(verification: Verification): VerificationCode {
+        val entity = VerificationEntity.from(verification)
+        return verificationJpaRepository.save(entity).toVerificationCode()
     }
 
     override fun existsByUuid(uuid: Uuid): Boolean {
@@ -34,11 +35,11 @@ class VerificationRepositoryImpl(
             ?: throw VerificationCodeNotFoundException()
     }
 
-    override fun getUuid(verificationCode: VerificationCode): Uuid {
+    override fun getByCode(verificationCode: VerificationCode): Verification {
         return jpaQueryFactory.selectFrom(verificationEntity)
             .where(verificationEntity.verificationCode.eq(verificationCode.value))
             .fetchFirst()
-            ?.toUuid()
+            ?.toDomain()
             ?: throw VerificationCodeNotFoundException()
     }
 

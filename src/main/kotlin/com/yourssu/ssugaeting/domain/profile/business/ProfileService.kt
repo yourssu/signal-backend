@@ -8,10 +8,7 @@ import com.yourssu.ssugaeting.domain.profile.business.command.TicketConsumedComm
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.ssugaeting.domain.profile.business.command.ProfileCreatedCommand
 import com.yourssu.ssugaeting.domain.profile.business.dto.ProfileResponse
-import com.yourssu.ssugaeting.domain.profile.implement.ProfilePriorityManager
-import com.yourssu.ssugaeting.domain.profile.implement.ProfileReader
-import com.yourssu.ssugaeting.domain.profile.implement.ProfileWriter
-import com.yourssu.ssugaeting.domain.profile.implement.UsedTicketManager
+import com.yourssu.ssugaeting.domain.profile.implement.*
 import com.yourssu.ssugaeting.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.ssugaeting.domain.viewer.implement.ViewerReader
 import org.springframework.stereotype.Service
@@ -22,14 +19,16 @@ class ProfileService(
     private val profileWriter: ProfileWriter,
     private val profileReader: ProfileReader,
     private val viewerReader: ViewerReader,
+    private val genderValidator: GenderValidator,
     private val usedTicketManager: UsedTicketManager,
     private val profilePriorityManager: ProfilePriorityManager,
     private val policy: PolicyConfigurationProperties,
     private val adminAccessChecker: AdminAccessChecker,
 ) {
     fun createProfile(command: ProfileCreatedCommand): ProfileContactResponse {
-        val profile = profileWriter.createProfile(command.toDomain())
-        return ProfileContactResponse.from(profile)
+        val profile = command.toDomain()
+        genderValidator.validateProfile(profile)
+        return ProfileContactResponse.from(profileWriter.createProfile(profile))
     }
 
     fun getProfile(command: ProfileFoundCommand): ProfileContactResponse {

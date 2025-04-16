@@ -1,6 +1,8 @@
 package com.yourssu.ssugaeting.domain.verification.storage.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
+import com.yourssu.ssugaeting.domain.profile.implement.domain.Gender
+import com.yourssu.ssugaeting.domain.verification.implement.domain.Verification
 import com.yourssu.ssugaeting.domain.verification.implement.domain.VerificationCode
 import jakarta.persistence.*
 
@@ -17,20 +19,28 @@ class VerificationEntity(
     @Column(nullable = false, unique = true)
     val verificationCode: Int,
 
-) {
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val gender: Gender,
+
+    ) {
     companion object {
         fun from(
-            uuid: Uuid,
-            verificationCode: VerificationCode,
+            verification: Verification
         ) = VerificationEntity(
-            uuid = uuid.value,
-            verificationCode = verificationCode.value,
+            uuid = verification.uuid.value,
+            verificationCode = verification.verificationCode.value,
+            gender = verification.gender,
         )
     }
 
-    fun toUuid() = Uuid(
-        value = uuid,
-    )
+    fun toDomain(): Verification {
+        return Verification(
+            uuid = Uuid(uuid),
+            verificationCode = VerificationCode(verificationCode),
+            gender = gender,
+        )
+    }
 
     fun toVerificationCode() = VerificationCode(
         value = verificationCode,

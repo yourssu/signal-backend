@@ -8,6 +8,7 @@ data class ViewerDetailResponse(
     val id: Long? = null,
     val uuid: String,
     val ticket: Int,
+    val gender: String,
     val usedTicket: Int,
     val updatedTime: String,
     val purchasedProfiles: List<PurchasedProfileResponse>,
@@ -20,6 +21,7 @@ data class ViewerDetailResponse(
             return ViewerDetailResponse(
                 id = viewer.id,
                 uuid = viewer.uuid.value,
+                gender = viewer.gender.name,
                 ticket = viewer.ticket,
                 usedTicket = viewer.usedTicket,
                 updatedTime = viewer.updatedTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

@@ -1,5 +1,5 @@
 @host=localhost:8080
-@uuid=it-means-the-uuid-is-optional
+@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
 
 // Create a new profile - 201 Created
 ###

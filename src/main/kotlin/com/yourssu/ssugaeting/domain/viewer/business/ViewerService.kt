@@ -1,6 +1,7 @@
 package com.yourssu.ssugaeting.domain.viewer.business
 
 import com.yourssu.ssugaeting.domain.profile.business.dto.PurchasedProfileResponse
+import com.yourssu.ssugaeting.domain.profile.implement.GenderValidator
 import com.yourssu.ssugaeting.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.ssugaeting.domain.verification.implement.VerificationWriter
 import com.yourssu.ssugaeting.domain.viewer.business.command.AllViewersFoundCommand
@@ -22,19 +23,24 @@ class ViewerService(
     private val verificationReader: VerificationReader,
     private val viewerWriter: ViewerWriter,
     private val viewerReader: ViewerReader,
+    private val genderValidator: GenderValidator,
     private val purchasedProfileReader: PurchasedProfileReader,
     private val adminAccessChecker: AdminAccessChecker,
 ) {
     fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
-        val code = verificationWriter.issueVerificationCode(command.toDomain())
+        genderValidator.validateViewer(uuid = command.toUuid(), gender = command.toGender())
+        val code = verificationWriter.issueVerificationCode(uuid = command.toUuid(), command.toGender()!!)
         return VerificationResponse.from(code)
     }
 
     fun issueTicket(command: TicketIssuedCommand): ViewerResponse {
         adminAccessChecker.validateAdminAccess(command.secretKey)
-        val uuid = verificationReader.findByCode(command.toVerificationCode())
-        val viewer = viewerWriter.issueTicket(uuid = uuid, ticket = command.ticket)
-        verificationWriter.remove(uuid)
+        val verification = verificationReader.findByCode(command.toVerificationCode())
+        val viewer = viewerWriter.issueTicket(
+            uuid = verification.uuid,
+            ticket = command.ticket,
+            gender = verification.gender)
+        verificationWriter.remove(verification.uuid)
         return ViewerResponse.from(viewer)
     }
 

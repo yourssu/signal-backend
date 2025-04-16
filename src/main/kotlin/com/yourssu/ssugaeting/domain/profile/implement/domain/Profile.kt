@@ -1,6 +1,7 @@
 package com.yourssu.ssugaeting.domain.profile.implement.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
+import com.yourssu.ssugaeting.domain.profile.implement.exception.GenderMismatchException
 import com.yourssu.ssugaeting.domain.profile.implement.exception.IntroSentenceLengthViolatedException
 import com.yourssu.ssugaeting.domain.profile.implement.exception.IntroSentenceSizeViolatedException
 import com.yourssu.ssugaeting.domain.profile.implement.exception.NicknameLengthViolatedException
@@ -58,5 +59,11 @@ class Profile(
             nickname = nickname,
             introSentences = introSentences
         )
+    }
+
+    fun validateSameGender(gender: Gender) {
+        if (this.gender != gender) {
+            throw GenderMismatchException()
+        }
     }
 }

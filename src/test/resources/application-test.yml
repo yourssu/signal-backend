@@ -18,13 +18,17 @@ spring:
       enabled: true
       path: /h2-console
 
-logging:
-  level:
-    org.springframework: DEBUG
-
 domain:
   permission:
     admin:
       secret-key: "DonaEmilyEatSteakLeopold"
   policy:
     contact-price: 2
+
+infra:
+  openai:
+    url: "https://api.openai.com/v1/responses"
+    api-key: "api-key-value"
+    model: "gpt-4o-mini"
+    prompt: "prompt for a developer"
+    user-input: 100

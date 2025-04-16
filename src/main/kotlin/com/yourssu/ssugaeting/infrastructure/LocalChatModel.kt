@@ -8,7 +8,7 @@ private const val MAXIMUM_NICKNAME_LENGTH = 32
 private const val STATEMENT_SEPARATOR = "&"
 
 @Component
-@Profile("local")
+@Profile("local", "test")
 class LocalChatModel: ChatModel {
     override fun suggestNickname(statements: List<String>): NicknameSuggestedResponse {
         val nickname = statements.joinToString(STATEMENT_SEPARATOR)

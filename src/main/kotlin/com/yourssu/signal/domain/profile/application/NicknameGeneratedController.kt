@@ -19,7 +19,7 @@ class NicknameGeneratedController(
 ) {
     @PostMapping("/nickname")
     fun suggestedNickname(@Valid @RequestBody request: NicknameSuggestedRequest): ResponseEntity<Response<NicknameSuggestedResponse>> {
-        val response = chatModel.suggestNickname(request.description)
+        val response = chatModel.suggestNickname(request.introSentences)
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Response(result = response))
     }

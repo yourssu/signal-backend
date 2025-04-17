@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotNull
 
 data class NicknameSuggestedRequest(
     @field:NotNull
-    val description: List<String>,
+    val introSentences: List<String>,
 ) {
 }

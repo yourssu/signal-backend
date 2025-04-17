@@ -3,7 +3,7 @@ package com.yourssu.signal.domain.viewer.business.dto
 import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 
 data class ViewerResponse(
-    val id: Long? = null,
+    val id: Long,
     val uuid: String,
     val gender: String,
     val ticket: Int,
@@ -13,7 +13,7 @@ data class ViewerResponse(
     companion object {
         fun from(viewer: Viewer): ViewerResponse {
             return ViewerResponse(
-                id = viewer.id,
+                id = viewer.id!!,
                 uuid = viewer.uuid.value,
                 gender = viewer.gender.name,
                 ticket = viewer.ticket,

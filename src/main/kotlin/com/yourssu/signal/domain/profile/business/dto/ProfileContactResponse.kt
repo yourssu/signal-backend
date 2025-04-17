@@ -3,7 +3,7 @@ package com.yourssu.signal.domain.profile.business.dto
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 
 class ProfileContactResponse(
-    val profileId: Long? = null,
+    val profileId: Long,
     val uuid: String,
     val gender: String,
     val animal: String,
@@ -15,7 +15,7 @@ class ProfileContactResponse(
     companion object {
         fun from(profile: Profile): ProfileContactResponse {
             return ProfileContactResponse(
-                profileId = profile.id,
+                profileId = profile.id!!,
                 uuid = profile.uuid.value,
                 gender = profile.gender.name,
                 animal = profile.animal,

@@ -5,7 +5,7 @@ import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import java.time.format.DateTimeFormatter
 
 data class ViewerDetailResponse(
-    val id: Long? = null,
+    val id: Long,
     val uuid: String,
     val ticket: Int,
     val gender: String,
@@ -19,7 +19,7 @@ data class ViewerDetailResponse(
             purchasedProfiles: List<PurchasedProfileResponse>,
         ): ViewerDetailResponse {
             return ViewerDetailResponse(
-                id = viewer.id,
+                id = viewer.id!!,
                 uuid = viewer.uuid.value,
                 gender = viewer.gender.name,
                 ticket = viewer.ticket,

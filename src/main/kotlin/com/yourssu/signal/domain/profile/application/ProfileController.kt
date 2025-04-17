@@ -4,6 +4,7 @@ import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.profile.application.dto.*
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.business.ProfileService
+import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.viewer.application.dto.RandomProfileRequest
@@ -25,7 +26,7 @@ class ProfileController(
     }
 
     @GetMapping("/uuid")
-    fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<ProfileContactResponse>> {
+    fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<MyProfileResponse>> {
         val response = profileService.getProfile(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }

@@ -2,8 +2,9 @@ package com.yourssu.signal.domain.profile.business.dto
 
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 
-class ProfileContactResponse(
+class MyProfileResponse(
     val profileId: Long,
+    val uuid: String,
     val gender: String,
     val animal: String,
     val contact: String,
@@ -12,9 +13,10 @@ class ProfileContactResponse(
     val introSentences: List<String>,
 ) {
     companion object {
-        fun from(profile: Profile): ProfileContactResponse {
-            return ProfileContactResponse(
+        fun from(profile: Profile): MyProfileResponse {
+            return MyProfileResponse(
                 profileId = profile.id!!,
+                uuid = profile.uuid.value,
                 gender = profile.gender.name,
                 animal = profile.animal,
                 contact = profile.contact,

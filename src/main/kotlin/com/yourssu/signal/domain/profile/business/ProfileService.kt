@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.profile.business.command.RandomProfileFoundComm
 import com.yourssu.signal.domain.profile.business.command.TicketConsumedCommand
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.command.ProfileCreatedCommand
+import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
@@ -31,9 +32,9 @@ class ProfileService(
         return ProfileContactResponse.from(profileWriter.createProfile(profile))
     }
 
-    fun getProfile(command: ProfileFoundCommand): ProfileContactResponse {
+    fun getProfile(command: ProfileFoundCommand): MyProfileResponse {
         val profile = profileReader.getByUuid(command.toDomain())
-        return ProfileContactResponse.from(profile)
+        return MyProfileResponse.from(profile)
     }
 
     fun getRandomProfile(command: RandomProfileFoundCommand): ProfileResponse {

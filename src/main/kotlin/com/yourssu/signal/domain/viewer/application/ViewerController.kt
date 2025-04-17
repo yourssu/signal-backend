@@ -1,14 +1,19 @@
 package com.yourssu.signal.domain.viewer.application
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.viewer.application.dto.*
 import com.yourssu.signal.domain.viewer.business.ViewerService
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+
+private val logger = KotlinLogging.logger {}
+private val mapper = ObjectMapper()
 
 @RestController
 @RequestMapping("/api/viewers")
@@ -24,6 +29,13 @@ class ViewerController(
     @PostMapping
     fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest) : ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.issueTicket(request.toCommand())
+        logger.info { "POST /api/viewers response: ${mapper.writeValueAsString(
+            mapOf(
+                "인증 코드" to request.verificationCode,
+                "발급한 이용권 개수" to request.ticket,
+                "보유한 이용권 개수" to response.ticket - response.usedTicket,
+            )
+        )}" }
         return ResponseEntity.ok(Response(result = response))
     }
 

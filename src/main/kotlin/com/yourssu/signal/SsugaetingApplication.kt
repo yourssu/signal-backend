@@ -8,8 +8,8 @@ import org.springframework.cache.annotation.EnableCaching
 @EnableCaching
 @ConfigurationPropertiesScan
 @SpringBootApplication
-class signalApplication
+class SignalApplication
 
 fun main(args: Array<String>) {
-    runApplication<signalApplication>(*args)
+    runApplication<SignalApplication>(*args)
 }

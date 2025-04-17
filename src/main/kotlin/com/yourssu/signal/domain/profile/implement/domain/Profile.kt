@@ -6,9 +6,9 @@ import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLength
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.NicknameLengthViolatedException
 
-private const val MAXIMUM_NICKNAME_LENGTH = 10
+private const val MAXIMUM_NICKNAME_LENGTH = 15
 private const val MAXIMUM_INTRO_SENTENCES_SIZE = 3
-private const val MAXIMUM_INTRO_SENTENCE_LENGTH = 23
+private const val MAXIMUM_INTRO_SENTENCE_LENGTH = 20
 
 class Profile(
     val id: Long? = null,

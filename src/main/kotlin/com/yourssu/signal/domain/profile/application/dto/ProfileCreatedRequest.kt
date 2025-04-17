@@ -18,7 +18,7 @@ data class ProfileCreatedRequest(
     @field:NotBlank
     val mbti: String,
 
-    @field:Size(min = 1, max = 10)
+    @field:Size(min = 1, max = 15)
     val nickname: String,
 
     @field:Size(min = 0, max = 3)

@@ -1,4 +1,4 @@
-@host=localhost:9001
+@host=localhost:8080
 
 // Suggest a nickname - 200 OK
 ###

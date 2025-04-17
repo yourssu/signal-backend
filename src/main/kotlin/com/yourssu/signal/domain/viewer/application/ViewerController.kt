@@ -40,7 +40,7 @@ class ViewerController(
     }
 
     @GetMapping("/uuid")
-    fun getViewer(@Valid @ModelAttribute request: ViewFoundRequest): ResponseEntity<Response<ViewerDetailResponse>> {
+    fun getViewer(@Valid @ModelAttribute request: FoundSelfRequest): ResponseEntity<Response<ViewerDetailResponse>> {
         val response = viewerService.getViewer(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }

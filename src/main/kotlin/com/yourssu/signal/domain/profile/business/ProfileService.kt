@@ -38,9 +38,14 @@ class ProfileService(
     }
 
     fun getRandomProfile(command: RandomProfileFoundCommand): ProfileResponse {
-        val myProfile = profileReader.getByUuid(command.toUuid())
-        val excludeProfileIds = command.toExcludeProfiles(myProfile)
-        val profile = profilePriorityManager.pickRandomProfile(excludeProfileIds, myProfile.gender)
+        val viewer = viewerReader.get(command.toUuid())
+        if (profileReader.existsByUuid(command.toUuid())) {
+            val myProfile = profileReader.getByUuid(command.toUuid())
+            val excludeProfileIds = command.toExcludeProfiles(myProfile)
+            val profile = profilePriorityManager.pickRandomProfile(excludeProfileIds, viewer.gender)
+            return ProfileResponse.from(profile)
+        }
+        val profile = profilePriorityManager.pickRandomProfile(command.toExcludeProfiles(), viewer.gender)
         return ProfileResponse.from(profile)
     }
 

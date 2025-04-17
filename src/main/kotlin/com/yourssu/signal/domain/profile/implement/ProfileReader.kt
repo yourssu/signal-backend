@@ -16,6 +16,10 @@ class ProfileReader(
         return profile.copy(introSentences = introSentences)
     }
 
+    fun existsByUuid(uuid: Uuid): Boolean {
+        return profileRepository.existsByUuid(uuid)
+    }
+
     fun getById(id: Long): Profile {
         val profile = profileRepository.getById(id)
         val introSentences = introSentenceRepository.findAllByUuid(profile.uuid)

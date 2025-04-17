@@ -11,7 +11,10 @@ class RandomProfileFoundCommand(
         return Uuid(uuid)
     }
 
-    fun toExcludeProfiles(myProfile: Profile): HashSet<Long> {
+    fun toExcludeProfiles(myProfile: Profile? = null): HashSet<Long> {
+        if (myProfile == null) {
+            return excludeProfiles.toHashSet()
+        }
         return (excludeProfiles + myProfile.id!!).toHashSet()
     }
 }

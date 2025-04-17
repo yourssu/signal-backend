@@ -1,4 +1,4 @@
-package com.yourssu.soongpt.common.config
+package com.yourssu.signal.config
 
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching

@@ -48,7 +48,7 @@ Content-Type: application/json
 
 ###
 
-// When the MBTI value is invalid, return 400 Bad Request
+// When the MBTI value is blank, return 400 Bad Request
 ###
 POST {{host}}/api/profiles
 Content-Type: application/json
@@ -57,7 +57,7 @@ Content-Type: application/json
   "gender": "MALE",
   "animal": "DOG",
   "contact": "@leo",
-  "mbti": "iiii",
+  "mbti": "",
   "nickname": "nickname",
   "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }

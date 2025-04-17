@@ -2,7 +2,6 @@ package com.yourssu.ssugaeting.domain.profile.storage.domain
 
 import com.yourssu.ssugaeting.domain.common.implement.Uuid
 import com.yourssu.ssugaeting.domain.profile.implement.domain.Gender
-import com.yourssu.ssugaeting.domain.profile.implement.domain.Mbti
 import com.yourssu.ssugaeting.domain.profile.implement.domain.Profile
 import jakarta.persistence.*
 
@@ -28,8 +27,7 @@ class ProfileEntity(
     val contact: String,
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val mbti: Mbti,
+    val mbti: String,
 
     @Column(nullable = false)
     val nickname: String,

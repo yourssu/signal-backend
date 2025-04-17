@@ -16,7 +16,7 @@ class ProfileResponse(
                 profileId = profile.id,
                 gender = profile.gender.name,
                 animal = profile.animal,
-                mbti = profile.mbti.name,
+                mbti = profile.mbti,
                 nickname = profile.nickname,
                 introSentences = profile.introSentences,
             )

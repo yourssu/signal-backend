@@ -16,7 +16,7 @@ class Profile(
     val gender: Gender,
     val animal: String,
     val contact: String,
-    val mbti: Mbti,
+    val mbti: String,
     val nickname: String,
     val introSentences: List<String>,
 ) {
@@ -35,7 +35,7 @@ class Profile(
     }
 
     companion object {
-        fun ofNewProfile(gender: Gender, animal: String, contact: String, mbti: Mbti, nickname: String, introSentences: List<String>): Profile {
+        fun ofNewProfile(gender: Gender, animal: String, contact: String, mbti: String, nickname: String, introSentences: List<String>): Profile {
             return Profile(
                 uuid = Uuid.randomUUID(),
                 gender = gender,

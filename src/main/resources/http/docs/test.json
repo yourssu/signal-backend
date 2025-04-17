@@ -1,0 +1,22 @@
+{
+  "Reply": {
+    "Method": "POST /api/profiles - 76ms",
+    "Status": 201,
+    "Payload": {
+      "timestamp": "2025-04-18T08:30:56.889336+09:00",
+      "result": {
+        "profileId": 1,
+        "gender": "FEMALE",
+        "animal": "DOG",
+        "contact": "@leo",
+        "mbti": "ISTJ",
+        "nickname": "leopold",
+        "introSentences": [
+          "나는 딸기를 좋아해",
+          "나는 포도도 좋아해",
+          "제일 좋아하는 음식은 치킨이야"
+        ]
+      }
+    }
+  }
+}

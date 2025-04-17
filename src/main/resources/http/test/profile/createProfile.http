@@ -74,7 +74,7 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
-  "nickname": "Maximum length is 10",
+  "nickname": "Maximum length is 15",
   "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 

@@ -9,5 +9,4 @@ class SignalApplicationTests {
     @Test
     fun contextLoads() {
     }
-
 }

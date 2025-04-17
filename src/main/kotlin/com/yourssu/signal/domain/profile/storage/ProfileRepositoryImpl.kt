@@ -57,9 +57,10 @@ class ProfileRepositoryImpl(
     }
 
     @CachePut(cacheNames = ["profileCache"], key = "#gender.name")
-    override fun updateCacheProfiles(gender: Gender): List<Long> {
+    override fun updateCacheOppositeGenderIds(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)
             .from(profileEntity)
+            .where(!profileEntity.gender.eq(gender))
             .fetch()
     }
 }

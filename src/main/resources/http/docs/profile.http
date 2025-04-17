@@ -40,6 +40,12 @@ Content-Type: application/json
 ###
 
 
+// Count All Profiles
+###
+GET {{host}}/api/profiles/count
+
+###
+
 // Get a profile By Uuid - 200 OK
 ###
 GET {{host}}/api/profiles/uuid?uuid={{uuid}}

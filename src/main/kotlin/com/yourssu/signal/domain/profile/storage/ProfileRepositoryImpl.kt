@@ -48,7 +48,7 @@ class ProfileRepositoryImpl(
         return profileJpaRepository.findAll().map { it.toDomain() }
     }
 
-    @Cacheable(cacheNames = ["profileCache"])
+    @Cacheable(cacheNames = ["profileCache"], key = "#gender.name")
     override fun findAllOppositeGenderIds(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)
             .from(profileEntity)
@@ -56,9 +56,8 @@ class ProfileRepositoryImpl(
             .fetch()
     }
 
-    @Async
-    @CachePut(cacheNames = ["profileCache"])
-    override fun updateCacheProfiles(): List<Long> {
+    @CachePut(cacheNames = ["profileCache"], key = "#gender.name")
+    override fun updateCacheProfiles(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)
             .from(profileEntity)
             .fetch()

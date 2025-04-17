@@ -60,4 +60,8 @@ class ProfileService(
         return profileReader.getAll()
             .map { ProfileResponse.from(it) }
     }
+
+    fun countAllProfiles(): ProfilesCountResponse {
+        return ProfilesCountResponse.of(profileReader.countAll())
+    }
 }

@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.profile.application
 
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.profile.application.dto.*
+import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.business.ProfileService
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
@@ -32,6 +33,12 @@ class ProfileController(
     @GetMapping
     fun getAllProfiles(@Valid @ModelAttribute request: ProfilesFoundRequest): ResponseEntity<Response<List<ProfileResponse>>> {
         val response = profileService.getAllProfiles(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @GetMapping("/count")
+    fun countAllProfiles(): ResponseEntity<Response<ProfilesCountResponse>> {
+        val response = profileService.countAllProfiles()
         return ResponseEntity.ok(Response(result = response))
     }
 

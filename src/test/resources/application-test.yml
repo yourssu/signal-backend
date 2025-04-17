@@ -31,4 +31,4 @@ infra:
     api-key: "api-key-value"
     model: "gpt-4o-mini"
     prompt: "prompt for a developer"
-    user-input: 72
+    user-input: 100

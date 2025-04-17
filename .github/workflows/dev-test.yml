@@ -1,4 +1,4 @@
-name: Dev - Test
+name: Dev - Build and Deploy to EC2
 
 on:
   push:
@@ -25,8 +25,20 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Clean Build with Gradle (with Testing)
+      - name: Clean Build with Gradle (without Testing)
         run: |
-          ./gradlew clean test
-#          echo ${{ secrets.APPLICATION_PROD_YML }} | base64 --decode > ./src/main/resources/application-prod.yml
-#          echo ${{ secrets.APPLICATION_YML_PROD_MODE }} | base64 --decode > ./src/main/resources/application.yml
+          echo ${{ secrets.APPLICATION_DEV_YML }} | base64 --decode > ./src/main/resources/application-dev.yml
+          ./gradlew clean build
+
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.YOURSSU_SECRET }}
+          HOST: ${{ secrets.YOURSSU_STG_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          echo "$PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          mv build/libs/signal-0.0.1-SNAPSHOT.jar yourssu-signal-application.jar
+          scp -i private_key.pem yourssu-signal-application.jar ubuntu@$HOST:/home/ubuntu/signal-api
+          ssh -i private_key.pem ubuntu@$HOST "/home/ubuntu/signal-api/run.sh"

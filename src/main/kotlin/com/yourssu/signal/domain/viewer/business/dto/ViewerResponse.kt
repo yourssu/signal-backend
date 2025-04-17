@@ -1,0 +1,25 @@
+package com.yourssu.signal.domain.viewer.business.dto
+
+import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+
+data class ViewerResponse(
+    val id: Long? = null,
+    val uuid: String,
+    val gender: String,
+    val ticket: Int,
+    val usedTicket: Int,
+    val updatedTime: String,
+) {
+    companion object {
+        fun from(viewer: Viewer): ViewerResponse {
+            return ViewerResponse(
+                id = viewer.id,
+                uuid = viewer.uuid.value,
+                gender = viewer.gender.name,
+                ticket = viewer.ticket,
+                usedTicket = viewer.usedTicket,
+                updatedTime = viewer.updatedTime.toString(),
+            )
+        }
+    }
+}

@@ -9,13 +9,12 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
-import java.nio.charset.StandardCharsets
 
 private val log = KotlinLogging.logger {}
 
-@Profile("!prod")
+@Profile("prod")
 @Component
-class LoggingFilter : OncePerRequestFilter() {
+class ProdLoggingFilter : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -30,15 +29,9 @@ class LoggingFilter : OncePerRequestFilter() {
 
         val method = requestWrapper.method
         val requestUri = requestWrapper.requestURI
-        val requestPayload = String(requestWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         val responseStatus = responseWrapper.status
-        val responsePayload = String(responseWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         log.info {
-            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Payload":$requestPayload}}"""
-                .replace("\n", "")
-        }
-        log.info {
-            """{"Reply":{"Method":"$method $requestUri - ${duration}ms","Status":$responseStatus,"Payload": $responsePayload}}"""
+            """{"Reply":{"Method":"$method $requestUri - ${duration}ms","Status":$responseStatus}}"""
                 .replace("\n", "")
         }
         responseWrapper.copyBodyToResponse()

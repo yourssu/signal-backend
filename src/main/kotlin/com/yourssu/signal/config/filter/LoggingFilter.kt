@@ -34,11 +34,11 @@ class LoggingFilter : OncePerRequestFilter() {
         val responseStatus = responseWrapper.status
         val responsePayload = String(responseWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         log.info {
-            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Payload":$requestPayload}}"""
+            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Payload":$requestPayload},"Reply":{"Payload":$responsePayload}}"""
                 .replace("\n", "")
         }
         log.info {
-            """{"Reply":{"Method":"$method $requestUri - ${duration}ms","Status":$responseStatus,"Payload": $responsePayload}}"""
+            """{"Reply":{"Method":"$method $requestUri - ${duration}ms","Status":$responseStatus}}"""
                 .replace("\n", "")
         }
         responseWrapper.copyBodyToResponse()

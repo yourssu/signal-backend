@@ -11,13 +11,12 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-private const val ENCRYPTED_ALGORITHM = "AES"
-private const val CIPHER_TRANSFORMATION = "AES/CBC/PKCS5Padding"
+private const val HASH_ALGORITHM = "SHA-256"
+private const val AES_ALGORITHM = "AES"
 private const val IV_SIZE = 16
+private const val CIPHER_TRANSFORMATION = "AES/CBC/PKCS5Padding"
 
 private const val DELIMITER = "||"
-
-private const val HASH_ALGORITHM = "SHA-256"
 
 @Component
 class DataCipher(
@@ -26,7 +25,7 @@ class DataCipher(
     private val secretKey: SecretKeySpec = SecretKeySpec(
         MessageDigest.getInstance(HASH_ALGORITHM)
             .digest(properties.contactSecretKey.toByteArray(UTF_8)),
-        ENCRYPTED_ALGORITHM
+        AES_ALGORITHM
     )
 
     fun encrypt(data: String): String {
@@ -43,11 +42,11 @@ class DataCipher(
 
     fun decrypt(encrypted: String): String {
         val parts = encrypted.split(DELIMITER)
-        val iv = Base64.getDecoder().decode(parts[0])
-        val encryptedData = Base64.getDecoder().decode(parts[1])
+        val ivBytes = Base64.getDecoder().decode(parts[0])
+        val encryptedDataBytes = Base64.getDecoder().decode(parts[1])
 
         val cipher = Cipher.getInstance(CIPHER_TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
-        return cipher.doFinal(encryptedData).toString(UTF_8)
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(ivBytes))
+        return cipher.doFinal(encryptedDataBytes).toString(UTF_8)
     }
 }

@@ -33,13 +33,13 @@ class ProfileEntity(
     val nickname: String,
 ) {
     companion object {
-        fun from(profile: Profile): ProfileEntity {
+        fun from(profile: Profile, encryptedContact: String): ProfileEntity {
             return ProfileEntity(
                 id = profile.id,
                 gender = profile.gender,
                 uuid = profile.uuid.value,
                 animal = profile.animal,
-                contact = profile.contact,
+                contact = encryptedContact,
                 mbti = profile.mbti,
                 nickname = profile.nickname,
             )

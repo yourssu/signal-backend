@@ -48,7 +48,7 @@ class Profile(
         }
     }
 
-    fun copy(introSentences: List<String>): Profile {
+    fun copy(introSentences: List<String> = this.introSentences, contact: String = this.contact): Profile {
         return Profile(
             id = id,
             uuid = uuid,

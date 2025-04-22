@@ -13,7 +13,7 @@ class DataCipherTest {
 
     @Test
     fun testEncryptAndDecrypt() {
-        val originalData = "@Hello"
+        val originalData = "@LEO"
         val encryptedData = dataCipher.encrypt(originalData)
         val decryptedData = dataCipher.decrypt(encryptedData)
 

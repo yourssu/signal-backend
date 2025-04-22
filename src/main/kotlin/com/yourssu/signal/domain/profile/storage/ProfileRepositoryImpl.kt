@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.profile.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.yourssu.signal.config.security.DataCipher
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileRepository
 import com.yourssu.signal.domain.profile.implement.domain.Gender
@@ -11,31 +12,32 @@ import com.yourssu.signal.domain.profile.storage.execption.ProfileNotFoundExcept
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Repository
 
 @Repository
 class ProfileRepositoryImpl(
     private val profileJpaRepository: ProfileJpaRepository,
     private val jpaQueryFactory: JPAQueryFactory,
+    private val dataCipher: DataCipher,
 ) : ProfileRepository {
     override fun save(profile: Profile): Profile {
-        val saveProfile = profileJpaRepository.save(ProfileEntity.from(profile))
-        return saveProfile.toDomain(introSentences = profile.introSentences)
+        val encryptedContact = dataCipher.encrypt(profile.contact)
+        val saveProfile = profileJpaRepository.save(ProfileEntity.from(profile, encryptedContact))
+        return decryptContact(saveProfile.toDomain(introSentences = profile.introSentences))
     }
 
     override fun getByUuid(uuid: Uuid): Profile {
-        return jpaQueryFactory.selectFrom(profileEntity)
+        return decryptContact(jpaQueryFactory.selectFrom(profileEntity)
             .where(profileEntity.uuid.eq(uuid.value))
             .fetchFirst()
             ?.toDomain()
-            ?: throw ProfileNotFoundException()
+            ?: throw ProfileNotFoundException())
     }
 
     override fun getById(id: Long): Profile {
-        return profileJpaRepository.findById(id)
+        return decryptContact(profileJpaRepository.findById(id)
             .orElseThrow { ProfileNotFoundException() }
-            .toDomain()
+            .toDomain())
     }
 
     override fun existsByUuid(uuid: Uuid): Boolean {
@@ -62,6 +64,12 @@ class ProfileRepositoryImpl(
             .from(profileEntity)
             .where(!profileEntity.gender.eq(gender))
             .fetch()
+    }
+
+    private fun decryptContact(profile: Profile): Profile {
+        return profile.copy(
+            contact = dataCipher.decrypt(profile.contact)
+        )
     }
 }
 

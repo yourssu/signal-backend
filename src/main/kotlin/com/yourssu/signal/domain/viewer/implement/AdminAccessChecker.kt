@@ -9,7 +9,7 @@ class AdminAccessChecker(
     private val adminConfigurationProperties: AdminConfigurationProperties,
 ) {
     fun validateAdminAccess(secretKey: String) {
-        if (!adminConfigurationProperties.isValidSecretKey(secretKey)) {
+        if (!adminConfigurationProperties.isValidAccessKey(secretKey)) {
             throw AdminPermissionDeniedException()
         }
     }

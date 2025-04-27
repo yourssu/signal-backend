@@ -43,6 +43,12 @@ class ProfileController(
         return ResponseEntity.ok(Response(result = response))
     }
 
+    @GetMapping("/{profileId}")
+    fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest, @PathVariable profileId: Long): ResponseEntity<Response<ProfileContactResponse>> {
+        val response = profileService.getProfile(request.toCommand(profileId))
+        return ResponseEntity.ok(Response(result = response))
+    }
+
     @GetMapping("/random")
     fun getRandomProfile(@Valid @ModelAttribute request: RandomProfileRequest): ResponseEntity<Response<ProfileResponse>> {
         val response = profileService.getRandomProfile(request.toCommand())

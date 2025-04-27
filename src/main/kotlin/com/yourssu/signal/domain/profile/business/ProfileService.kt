@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.profile.business.command.RandomProfileFoundComm
 import com.yourssu.signal.domain.profile.business.command.TicketConsumedCommand
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.command.ProfileCreatedCommand
+import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.profile.implement.*
@@ -69,5 +70,12 @@ class ProfileService(
 
     fun countAllProfiles(): ProfilesCountResponse {
         return ProfilesCountResponse.of(profileReader.countAll())
+    }
+
+    fun getProfile(command: ProfileFoundCommand): ProfileContactResponse {
+        val viewer = viewerReader.get(command.toUuid())
+        val targetProfile = profileReader.getById(command.profileId)
+        usedTicketManager.validatePurchasedProfile(viewer, targetProfile)
+        return ProfileContactResponse.from(targetProfile)
     }
 }

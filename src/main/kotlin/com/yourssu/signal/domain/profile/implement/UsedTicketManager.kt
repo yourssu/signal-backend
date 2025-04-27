@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
+import com.yourssu.signal.domain.profile.implement.exception.NoPurchasedProfileException
 import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import com.yourssu.signal.domain.viewer.implement.ViewerRepository
 import org.springframework.stereotype.Component
@@ -21,6 +22,13 @@ class UsedTicketManager(
         val updatedViewer = viewerRepository.updateUsedTicket(viewer.consumeTicket(ticket))
         savePurchasedProfile(purchasedProfile)
         return updatedViewer
+    }
+
+    fun validatePurchasedProfile(viewer: Viewer, profile: Profile) {
+        val purchasedProfile = PurchasedProfile(viewerId = viewer.id!!, profileId = profile.id!!)
+        if (!exists(purchasedProfile)) {
+            throw NoPurchasedProfileException()
+        }
     }
 
     private fun savePurchasedProfile(purchasedProfile: PurchasedProfile) {

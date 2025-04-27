@@ -1,8 +1,8 @@
 @host=localhost:8080
 @uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
 
-@gender=MALE
-#@gender=FEMALE
+#@gender=MALE
+@gender=FEMALE
 
 // Issue a verification code for uuid - 200 OK
 ###
@@ -66,3 +66,10 @@ Content-Type: application/json
 
 ###
 // If this profile is already purchased, then does not consume tickets.
+
+
+// Get a purchased profile - 200 OK
+###
+GET {{host}}/api/profiles/{{profileId}}?uuid={{uuid}}
+
+###

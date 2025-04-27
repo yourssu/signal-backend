@@ -79,5 +79,5 @@
 {
   "timestamp": "2025-04-27T14:48:50.917092+09:00",
   "status": 404,
-  "message": "Viewer not found"
+  "message": "해당하는 Viewer를 찾을 수 없습니다."
 }

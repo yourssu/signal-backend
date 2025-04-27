@@ -13,7 +13,7 @@
 ## Viewer
 
 [인증번호 발급 (POST /api/viewers/verification)](viewer/issue_verification.md)  
-
+[뷰어 조회 (GET /api/viewer/uuid)](viewer/get_viewer_uuid.md)
 
 ## Admin
 [전체 프로필 조회 (GET /api/profiles)](profile/consume_ticket.md)  

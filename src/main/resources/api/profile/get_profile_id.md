@@ -73,7 +73,7 @@
 }
 ```
 
-- the viewer's uuid is not exist
+- the viewer's uuid does not exist
 
 ```json
 {

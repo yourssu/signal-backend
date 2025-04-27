@@ -26,7 +26,7 @@ class ProfileController(
     }
 
     @GetMapping("/uuid")
-    fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest): ResponseEntity<Response<MyProfileResponse>> {
+    fun getProfile(@Valid @ModelAttribute request: MyProfileFoundRequest): ResponseEntity<Response<MyProfileResponse>> {
         val response = profileService.getProfile(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }

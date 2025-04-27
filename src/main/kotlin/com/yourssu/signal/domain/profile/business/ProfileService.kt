@@ -2,7 +2,7 @@ package com.yourssu.signal.domain.profile.business
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.profile.business.command.AllProfilesFoundCommand
-import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
+import com.yourssu.signal.domain.profile.business.command.MtProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.command.RandomProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.command.TicketConsumedCommand
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
@@ -32,7 +32,7 @@ class ProfileService(
         return ProfileContactResponse.from(profileWriter.createProfile(profile))
     }
 
-    fun getProfile(command: ProfileFoundCommand): MyProfileResponse {
+    fun getProfile(command: MtProfileFoundCommand): MyProfileResponse {
         val profile = profileReader.getByUuid(command.toDomain())
         return MyProfileResponse.from(profile)
     }

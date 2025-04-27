@@ -2,7 +2,7 @@ package com.yourssu.signal.domain.profile.business.command
 
 import com.yourssu.signal.domain.common.implement.Uuid
 
-class ProfileFoundCommand(
+class MtProfileFoundCommand(
     val uuid: String
 ) {
     fun toDomain(): Uuid {

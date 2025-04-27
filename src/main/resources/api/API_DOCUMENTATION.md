@@ -6,3 +6,5 @@
 [나의 프로필 조회 (GET /api/profiles/uuid)](profile/get_profile_uuid.md)  
 [전체 프로필 개수 조회 (GET /api/profiles/count)](profile/count_profile.md)  
 
+
+[전체 프로필 조회 (GET /api/profiles)](profile/get_all_profile_for_admin.md)  

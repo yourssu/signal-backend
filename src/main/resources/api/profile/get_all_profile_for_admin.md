@@ -2,7 +2,7 @@
 
 ## Request
 
-### Request Parameters
+### Query Parameters
 
 | Name        | Type   | Required | Constraint |
 |-------------|--------|----------|------------|

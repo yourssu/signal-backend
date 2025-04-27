@@ -11,7 +11,7 @@
 | `contact`        | string   | true     | only "^010\\d{8}\$" or "^@[a-zA-Z0-9._]{1,30}\$"                                 |
 | `mbti`           | string   | true     | @NotBlank                                                                        |
 | `nickname`       | string   | true     | @Size(min = 1, max = 15)                                                         |
-| `introSentences` | string[] | true     | @Size(min = 0, max = 3)List<@Size(min = 0, max = 15) String>                     |
+| `introSentences` | string[] | true     | @Size(min = 0, max = 3)List<@Size(min = 0, max = 20) String>                     |
 | `uuid`           | string   | false    | validate the gender of a viewer. if null, then generate a new uuid for a profile |
 
 ## Reply

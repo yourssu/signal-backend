@@ -9,7 +9,12 @@
 [랜덤 프로필 조회 (GET /api/profiles/random)](profile/get_random_profile.md)  
 [연락처 구매 (GET /api/profiles/ticket)](profile/consume_ticket.md)
 
-[전체 프로필 조회 (GET /api/profiles)](profile/consume_ticket.md)  
 
 ## Viewer
-[인증번호 발급 (POST /api/viewer/verification)](viewer/issue_verification.md)  
+
+[인증번호 발급 (POST /api/viewers/verification)](viewer/issue_verification.md)  
+
+
+## Admin
+[전체 프로필 조회 (GET /api/profiles)](profile/consume_ticket.md)  
+[티켓 발급 (POST /api/viewers)](viewer/issue_ticket.md)  

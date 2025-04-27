@@ -10,3 +10,6 @@
 [연락처 구매 (GET /api/profiles/ticket)](profile/consume_ticket.md)
 
 [전체 프로필 조회 (GET /api/profiles)](profile/consume_ticket.md)  
+
+## Viewer
+[인증번호 발급 (POST /api/viewer/verification)](viewer/issue_verification.md)  

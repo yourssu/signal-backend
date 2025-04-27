@@ -104,3 +104,15 @@
   "message": "잘못된 요청입니다."
 }
 ```
+
+### 409 Conflict
+
+- the gender is not match with existing viewer
+
+```json
+{
+  "timestamp": "2025-04-27T16:04:52.613191+09:00",
+  "status": 409,
+  "message": "성별이 일치하지 않습니다."
+}
+```

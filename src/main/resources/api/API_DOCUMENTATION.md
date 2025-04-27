@@ -17,4 +17,5 @@
 
 ## Admin
 [전체 프로필 조회 (GET /api/profiles)](profile/consume_ticket.md)  
+[전체 뷰어 조회 (GET /api/viewers)](viewer/get_all_viewer_for_admin.md)  
 [티켓 발급 (POST /api/viewers)](viewer/issue_ticket.md)  

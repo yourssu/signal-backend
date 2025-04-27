@@ -1,7 +1,7 @@
 # Yourssu-Signal-Backend
 
 ## API Documentation
-[API Documentation](./src/main/resources/api/API_DOCUMENTATION.md)
+[API_DOCUMENTATION](./src/main/resources/api/API_DOCUMENTATION.md)
 
 ## .http
 - [프로필 API](src/main/resources/http/docs/profile.http)

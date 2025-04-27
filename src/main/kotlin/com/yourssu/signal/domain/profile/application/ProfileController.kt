@@ -19,7 +19,7 @@ class ProfileController(
     private val profileService: ProfileService,
 ) {
     @PostMapping
-    fun createProfile(@Valid @RequestBody request: ProfileCreatedRequest): ResponseEntity<Response<ProfileContactResponse>> {
+    fun createProfile(@Valid @RequestBody request: ProfileCreatedRequest): ResponseEntity<Response<MyProfileResponse>> {
         val response = profileService.createProfile(request.toCommand())
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Response(result = response))

@@ -27,10 +27,10 @@ class ProfileService(
     private val policy: PolicyConfigurationProperties,
     private val adminAccessChecker: AdminAccessChecker,
 ) {
-    fun createProfile(command: ProfileCreatedCommand): ProfileContactResponse {
+    fun createProfile(command: ProfileCreatedCommand): MyProfileResponse {
         val profile = command.toDomain()
         genderValidator.validateProfile(profile)
-        return ProfileContactResponse.from(profileWriter.createProfile(profile))
+        return MyProfileResponse.from(profileWriter.createProfile(profile))
     }
 
     fun getProfile(command: MtProfileFoundCommand): MyProfileResponse {

@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.profile.storage.domain
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 import jakarta.persistence.*
@@ -31,7 +32,7 @@ class ProfileEntity(
 
     @Column(nullable = false)
     val nickname: String,
-) {
+): BaseEntity() {
     companion object {
         fun from(profile: Profile, encryptedContact: String): ProfileEntity {
             return ProfileEntity(

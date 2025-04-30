@@ -1,8 +1,9 @@
 package com.yourssu.signal.domain.profile.storage.domain
 
+import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
 import jakarta.persistence.*
-import java.time.ZonedDateTime
+import java.time.ZoneId
 
 @Entity
 @Table(name = "purchased_profile")
@@ -16,16 +17,12 @@ class PurchasedProfileEntity (
 
     @Column(nullable = false, name = "viewer_id")
     val viewerId: Long,
-
-    @Column(nullable = false, name = "created_time")
-    val createdTime: ZonedDateTime,
-) {
+): BaseEntity() {
     companion object {
         fun from(purchasedProfile: PurchasedProfile) = PurchasedProfileEntity(
             id = purchasedProfile.id,
             profileId = purchasedProfile.profileId,
             viewerId = purchasedProfile.viewerId,
-            createdTime = purchasedProfile.createdTime,
         )
     }
 
@@ -33,6 +30,6 @@ class PurchasedProfileEntity (
         id = id,
         profileId = profileId,
         viewerId = viewerId,
-        createdTime = createdTime,
+        createdTime = createdTime?.atZone(ZoneId.systemDefault())
     )
 }

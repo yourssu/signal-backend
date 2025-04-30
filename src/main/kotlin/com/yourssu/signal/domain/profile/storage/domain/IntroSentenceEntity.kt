@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.profile.storage.domain
 
+import com.yourssu.signal.domain.common.storage.BaseEntity
 import jakarta.persistence.*
 
 @Entity
@@ -14,7 +15,7 @@ class IntroSentenceEntity(
 
     @Column(nullable = false)
     val uuid: String,
-) {
+): BaseEntity() {
     companion object {
         fun from(introSentence: String, uuid: String): IntroSentenceEntity {
             return IntroSentenceEntity(

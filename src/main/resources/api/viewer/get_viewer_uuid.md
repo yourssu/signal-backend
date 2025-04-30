@@ -26,15 +26,20 @@
 
 ```json
 {
-  "timestamp": "2025-04-27T16:25:05.072975+09:00",
+  "timestamp": "2025-04-30T13:57:23.439067+09:00",
   "result": {
     "id": 1,
     "uuid": "ec5ea893-8540-42c5-958a-ce69ed7f9f63",
     "ticket": 3,
-    "gender": "MALE",
-    "usedTicket": 0,
-    "updatedTime": "2025-04-27T16:25:01.767483+09:00",
-    "purchasedProfiles": []
+    "gender": "FEMALE",
+    "usedTicket": 2,
+    "updatedTime": "2025-04-30T13:57:16.343937+09:00",
+    "purchasedProfiles": [
+      {
+        "profileId": 1,
+        "createdTime": "2025-04-30T13:57:16.342400+09:00[Asia/Seoul]"
+      }
+    ]
   }
 }
 ```

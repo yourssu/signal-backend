@@ -1,14 +1,9 @@
 package com.yourssu.signal.domain.profile.implement.domain
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator.validateIntroSentences
+import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator.validateNickname
 import com.yourssu.signal.domain.profile.implement.exception.GenderMismatchException
-import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLengthViolatedException
-import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
-import com.yourssu.signal.domain.profile.implement.exception.NicknameLengthViolatedException
-
-private const val MAXIMUM_NICKNAME_LENGTH = 15
-private const val MAXIMUM_INTRO_SENTENCES_SIZE = 3
-private const val MAXIMUM_INTRO_SENTENCE_LENGTH = 20
 
 class Profile(
     val id: Long? = null,
@@ -21,17 +16,8 @@ class Profile(
     val introSentences: List<String>,
 ) {
     init {
-        if (nickname.isEmpty() || nickname.length > MAXIMUM_NICKNAME_LENGTH) {
-            throw NicknameLengthViolatedException()
-        }
-        if (introSentences.size > MAXIMUM_INTRO_SENTENCES_SIZE) {
-            throw IntroSentenceSizeViolatedException()
-        }
-        for (introSentence in introSentences) {
-            if (introSentence.length > MAXIMUM_INTRO_SENTENCE_LENGTH) {
-                throw IntroSentenceLengthViolatedException()
-            }
-        }
+        validateNickname(nickname)
+        validateIntroSentences(introSentences)
     }
 
     companion object {

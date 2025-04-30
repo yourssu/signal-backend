@@ -24,7 +24,7 @@ domain:
       access-key: "DonaEmilyEatSteakLeopold"
       contact-secret-key : "ThisIsASecretKeyForContact"
   policy:
-    contact-price: 2
+    contact-price: 1
 
 infra:
   openai:

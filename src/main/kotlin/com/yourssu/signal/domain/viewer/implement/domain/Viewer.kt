@@ -16,7 +16,7 @@ class Viewer(
     val gender: Gender,
     val ticket: Int,
     val usedTicket: Int = INITIAL_USED_TICKET,
-    val updatedTime: ZonedDateTime = ZonedDateTime.now(),
+    val updatedTime: ZonedDateTime?,
 ) {
     companion object {
         private fun validateMinimumAddedTickets(ticket: Int) {

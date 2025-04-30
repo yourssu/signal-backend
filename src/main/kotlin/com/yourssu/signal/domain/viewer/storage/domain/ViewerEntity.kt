@@ -1,15 +1,14 @@
 package com.yourssu.signal.domain.viewer.storage.domain
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import jakarta.persistence.*
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
-import java.time.ZonedDateTime
+import java.time.ZoneId
 
 @Entity
 @Table(name = "viewer")
-@EntityListeners(AuditingEntityListener::class)
 class ViewerEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,12 +27,9 @@ class ViewerEntity(
     @Column(nullable = false)
     var usedTicket: Int = 0,
 
-    @Column(nullable = false)
-    var updatedTime: ZonedDateTime,
-
     @Version
     var version: Long? = null,
-) {
+): BaseEntity() {
     companion object {
         fun from(viewer: Viewer): ViewerEntity {
             return ViewerEntity(
@@ -41,7 +37,6 @@ class ViewerEntity(
                 gender = viewer.gender,
                 ticket = viewer.ticket,
                 usedTicket = 0,
-                updatedTime = viewer.updatedTime
             )
         }
     }
@@ -53,17 +48,15 @@ class ViewerEntity(
             gender = gender,
             ticket = ticket,
             usedTicket = usedTicket,
-            updatedTime = updatedTime,
+            updatedTime = updatedTime?.atZone(ZoneId.systemDefault())
         )
     }
 
     fun updateTicket(viewer: Viewer) {
         this.ticket = viewer.ticket
-        this.updatedTime = ZonedDateTime.now()
     }
 
     fun updateUsedTicket(viewer: Viewer) {
         this.usedTicket = viewer.usedTicket
-        this.updatedTime = ZonedDateTime.now()
     }
 }

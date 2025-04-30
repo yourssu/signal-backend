@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZonedDateTime
 
 @Component
 class ViewerWriter(
@@ -24,6 +25,6 @@ class ViewerWriter(
     }
 
     private fun createViewer(uuid: Uuid, ticket: Int, gender: Gender): Viewer {
-        return viewerRepository.save(Viewer(uuid = uuid, ticket = ticket, gender = gender))
+        return viewerRepository.save(Viewer(uuid = uuid, ticket = ticket, gender = gender, updatedTime = null))
     }
 }

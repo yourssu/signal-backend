@@ -1,4 +1,3 @@
-@host=localhost:8080
 @uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
 
 
@@ -72,7 +71,7 @@ POST {{host}}/api/profiles/nickname
 Content-Type: application/json
 
 {
-  "description": [
+  "introSentences": [
     "나는 딸기를 좋아해",
     "나는 포도도 좋아해",
     "제일 좋아하는 음식은 치킨이야"

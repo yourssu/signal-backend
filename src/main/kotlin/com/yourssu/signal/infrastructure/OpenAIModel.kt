@@ -22,7 +22,7 @@ class OpenAIModel(
     private val okHttpClient: OkHttpClient,
     private val properties: OpenAIConfigurationProperties
 ) : ChatModel {
-    @Cacheable("nicknameCache", key = "T(java.lang.String).join(',', #statements)")
+//    @Cacheable("nicknameCache", key = "T(java.lang.String).join(',', #statements)")
     override fun suggestNickname(statements: List<String>): NicknameSuggestedResponse {
         val response = okHttpClient.newCall(request(statements)).execute().body
         return NicknameSuggestedResponse(parse(response))

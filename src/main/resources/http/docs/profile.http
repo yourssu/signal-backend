@@ -45,7 +45,7 @@ GET {{host}}/api/profiles/count
 
 ###
 
-@count_gender = male
+@count_gender = female
 // Count Profiles By Gender
 ###
 GET {{host}}/api/profiles/genders/{{count_gender}}/count

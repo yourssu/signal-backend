@@ -9,7 +9,7 @@ interface ProfileRepository {
     fun getByUuid(uuid: Uuid): Profile
     fun existsByUuid(uuid: Uuid): Boolean
     fun findAll(): List<Profile>
-    fun findAllOppositeGenderIds(gender: Gender): List<Long>
-    fun updateCacheOppositeGenderIds(gender: Gender): List<Long>
+    fun findIdsByGender(gender: Gender): List<Long>
+    fun updateCacheIdsByGender(gender: Gender): List<Long>
     fun getById(id: Long): Profile
 }

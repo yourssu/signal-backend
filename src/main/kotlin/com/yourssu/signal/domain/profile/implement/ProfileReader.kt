@@ -31,17 +31,17 @@ class ProfileReader(
     }
 
     fun findAllOppositeGenderIds(myGender: Gender): List<Long> {
-        return profileRepository.findAllOppositeGenderIds(myGender)
+        return profileRepository.findIdsByGender(myGender.opposite())
     }
 
     fun countAll(): Int {
         return Gender.entries
             .stream()
-            .mapToInt { profileRepository.findAllOppositeGenderIds(it).size }
+            .mapToInt { profileRepository.findIdsByGender(it).size }
             .sum()
     }
 
     fun count(gender: Gender): Int {
-        return profileRepository.findAllOppositeGenderIds(gender.opposite()).size
+        return profileRepository.findIdsByGender(gender).size
     }
 }

@@ -15,7 +15,7 @@ class ProfileWriter(
         val savedProfile = profileRepository.save(profile)
         introSentenceRepository.saveAll(introSentences = profile.introSentences, uuid = savedProfile.uuid)
         for (gender in Gender.entries) {
-            profileRepository.updateCacheOppositeGenderIds(gender)
+            profileRepository.updateCacheIdsByGender(gender)
         }
         return savedProfile
     }

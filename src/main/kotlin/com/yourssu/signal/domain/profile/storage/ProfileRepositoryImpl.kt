@@ -51,18 +51,18 @@ class ProfileRepositoryImpl(
     }
 
     @Cacheable(cacheNames = ["profileCache"], key = "#gender.name")
-    override fun findAllOppositeGenderIds(gender: Gender): List<Long> {
+    override fun findIdsByGender(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)
             .from(profileEntity)
-            .where(!profileEntity.gender.eq(gender))
+            .where(profileEntity.gender.eq(gender))
             .fetch()
     }
 
     @CachePut(cacheNames = ["profileCache"], key = "#gender.name")
-    override fun updateCacheOppositeGenderIds(gender: Gender): List<Long> {
+    override fun updateCacheIdsByGender(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)
             .from(profileEntity)
-            .where(!profileEntity.gender.eq(gender))
+            .where(profileEntity.gender.eq(gender))
             .fetch()
     }
 

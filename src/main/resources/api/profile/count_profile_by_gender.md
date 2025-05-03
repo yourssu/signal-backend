@@ -1,4 +1,4 @@
-# countAllProfiles (GET /api/profiles/genders/{gender}/count)
+# countProfilesByGender (GET /api/profiles/genders/{gender}/count)
 
 ## Request
 
@@ -12,9 +12,9 @@
 
 ### Response Body
 
-| Name    | Type    | Description                |
-|---------|---------|----------------------------|
-| `count` | integer | the number of all profiles |
+| Name    | Type    | Description                        |
+|---------|---------|------------------------------------|
+| `count` | integer | the number of profiles by a gender |
 
 ### 200 OK
 

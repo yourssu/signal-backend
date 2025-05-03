@@ -2,7 +2,7 @@
 
 ## Request
 
-### Path Parameters
+### Path Variables
 
 | Name     | Type   | Required | Constraint                                                               |
 |----------|--------|----------|--------------------------------------------------------------------------|

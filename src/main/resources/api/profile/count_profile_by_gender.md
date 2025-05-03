@@ -4,9 +4,9 @@
 
 ### Path Parameters
 
-| Name     | Type   | Required | Constraint                                            |
-|----------|--------|----------|-------------------------------------------------------|
-| `gender` | string | true     | The gender to filter profiles by (eg. male or female) |
+| Name     | Type   | Required | Constraint                                                               |
+|----------|--------|----------|--------------------------------------------------------------------------|
+| `gender` | string | true     | The gender to filter profiles by (eg. male or female). Case-insensitive. |
 
 ## Reply
 

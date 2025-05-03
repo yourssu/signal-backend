@@ -15,4 +15,11 @@ enum class Gender {
                 .orElseThrow{ GenderNotFoundException() }
         }
     }
+
+    fun opposite(): Gender {
+        if (this == MALE) {
+            return FEMALE
+        }
+        return  MALE
+    }
 }

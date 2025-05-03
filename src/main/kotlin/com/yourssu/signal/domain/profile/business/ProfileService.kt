@@ -11,6 +11,7 @@ import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import org.springframework.stereotype.Service
@@ -70,6 +71,11 @@ class ProfileService(
 
     fun countAllProfiles(): ProfilesCountResponse {
         return ProfilesCountResponse.of(profileReader.countAll())
+    }
+
+    fun countByGender(gender: String): ProfilesCountResponse {
+        val count = profileReader.count(Gender.of(gender))
+        return ProfilesCountResponse.of(count)
     }
 
     fun getProfile(command: ProfileFoundCommand): ProfileContactResponse {

@@ -1,8 +1,8 @@
 @uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
 
 
-#@gender=MALE
-@gender=FEMALE
+@gender=MALE
+#@gender=FEMALE
 
 // Create a new profile - 201 Created
 ###
@@ -42,6 +42,13 @@ Content-Type: application/json
 // Count All Profiles
 ###
 GET {{host}}/api/profiles/count
+
+###
+
+@count_gender = male
+// Count Profiles By Gender
+###
+GET {{host}}/api/profiles/genders/{{count_gender}}/count
 
 ###
 

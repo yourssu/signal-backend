@@ -40,4 +40,8 @@ class ProfileReader(
             .mapToInt { profileRepository.findAllOppositeGenderIds(it).size }
             .sum()
     }
+
+    fun count(gender: Gender): Int {
+        return profileRepository.findAllOppositeGenderIds(gender.opposite()).size
+    }
 }

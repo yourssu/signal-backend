@@ -43,6 +43,12 @@ class ProfileController(
         return ResponseEntity.ok(Response(result = response))
     }
 
+    @GetMapping("/genders/{gender}/count")
+    fun countByGender(@PathVariable gender: String): ResponseEntity<Response<ProfilesCountResponse>> {
+        val response = profileService.countByGender(gender)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
     @GetMapping("/{profileId}")
     fun getProfile(@Valid @ModelAttribute request: ProfileFoundRequest, @PathVariable profileId: Long): ResponseEntity<Response<ProfileContactResponse>> {
         val response = profileService.getProfile(request.toCommand(profileId))

@@ -12,14 +12,14 @@ enum class Gender {
             return entries.stream()
                 .filter { it.name == value.uppercase() }
                 .findFirst()
-                .orElseThrow{ GenderNotFoundException() }
+                .orElseThrow { GenderNotFoundException() }
         }
     }
 
     fun opposite(): Gender {
-        if (this == MALE) {
-            return FEMALE
+        return when (this) {
+            FEMALE -> MALE
+            MALE -> FEMALE
         }
-        return  MALE
     }
 }

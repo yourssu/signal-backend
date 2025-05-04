@@ -40,7 +40,7 @@ Content-Type: application/json
 
 // sse for issued ticket
 ###
-GET {{host}}/api/viewers/tickets/stream?uuid={{uuid}}
+GET {{host}}/api/viewers/tickets/events?uuid={{uuid}}
 Accept: text/event-stream
 
 ###

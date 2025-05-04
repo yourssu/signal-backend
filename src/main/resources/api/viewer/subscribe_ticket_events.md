@@ -10,7 +10,7 @@
 
 ## Reply
 
-Content-Type: text/event-stream
+Content-Type: `text/event-stream`
 
 ### 200 OK
 

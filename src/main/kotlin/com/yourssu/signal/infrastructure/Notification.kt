@@ -7,6 +7,6 @@ private val logger = KotlinLogging.logger {}
 
 object Notification {
     fun notifyTicketIssued(verification: Verification, ticket: Int) {
-        logger.info { "인증 번호: ${verification.verificationCode.value}\n티켓 개수: $ticket" }
+        logger.info { "&${verification.verificationCode.value} $ticket"}
     }
 }

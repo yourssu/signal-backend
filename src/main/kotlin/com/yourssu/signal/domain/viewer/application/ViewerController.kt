@@ -9,25 +9,35 @@ import com.yourssu.signal.domain.viewer.business.ViewerService
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
+import com.yourssu.signal.infrastructure.TicketSseManager
 import jakarta.validation.Valid
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 
 @RestController
 @RequestMapping("/api/viewers")
 class ViewerController(
     private val viewerService: ViewerService,
+    private val ticketSseManager: TicketSseManager,
 ) {
     @PostMapping("/verification")
-    fun issueVerification(@Valid @RequestBody request: VerificationRequest) : ResponseEntity<Response<VerificationResponse>> {
+    fun issueVerification(@Valid @RequestBody request: VerificationRequest): ResponseEntity<Response<VerificationResponse>> {
         val response = viewerService.issueVerificationCode(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
 
     @PostMapping
-    fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest) : ResponseEntity<Response<ViewerResponse>> {
+    fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest): ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.issueTicket(request.toCommand())
+        ticketSseManager.notifyTicketIssued(response)
         return ResponseEntity.ok(Response(result = response))
+    }
+
+    @GetMapping("/tickets/stream", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun streamTicketEvents(@Valid @ModelAttribute request: FoundSelfRequest): SseEmitter {
+        return ticketSseManager.streamTicketEvents(request.toCommand())
     }
 
     @GetMapping("/uuid")
@@ -37,7 +47,7 @@ class ViewerController(
     }
 
     @GetMapping
-    fun findAllViewers(@Valid @ModelAttribute request: ViewersFoundRequest) : ResponseEntity<Response<List<ViewerResponse>>> {
+    fun findAllViewers(@Valid @ModelAttribute request: ViewersFoundRequest): ResponseEntity<Response<List<ViewerResponse>>> {
         val response = viewerService.findAllViewers(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }

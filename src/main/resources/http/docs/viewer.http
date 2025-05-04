@@ -39,6 +39,20 @@ Content-Type: application/json
 // The verification code is able to be used only once.
 
 
+// sse for issued ticket
+###
+GET {{host}}/api/viewers/tickets/stream?uuid={{uuid}}
+Accept: text/event-stream
+
+###
+
+// sse for issued ticket
+###
+GET {{host}}/api/viewers/events
+Accept: text/event-stream
+
+###
+
 // Get a Viewer by uuid - 200 OK
 // with purchased profiles info
 ###

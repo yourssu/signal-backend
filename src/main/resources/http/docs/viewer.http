@@ -31,7 +31,7 @@ Content-Type: application/json
 {
   "secretKey": "{{secretKey}}",
   "verificationCode": {{verificationCode}},
-  "ticket": 3
+  "ticket": 1
 }
 
 ###

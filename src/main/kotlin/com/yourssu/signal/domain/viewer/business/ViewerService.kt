@@ -15,6 +15,7 @@ import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.VerificationReader
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.domain.viewer.implement.ViewerWriter
+import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Service
 
 @Service
@@ -41,6 +42,7 @@ class ViewerService(
             ticket = command.ticket,
             gender = verification.gender)
         verificationWriter.remove(verification.uuid)
+        Notification.notifyTicketIssued(verification, command.ticket)
         return ViewerResponse.from(viewer)
     }
 

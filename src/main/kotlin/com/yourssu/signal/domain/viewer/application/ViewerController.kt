@@ -35,8 +35,8 @@ class ViewerController(
         return ResponseEntity.ok(Response(result = response))
     }
 
-    @GetMapping("/tickets/stream", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    fun streamTicketEvents(@Valid @ModelAttribute request: FoundSelfRequest): SseEmitter {
+    @GetMapping("/tickets/events", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
+    fun subscribeToTicketEvents(@Valid @ModelAttribute request: FoundSelfRequest): SseEmitter {
         return ticketSseManager.streamTicketEvents(request.toCommand())
     }
 

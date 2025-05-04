@@ -14,6 +14,7 @@
 ## Viewer
 
 [인증번호 발급 (POST /api/viewers/verification)](viewer/issue_verification.md)  
+[티켓 발급 확인 (GET /api/viewers/tickets/events)](viewer/subscribe_ticket_events.md)  
 [뷰어 조회 (GET /api/viewers/uuid)](viewer/get_viewer_uuid.md)
 
 ## Admin

@@ -1,4 +1,4 @@
-# getViewerUuid (GET /api/viewer/uuid)
+# getViewerUuid (GET /api/viewers/uuid)
 
 ## Request
 

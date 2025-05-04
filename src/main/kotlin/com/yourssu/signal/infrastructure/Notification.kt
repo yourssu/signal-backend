@@ -6,7 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 object Notification {
-    fun notifyTicketIssued(verification: Verification, ticket: Int) {
-        logger.info { "&${verification.verificationCode.value} $ticket"}
+    fun notifyTicketIssued(verification: Verification, ticket: Int, availableTicket: Int) {
+        logger.info { "&${verification.verificationCode.value} $ticket $availableTicket"}
     }
 }

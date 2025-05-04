@@ -42,7 +42,7 @@ class ViewerService(
             ticket = command.ticket,
             gender = verification.gender)
         verificationWriter.remove(verification.uuid)
-        Notification.notifyTicketIssued(verification, command.ticket)
+        Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
         return ViewerResponse.from(viewer)
     }
 

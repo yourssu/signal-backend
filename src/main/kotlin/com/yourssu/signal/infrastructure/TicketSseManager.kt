@@ -4,7 +4,6 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.viewer.business.command.ViewerFoundCommand
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.http.MediaType
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
@@ -14,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap
 private val logger = KotlinLogging.logger {}
 
 private const val EMITTER_TIMEOUT = 30_0000L
- private const val EMITTER_SENT_EVENT_NAME = "{\"message\" : \"ISSUED\"}"
 
 @Component
 class TicketSseManager(
@@ -35,7 +33,6 @@ class TicketSseManager(
         val uuid = Uuid(response.uuid)
         val emitter = emitters[uuid] ?: return
         try {
-            emitter.send(EMITTER_SENT_EVENT_NAME, MediaType.TEXT_EVENT_STREAM)
             logger.info { "Sent ticket-issued event to uuid: $uuid" }
             emitter.complete()
         } catch (e: IOException) {

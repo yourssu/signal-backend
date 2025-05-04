@@ -1,5 +1,4 @@
-@host=localhost:8080
-@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
+@uuid=5c0adc2a-a529-493a-b90f-e9e4d528d2eb
 
 @gender=MALE
 #@gender=FEMALE

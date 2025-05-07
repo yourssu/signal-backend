@@ -3,8 +3,8 @@ package com.yourssu.signal.domain.profile.implement
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
 import com.yourssu.signal.domain.profile.implement.exception.NoPurchasedProfileException
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import com.yourssu.signal.domain.viewer.implement.ViewerRepository
+import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -33,6 +33,7 @@ class UsedTicketManager(
 
     private fun savePurchasedProfile(purchasedProfile: PurchasedProfile) {
         purchasedProfileRepository.save(purchasedProfile)
+        purchasedProfileRepository.updateCacheIds()
     }
 
     private fun exists(purchasedProfile: PurchasedProfile): Boolean {

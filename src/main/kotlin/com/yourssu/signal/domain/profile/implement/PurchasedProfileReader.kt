@@ -10,4 +10,8 @@ class PurchasedProfileReader(
     fun findByViewerId(viewerId: Long): List<PurchasedProfile> {
         return purchasedProfileRepository.findByViewerId(viewerId)
     }
+
+    fun findProfileIdsOrderByPurchasedAsc(): List<Long> {
+        return purchasedProfileRepository.findProfileIdsOrderByPurchasedAsc()
+    }
 }

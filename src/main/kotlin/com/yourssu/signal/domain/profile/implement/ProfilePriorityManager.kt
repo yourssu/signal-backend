@@ -8,15 +8,18 @@ import org.springframework.stereotype.Component
 @Component
 class ProfilePriorityManager(
     private val profileReader: ProfileReader,
+    private val purchasedProfileReader: PurchasedProfileReader,
 ) {
     fun pickRandomProfile(
         excludeProfileIds: HashSet<Long>,
         myGender: Gender,
     ): Profile {
-        val profileId = profileReader.findAllOppositeGenderIds(myGender)
-            .shuffled()
-            .firstOrNull { it !in excludeProfileIds }
-            ?: throw RandomProfileNotFoundException()
-        return profileReader.getById(profileId)
+        val oppositeIds = profileReader.findAllOppositeGenderIds(myGender).toHashSet()
+        val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc()
+            .filter { it in oppositeIds }
+            .toSet()
+        val profileIdsOrderByPurchased = (oppositeIds - purchasedProfileIds - excludeProfileIds).shuffled() + (purchasedProfileIds - excludeProfileIds)
+        val randomProfileId = profileIdsOrderByPurchased.firstOrNull() ?: throw RandomProfileNotFoundException()
+        return profileReader.getById(randomProfileId)
     }
 }

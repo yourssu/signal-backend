@@ -14,6 +14,7 @@ import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
+import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -55,11 +56,12 @@ class ProfileService(
     fun consumeTicket(command: TicketConsumedCommand): ProfileContactResponse {
         val viewer = viewerReader.get(command.toUuid())
         val targetProfile = profileReader.getById(command.profileId)
-        usedTicketManager.consumeTicket(
+        val updatedViewer = usedTicketManager.consumeTicket(
             viewer = viewer,
             profile = targetProfile,
             ticket = policy.contactPrice,
         )
+        Notification.notifyConsumedTicket(targetProfile.nickname, updatedViewer.ticket - updatedViewer.usedTicket)
         return ProfileContactResponse.from(targetProfile)
     }
 

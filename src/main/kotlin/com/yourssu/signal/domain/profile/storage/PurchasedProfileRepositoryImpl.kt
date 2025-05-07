@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.profile.storage
 
+import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileRepository
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
@@ -32,23 +33,25 @@ class PurchasedProfileRepositoryImpl(
             .map { it.toDomain() }
     }
 
-    @Cacheable(cacheNames = ["purchasedProfileCache"])
+//    @Cacheable(cacheNames = ["purchasedProfileCache"])
     override fun findProfileIdsOrderByPurchasedAsc(): List<Long> {
         return jpaQueryFactory
             .select(purchasedProfileEntity.profileId)
             .from(purchasedProfileEntity)
             .groupBy(purchasedProfileEntity.profileId)
-            .orderBy(purchasedProfileEntity.profileId.count().asc())
+            .orderBy(purchasedProfileEntity.profileId.count().asc(),
+                Expressions.numberTemplate(Double::class.java, "RAND()").asc())
             .fetch()
     }
 
-    @CachePut(cacheNames = ["purchasedProfileCache"])
+//    @CachePut(cacheNames = ["purchasedProfileCache"])
     override fun updateCacheIds(): List<Long> {
         return jpaQueryFactory
             .select(purchasedProfileEntity.profileId)
             .from(purchasedProfileEntity)
             .groupBy(purchasedProfileEntity.profileId)
-            .orderBy(purchasedProfileEntity.profileId.count().asc())
+            .orderBy(purchasedProfileEntity.profileId.count().asc(),
+                Expressions.numberTemplate(Double::class.java, "RAND()").asc())
             .fetch()
     }
 }

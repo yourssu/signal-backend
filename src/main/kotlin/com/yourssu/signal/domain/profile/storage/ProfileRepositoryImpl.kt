@@ -47,7 +47,7 @@ class ProfileRepositoryImpl(
     }
 
     override fun findAll(): List<Profile> {
-        return profileJpaRepository.findAll().map { it.toDomain() }
+        return profileJpaRepository.findAll().map { decryptContact(it.toDomain()) }
     }
 
     @Cacheable(cacheNames = ["profileCache"], key = "#gender.name")

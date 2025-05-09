@@ -65,10 +65,10 @@ class ProfileService(
         return ProfileContactResponse.from(targetProfile)
     }
 
-    fun getAllProfiles(command: AllProfilesFoundCommand): List<ProfileResponse> {
+    fun getAllProfiles(command: AllProfilesFoundCommand): List<ProfileContactResponse> {
         adminAccessChecker.validateAdminAccess(command.secretKey)
         return profileReader.getAll()
-            .map { ProfileResponse.from(it) }
+            .map { ProfileContactResponse.from(it) }
     }
 
     fun countAllProfiles(): ProfilesCountResponse {

@@ -3,7 +3,6 @@ package com.yourssu.signal.domain.profile.implement.domain
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator.validateIntroSentences
 import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator.validateNickname
-import com.yourssu.signal.domain.profile.implement.exception.GenderMismatchException
 
 class Profile(
     val id: Long? = null,
@@ -45,11 +44,5 @@ class Profile(
             nickname = nickname,
             introSentences = introSentences
         )
-    }
-
-    fun validateSameGender(gender: Gender) {
-        if (this.gender != gender) {
-            throw GenderMismatchException()
-        }
     }
 }

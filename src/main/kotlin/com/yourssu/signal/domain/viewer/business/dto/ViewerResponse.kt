@@ -5,7 +5,6 @@ import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 data class ViewerResponse(
     val id: Long,
     val uuid: String,
-    val gender: String,
     val ticket: Int,
     val usedTicket: Int,
     val updatedTime: String,
@@ -15,7 +14,6 @@ data class ViewerResponse(
             return ViewerResponse(
                 id = viewer.id!!,
                 uuid = viewer.uuid.value,
-                gender = viewer.gender.name,
                 ticket = viewer.ticket,
                 usedTicket = viewer.usedTicket,
                 updatedTime = viewer.updatedTime.toString(),

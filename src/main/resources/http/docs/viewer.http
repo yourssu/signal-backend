@@ -1,16 +1,12 @@
 @uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
 
-#@gender=MALE
-@gender=FEMALE
-
 // Issue a verification code for uuid - 200 OK
 ###
 POST {{host}}/api/viewers/verification
 Content-Type: application/json
 
 {
-  "uuid": "{{uuid}}",
-  "gender" : "{{gender}}"
+  "uuid": "{{uuid}}"
 }
 
 > {%

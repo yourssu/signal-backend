@@ -30,8 +30,8 @@ class ProfileReader(
         return profileRepository.findAll()
     }
 
-    fun findAllOppositeGenderIds(myGender: Gender): List<Long> {
-        return profileRepository.findIdsByGender(myGender.opposite())
+    fun findIdsByGender(gender: Gender): List<Long> {
+        return profileRepository.findIdsByGender(gender)
     }
 
     fun countAll(): Int {

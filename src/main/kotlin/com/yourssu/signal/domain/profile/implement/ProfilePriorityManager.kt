@@ -12,9 +12,9 @@ class ProfilePriorityManager(
 ) {
     fun pickRandomProfile(
         excludeProfileIds: HashSet<Long>,
-        myGender: Gender,
+        targetGender: Gender,
     ): Profile {
-        val oppositeIds = profileReader.findAllOppositeGenderIds(myGender).toHashSet()
+        val oppositeIds = profileReader.findIdsByGender(targetGender).toHashSet()
         val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc()
             .filter { it in oppositeIds }
             .toSet()

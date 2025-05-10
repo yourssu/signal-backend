@@ -4,10 +4,11 @@
 
 ### Query Parameters
 
-| Name              | Type      | Required | Constraint | Description   |
-|-------------------|-----------|----------|------------|---------------|
-| `uuid`            | string    | true     | @NotBlank  | Viewer's uuid |
-| `excludeProfiles` | integer[] | false    |            | excluded Ids  |
+| Name              | Type      | Required | Constraint | Description                  |
+|-------------------|-----------|----------|------------|------------------------------|
+| `uuid`            | string    | true     | @NotBlank  | Viewer's uuid                |
+| `gender`          | string    | true     | @NotBlank  | Gender of the random profile | 
+| `excludeProfiles` | integer[] | false    |            | excluded Ids                 |
 
 ## Reply
 
@@ -16,7 +17,7 @@
 | Name             | Type     | Description                                 |
 |------------------|----------|---------------------------------------------|
 | `profileId`      | integer  | The unique identifier of the random profile |
-| `gender`         | string   | Opposite Gender of the viewer               |
+| `gender`         | string   | Gender of the random profile                |
 | `animal`         | string   | Animal representing the profile             |
 | `mbti`           | string   | MBTI personality type                       |
 | `nickname`       | string   | Profile's nickname                          |

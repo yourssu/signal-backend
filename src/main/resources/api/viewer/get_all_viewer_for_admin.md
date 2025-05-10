@@ -16,7 +16,6 @@
 |---------------|---------|--------------------------------------------|
 | `id`          | integer | The unique identifier of the viewer        |
 | `uuid`        | string  | The Unique identifier string of the viewer |
-| `gender`      | string  | Gender of the viewer owner                 |
 | `ticket`      | integer | The number of total tickets                |
 | `usedTicket`  | integer | The number of used tickets                 |
 | `updatedTime` | String  | latest issued tickets                      |
@@ -30,7 +29,6 @@
     {
       "id": 1,
       "uuid": "ec5ea893-8540-42c5-958a-ce69ed7f9f63",
-      "gender": "MALE",
       "ticket": 6,
       "usedTicket": 0,
       "updatedTime": "2025-04-27T16:38:42.432065+09:00"
@@ -38,7 +36,6 @@
     {
       "id": 2,
       "uuid": "ec5ea893-8540-42c5-958a-ab69ed7f9f63",
-      "gender": "MALE",
       "ticket": 6,
       "usedTicket": 0,
       "updatedTime": "2025-04-27T16:38:42.432065+09:00"

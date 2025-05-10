@@ -2,7 +2,6 @@ package com.yourssu.signal.domain.viewer.storage.domain
 
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.common.storage.BaseEntity
-import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import jakarta.persistence.*
 import java.time.ZoneId
@@ -18,10 +17,6 @@ class ViewerEntity(
     val uuid: String,
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    val gender: Gender,
-
-    @Column(nullable = false)
     var ticket: Int = 0,
 
     @Column(nullable = false)
@@ -34,7 +29,6 @@ class ViewerEntity(
         fun from(viewer: Viewer): ViewerEntity {
             return ViewerEntity(
                 uuid = viewer.uuid.value,
-                gender = viewer.gender,
                 ticket = viewer.ticket,
                 usedTicket = 0,
             )
@@ -45,7 +39,6 @@ class ViewerEntity(
         return Viewer(
             id = id,
             uuid = Uuid(uuid),
-            gender = gender,
             ticket = ticket,
             usedTicket = usedTicket,
             updatedTime = updatedTime?.atZone(ZoneId.systemDefault())

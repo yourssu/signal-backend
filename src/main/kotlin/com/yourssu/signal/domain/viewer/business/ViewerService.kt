@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.viewer.business
 
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
-import com.yourssu.signal.domain.profile.implement.GenderValidator
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
 import com.yourssu.signal.domain.viewer.business.command.AllViewersFoundCommand
@@ -24,13 +23,11 @@ class ViewerService(
     private val verificationReader: VerificationReader,
     private val viewerWriter: ViewerWriter,
     private val viewerReader: ViewerReader,
-    private val genderValidator: GenderValidator,
     private val purchasedProfileReader: PurchasedProfileReader,
     private val adminAccessChecker: AdminAccessChecker,
 ) {
     fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
-        genderValidator.validateViewer(uuid = command.toUuid(), gender = command.toGender())
-        val code = verificationWriter.issueVerificationCode(uuid = command.toUuid(), command.toGender()!!)
+        val code = verificationWriter.issueVerificationCode(uuid = command.toUuid())
         return VerificationResponse.from(code)
     }
 
@@ -40,7 +37,7 @@ class ViewerService(
         val viewer = viewerWriter.issueTicket(
             uuid = verification.uuid,
             ticket = command.ticket,
-            gender = verification.gender)
+            )
         verificationWriter.remove(verification.uuid)
         Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
         return ViewerResponse.from(viewer)

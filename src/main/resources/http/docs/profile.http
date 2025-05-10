@@ -68,7 +68,7 @@ GET {{host}}/api/profiles?secretKey={{secretKey}}
 
 // Get a ramdom profile - 200 OK
 ###
-GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=
+GET {{host}}/api/profiles/random?uuid={{uuid}}&gender={{gender}}&excludeProfiles=
 
 ###
 

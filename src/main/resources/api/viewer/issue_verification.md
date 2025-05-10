@@ -8,7 +8,6 @@
 
 | Name     | Type   | Required | Constraint                       |
 |----------|--------|----------|----------------------------------|
-| `gender` | string | false    | validate the gender of a profile |
 | `uuid`   | string | true     | @NotBlank                        |
 
 ## Reply

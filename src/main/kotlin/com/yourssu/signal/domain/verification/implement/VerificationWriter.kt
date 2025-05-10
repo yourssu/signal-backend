@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.verification.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.verification.implement.domain.Verification
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import org.springframework.stereotype.Component
@@ -14,7 +13,7 @@ class VerificationWriter(
     private val verificationCodePool: VerificationCodePool,
 ) {
     @Transactional
-    fun issueVerificationCode(uuid: Uuid, gender: Gender): VerificationCode {
+    fun issueVerificationCode(uuid: Uuid): VerificationCode {
         if (isUuidRegistered(uuid)) {
             return verificationRepository.getVerificationCode(uuid)
         }
@@ -24,7 +23,6 @@ class VerificationWriter(
                 val verification = Verification(
                     uuid = uuid,
                     verificationCode = code,
-                    gender = gender,
                 )
                 return verificationRepository.issueVerificationCode(verification)
             }

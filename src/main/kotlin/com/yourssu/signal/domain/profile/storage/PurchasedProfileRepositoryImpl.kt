@@ -6,8 +6,6 @@ import com.yourssu.signal.domain.profile.implement.PurchasedProfileRepository
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
 import com.yourssu.signal.domain.profile.storage.domain.PurchasedProfileEntity
 import com.yourssu.signal.domain.profile.storage.domain.QPurchasedProfileEntity.purchasedProfileEntity
-import org.springframework.cache.annotation.CachePut
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
@@ -33,25 +31,12 @@ class PurchasedProfileRepositoryImpl(
             .map { it.toDomain() }
     }
 
-//    @Cacheable(cacheNames = ["purchasedProfileCache"])
     override fun findProfileIdsOrderByPurchasedAsc(): List<Long> {
         return jpaQueryFactory
             .select(purchasedProfileEntity.profileId)
             .from(purchasedProfileEntity)
             .groupBy(purchasedProfileEntity.profileId)
-            .orderBy(purchasedProfileEntity.profileId.count().asc(),
-                Expressions.numberTemplate(Double::class.java, "RAND()").asc())
-            .fetch()
-    }
-
-//    @CachePut(cacheNames = ["purchasedProfileCache"])
-    override fun updateCacheIds(): List<Long> {
-        return jpaQueryFactory
-            .select(purchasedProfileEntity.profileId)
-            .from(purchasedProfileEntity)
-            .groupBy(purchasedProfileEntity.profileId)
-            .orderBy(purchasedProfileEntity.profileId.count().asc(),
-                Expressions.numberTemplate(Double::class.java, "RAND()").asc())
+            .orderBy(purchasedProfileEntity.profileId.count().asc())
             .fetch()
     }
 }

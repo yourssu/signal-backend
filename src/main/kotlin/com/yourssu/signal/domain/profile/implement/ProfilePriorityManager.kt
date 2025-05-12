@@ -3,7 +3,11 @@ package com.yourssu.signal.domain.profile.implement
 import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.profile.implement.exception.RandomProfileNotFoundException
+import com.yourssu.signal.utils.GaussianDistributionUtils.calculateProbabilities
+import com.yourssu.signal.utils.GaussianDistributionUtils.selectIndexByProbabilityDistribution
 import org.springframework.stereotype.Component
+
+private const val STANDARD_DEVIATION = 5.0
 
 @Component
 class ProfilePriorityManager(
@@ -14,12 +18,19 @@ class ProfilePriorityManager(
         excludeProfileIds: HashSet<Long>,
         targetGender: Gender,
     ): Profile {
-        val oppositeIds = profileReader.findIdsByGender(targetGender).toHashSet()
-        val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc()
-            .filter { it in oppositeIds }
-            .toSet()
-        val profileIdsOrderByPurchased = (oppositeIds - purchasedProfileIds - excludeProfileIds).shuffled() + (purchasedProfileIds - excludeProfileIds)
-        val randomProfileId = profileIdsOrderByPurchased.firstOrNull() ?: throw RandomProfileNotFoundException()
-        return profileReader.getById(randomProfileId)
+        val oppositeIds = profileReader.findIdsByGender(targetGender)
+        val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc().toSet()
+        val candidateProfileId = oppositeIds.filter { it !in purchasedProfileIds && it !in excludeProfileIds }.shuffled() +
+                purchasedProfileIds.filter { it !in excludeProfileIds }
+        validateEmpty(candidateProfileId)
+        val probabilities = calculateProbabilities(size = candidateProfileId.size, stdDev = STANDARD_DEVIATION)
+        val profileIndex = selectIndexByProbabilityDistribution(probabilities)
+        return profileReader.getById(candidateProfileId[profileIndex])
+    }
+
+    private fun validateEmpty(candidateProfileId: List<Long>) {
+        if (candidateProfileId.isEmpty()) {
+            throw RandomProfileNotFoundException()
+        }
     }
 }

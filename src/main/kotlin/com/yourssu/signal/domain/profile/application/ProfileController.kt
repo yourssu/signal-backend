@@ -32,7 +32,7 @@ class ProfileController(
     }
 
     @GetMapping
-    fun getAllProfiles(@Valid @ModelAttribute request: ProfilesFoundRequest): ResponseEntity<Response<List<ProfileContactResponse>>> {
+    fun getAllProfiles(@Valid @ModelAttribute request: ProfilesFoundRequest): ResponseEntity<Response<List<ProfileResponse>>> {
         val response = profileService.getAllProfiles(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }

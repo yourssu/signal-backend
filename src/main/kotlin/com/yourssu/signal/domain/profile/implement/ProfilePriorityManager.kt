@@ -7,7 +7,7 @@ import com.yourssu.signal.utils.GaussianDistributionUtils.calculateProbabilities
 import com.yourssu.signal.utils.GaussianDistributionUtils.selectIndexByProbabilityDistribution
 import org.springframework.stereotype.Component
 
-private const val STANDARD_DEVIATION = 5.0
+private const val STANDARD_DEVIATION = 10.0
 
 @Component
 class ProfilePriorityManager(
@@ -18,10 +18,10 @@ class ProfilePriorityManager(
         excludeProfileIds: HashSet<Long>,
         targetGender: Gender,
     ): Profile {
-        val oppositeIds = profileReader.findIdsByGender(targetGender)
+        val profileIdsByGender = profileReader.findIdsByGender(targetGender).toSet()
         val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc().toSet()
-        val candidateProfileId = oppositeIds.filter { it !in purchasedProfileIds && it !in excludeProfileIds }.shuffled() +
-                purchasedProfileIds.filter { it !in excludeProfileIds }
+        val candidateProfileId = profileIdsByGender.filter { it !in purchasedProfileIds && it !in excludeProfileIds }.shuffled() +
+                purchasedProfileIds.filter { it !in excludeProfileIds && it in profileIdsByGender }
         validateEmpty(candidateProfileId)
         val probabilities = calculateProbabilities(size = candidateProfileId.size, stdDev = STANDARD_DEVIATION)
         val profileIndex = selectIndexByProbabilityDistribution(probabilities)

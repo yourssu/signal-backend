@@ -59,7 +59,7 @@ class ProfileService(
             profile = targetProfile,
             ticket = policy.contactPrice,
         )
-        Notification.notifyConsumedTicket(targetProfile.nickname, viewer.usedTicket - updatedViewer.usedTicket)
+        Notification.notifyConsumedTicket(targetProfile.nickname, updatedViewer.usedTicket - viewer.usedTicket)
         return ProfileContactResponse.from(targetProfile)
     }
 

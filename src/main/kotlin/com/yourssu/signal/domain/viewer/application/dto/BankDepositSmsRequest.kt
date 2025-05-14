@@ -9,11 +9,15 @@ class BankDepositSmsRequest(
 
     @field:NotBlank
     val message: String,
+
+    @field:NotBlank
+    val type: String,
 ) {
     fun toCommand(): ProcessDepositSmsCommand {
         return ProcessDepositSmsCommand(
             secretKey = secretKey,
             message = message,
+            type = type,
         )
     }
 }

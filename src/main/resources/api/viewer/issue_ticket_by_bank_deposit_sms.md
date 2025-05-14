@@ -11,11 +11,13 @@
 |-------------|--------|----------|------------|
 | `secretKey` | string | true     | @NotBlank  |
 | `message`   | string | true     | @NotBlank  |
+| `type`      | string | true     | @NotBlank  |
 
 ```json
 {
-  "message" : "[Web발신]\n[카카오뱅크]\n홍길동(3873)\n05\/14 11:30\n입금 {{ticket}}원\n{{verificationCode}}\n잔액 6원",
-  "secretKey" : "{{secretKey}}"
+  "message": "[Web발신]\n[카카오뱅크]\n홍길동(3873)\n05\/14 11:30\n입금 {{ticket}}원\n{{verificationCode}}\n잔액 6원",
+  "secretKey": "{{secretKey}}",
+  "type": "kakao"
 }
 ```
 

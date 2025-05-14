@@ -14,7 +14,7 @@ import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
-import com.yourssu.signal.infrastructure.SMSParser
+import com.yourssu.signal.infrastructure.deposit.SMSParser
 import org.springframework.stereotype.Service
 
 @Service
@@ -46,7 +46,8 @@ class ViewerService(
 
     fun issueTicket(command: ProcessDepositSmsCommand): ViewerResponse {
         adminAccessChecker.validateAdminAccess(command.secretKey)
-        val message = SMSParser.parse(command.message)
+        val messageParser = SMSParser.of(command.type)
+        val message = messageParser.parse(message = command.message)
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)

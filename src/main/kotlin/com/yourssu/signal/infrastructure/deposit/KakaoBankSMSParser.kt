@@ -1,9 +1,7 @@
-package com.yourssu.signal.infrastructure
+package com.yourssu.signal.infrastructure.deposit
 
-import com.yourssu.signal.infrastructure.dto.SMSMessage
-
-object SMSParser {
-    fun parse(message: String): SMSMessage {
+object KakaoBankSMSParser: SMSParser {
+    override fun parse(message: String): SMSMessage {
         val lines = message.split("\n")
         val depositLine = lines.find { it.contains("입금") } ?: ""
         val depositAmount = depositLine.filter { it.isDigit() }.toInt()

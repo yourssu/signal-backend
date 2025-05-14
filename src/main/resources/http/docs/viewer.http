@@ -41,7 +41,8 @@ Content-Type: application/json
 
 {
   "secretKey": "{{secretKey}}",
-  "message":"[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\/14 11:30\n입금 {{deposit}}원\n{{verificationCode}}\n잔액 6원"
+  "message":"[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\/14 11:30\n입금 {{deposit}}원\n{{verificationCode}}\n잔액 6원",
+  "type": "kakao"
 }
 
 ###

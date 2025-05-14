@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.viewer.application
 
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.viewer.application.dto.FoundSelfRequest
+import com.yourssu.signal.domain.viewer.application.dto.SMSTicketIssuedRequest
 import com.yourssu.signal.domain.viewer.application.dto.TicketIssuedRequest
 import com.yourssu.signal.domain.viewer.application.dto.VerificationRequest
 import com.yourssu.signal.domain.viewer.application.dto.ViewersFoundRequest
@@ -30,6 +31,13 @@ class ViewerController(
 
     @PostMapping
     fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest): ResponseEntity<Response<ViewerResponse>> {
+        val response = viewerService.issueTicket(request.toCommand())
+        ticketSseManager.notifyTicketIssued(response)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @PostMapping("/sms")
+    fun issueTicket(@Valid @RequestBody request: SMSTicketIssuedRequest): ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.issueTicket(request.toCommand())
         ticketSseManager.notifyTicketIssued(response)
         return ResponseEntity.ok(Response(result = response))

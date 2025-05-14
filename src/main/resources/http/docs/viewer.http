@@ -31,6 +31,19 @@ Content-Type: application/json
 }
 
 ###
+
+// Verify the uuid with the verification code - 200 OK
+
+###
+POST {{host}}/api/viewers/sms
+Content-Type: application/json
+
+{
+  "secretKey": "{{secretKey}}",
+  "message": "[Web발신]\n[카카오뱅크]\n남*현\n05/14 11:00\n입금 1원\n{{verificationCode}}\n잔액 3원"
+}
+
+###
 // The verification code is able to be used only once.
 
 

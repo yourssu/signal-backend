@@ -1,20 +1,25 @@
 package com.yourssu.signal.domain.viewer.business
 
+import com.yourssu.signal.domain.profile.business.command.TicketConsumedCommand
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
+import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import com.yourssu.signal.domain.viewer.business.command.AllViewersFoundCommand
 import com.yourssu.signal.domain.viewer.business.command.TicketIssuedCommand
 import com.yourssu.signal.domain.viewer.business.command.VerificationCommand
 import com.yourssu.signal.domain.viewer.business.command.ViewerFoundCommand
+import com.yourssu.signal.domain.viewer.business.dto.SMSTicketIssuedCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
+import com.yourssu.signal.domain.viewer.implement.PricePolicy
 import com.yourssu.signal.domain.viewer.implement.VerificationReader
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.domain.viewer.implement.ViewerWriter
 import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.SMSParser
 import org.springframework.stereotype.Service
 
 @Service
@@ -40,6 +45,21 @@ class ViewerService(
             )
         verificationWriter.remove(verification.uuid)
         Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
+        return ViewerResponse.from(viewer)
+    }
+
+    fun issueTicket(command: SMSTicketIssuedCommand): ViewerResponse {
+        adminAccessChecker.validateAdminAccess(command.secretKey)
+        val message = SMSParser.parse(command.message)
+        val code = VerificationCode.from(message.name)
+        val verification = verificationReader.findByCode(code)
+        val ticket = PricePolicy.toTicket(message.depositAmount)
+        val viewer = viewerWriter.issueTicket(
+            uuid = verification.uuid,
+            ticket = ticket,
+        )
+        verificationWriter.remove(verification.uuid)
+        Notification.notifyTicketIssued(verification, ticket, viewer.ticket - viewer.usedTicket)
         return ViewerResponse.from(viewer)
     }
 

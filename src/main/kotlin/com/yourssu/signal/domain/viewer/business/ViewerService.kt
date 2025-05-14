@@ -53,12 +53,12 @@ class ViewerService(
         Notification.notifyIssueTicketByBankDepositSms(message)
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
-        notifyError(ticket, message, code)
+        validateMessage(ticket, message, code)
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)
     }
 
-    private fun notifyError(
+    private fun validateMessage(
         ticket: Int,
         message: SMSMessage,
         code: VerificationCode

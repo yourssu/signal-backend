@@ -1,17 +1,17 @@
 package com.yourssu.signal.domain.viewer.application.dto
 
-import com.yourssu.signal.domain.viewer.business.dto.SMSTicketIssuedCommand
+import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
 import jakarta.validation.constraints.NotBlank
 
-class SMSTicketIssuedRequest(
+class BankDepositSmsRequest(
     @field:NotBlank
     val secretKey: String,
 
     @field:NotBlank
     val message: String,
 ) {
-    fun toCommand(): SMSTicketIssuedCommand {
-        return SMSTicketIssuedCommand(
+    fun toCommand(): ProcessDepositSmsCommand {
+        return ProcessDepositSmsCommand(
             secretKey = secretKey,
             message = message,
         )

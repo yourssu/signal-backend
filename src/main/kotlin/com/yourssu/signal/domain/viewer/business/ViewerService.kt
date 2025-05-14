@@ -8,17 +8,14 @@ import com.yourssu.signal.domain.viewer.business.command.AllViewersFoundCommand
 import com.yourssu.signal.domain.viewer.business.command.TicketIssuedCommand
 import com.yourssu.signal.domain.viewer.business.command.VerificationCommand
 import com.yourssu.signal.domain.viewer.business.command.ViewerFoundCommand
-import com.yourssu.signal.domain.viewer.business.dto.SMSTicketIssuedCommand
+import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
 import com.yourssu.signal.infrastructure.SMSParser
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
-
-val logger = KotlinLogging.logger {}
 
 @Service
 class ViewerService(
@@ -28,6 +25,7 @@ class ViewerService(
     private val viewerReader: ViewerReader,
     private val purchasedProfileReader: PurchasedProfileReader,
     private val adminAccessChecker: AdminAccessChecker,
+    private val ticketPricePolicy: TicketPricePolicy,
 ) {
     fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
         val code = verificationWriter.issueVerificationCode(uuid = command.toUuid())
@@ -46,20 +44,13 @@ class ViewerService(
         return ViewerResponse.from(viewer)
     }
 
-    fun issueTicket(command: SMSTicketIssuedCommand): ViewerResponse {
+    fun issueTicket(command: ProcessDepositSmsCommand): ViewerResponse {
         adminAccessChecker.validateAdminAccess(command.secretKey)
         val message = SMSParser.parse(command.message)
         val code = VerificationCode.from(message.name)
-        val verification = verificationReader.findByCode(code)
-        val ticket = PricePolicy.toTicket(message.depositAmount)
-        logger.info { "message: $message, ticket: $ticket, code: $code, verification: $verification" }
-        val viewer = viewerWriter.issueTicket(
-            uuid = verification.uuid,
-            ticket = ticket,
-        )
-        verificationWriter.remove(verification.uuid)
-        Notification.notifyTicketIssued(verification, ticket, viewer.ticket - viewer.usedTicket)
-        return ViewerResponse.from(viewer)
+        val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
+        val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
+        return issueTicket(ticketIssuedCommand)
     }
 
     fun getViewer(command: ViewerFoundCommand): ViewerDetailResponse {

@@ -1,16 +1,23 @@
-# issueTicket (POST /api/viewers)
+# issueTicketByBankDepositSms (POST /api/viewers/sms)
 
-- The verification code cannot be reused once a ticket has been issued.
+- Provide functionality to issue viewer tickets through bank deposit SMS. 
+- Once a ticket has been issued, the same verification code cannot be reused.
 
 ## Request
 
 ### Request Body
 
-| Name               | Type    | Required | Constraint |
-|--------------------|---------|----------|------------|
-| `secretKey`        | string  | true     | @NotBlank  |
-| `verificationCode` | integer | true     | @NotNull   |
-| `ticket`           | integer | true     | @Positive  |
+| Name        | Type   | Required | Constraint |
+|-------------|--------|----------|------------|
+| `secretKey` | string | true     | @NotBlank  |
+| `message`   | string | true     | @NotBlank  |
+
+```json
+{
+  "message" : "[Web발신]\n[카카오뱅크]\n홍길동(3873)\n05\/14 11:30\n입금 {{ticket}}원\n{{verificationCode}}\n잔액 6원",
+  "secretKey" : "{{secretKey}}"
+}
+```
 
 ## Reply
 

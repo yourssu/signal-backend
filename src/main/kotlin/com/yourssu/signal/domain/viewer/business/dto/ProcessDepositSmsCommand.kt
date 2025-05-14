@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.viewer.business.dto
 
-class SMSTicketIssuedCommand(
+class ProcessDepositSmsCommand(
     val secretKey: String,
     val message: String) {
 }

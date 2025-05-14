@@ -1,6 +1,5 @@
 package com.yourssu.signal.domain.viewer.business
 
-import com.yourssu.signal.domain.profile.business.command.TicketConsumedCommand
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
@@ -13,14 +12,13 @@ import com.yourssu.signal.domain.viewer.business.dto.SMSTicketIssuedCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
-import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
-import com.yourssu.signal.domain.viewer.implement.PricePolicy
-import com.yourssu.signal.domain.viewer.implement.VerificationReader
-import com.yourssu.signal.domain.viewer.implement.ViewerReader
-import com.yourssu.signal.domain.viewer.implement.ViewerWriter
+import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
 import com.yourssu.signal.infrastructure.SMSParser
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
+
+val logger = KotlinLogging.logger {}
 
 @Service
 class ViewerService(
@@ -54,6 +52,7 @@ class ViewerService(
         val code = VerificationCode.from(message.name)
         val verification = verificationReader.findByCode(code)
         val ticket = PricePolicy.toTicket(message.depositAmount)
+        logger.info { "message: $message, ticket: $ticket, code: $code, verification: $verification" }
         val viewer = viewerWriter.issueTicket(
             uuid = verification.uuid,
             ticket = ticket,

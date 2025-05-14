@@ -12,8 +12,10 @@ import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
+import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.deposit.SMSMessage
 import com.yourssu.signal.infrastructure.deposit.SMSParser
 import org.springframework.stereotype.Service
 
@@ -48,10 +50,35 @@ class ViewerService(
         adminAccessChecker.validateAdminAccess(command.secretKey)
         val messageParser = SMSParser.of(command.type)
         val message = messageParser.parse(message = command.message)
+        Notification.notifyIssueTicketByBankDepositSms(message)
+        validateSenderName(message)
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
+        validateAmount(ticket, message)
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)
+    }
+
+    private fun validateSenderName(message: SMSMessage) {
+        if (message.name.toIntOrNull() == null) {
+            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
+            throw TicketIssuedFailedException()
+        }
+        val code = VerificationCode.from(message.name)
+        if (!verificationReader.existsByCode(code)) {
+            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
+            throw TicketIssuedFailedException()
+        }
+    }
+
+    private fun validateAmount(
+        ticket: Int,
+        message: SMSMessage,
+    ) {
+        if (ticket == 0) {
+            Notification.notifyIssueFailedTicketByDepositAmount(message)
+            throw TicketIssuedFailedException()
+        }
     }
 
     fun getViewer(command: ViewerFoundCommand): ViewerDetailResponse {

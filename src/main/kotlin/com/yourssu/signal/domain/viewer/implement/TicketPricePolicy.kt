@@ -9,7 +9,7 @@ class TicketPricePolicy(
 ) {
     companion object {
         private const val PRICE_DELIMITER = "&"
-        private const val KEY_VALUE_DELIMITER = "="
+        private const val KEY_VALUE_DELIMITER = "n"
     }
 
     private val priceToTicketMap: Map<Int, Int> = initializePriceToTicketMap()

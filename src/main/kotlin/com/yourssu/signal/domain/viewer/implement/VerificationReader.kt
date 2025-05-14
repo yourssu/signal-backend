@@ -12,4 +12,8 @@ class VerificationReader(
     fun findByCode(code: VerificationCode): Verification {
         return verificationRepository.getByCode(code)
     }
+
+    fun existsByCode(code: VerificationCode): Boolean {
+        return verificationRepository.existsByCode(code)
+    }
 }

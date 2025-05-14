@@ -52,7 +52,10 @@ class ViewerService(
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
         if (ticket == 0) {
-            Notification.notifyIssueFailedTicketByBankDepositSms(message)
+            Notification.notifyIssueFailedTicketByDepositAmount(message)
+        }
+        if (!verificationReader.existsByCode(code)) {
+            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
         }
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)

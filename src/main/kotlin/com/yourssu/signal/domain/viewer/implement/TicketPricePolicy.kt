@@ -1,6 +1,8 @@
 package com.yourssu.signal.domain.viewer.implement
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
+import com.yourssu.signal.domain.viewer.implement.exception.InvalidTicketPriceException
+import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Component
 
 @Component

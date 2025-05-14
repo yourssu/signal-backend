@@ -48,8 +48,12 @@ class ViewerService(
         adminAccessChecker.validateAdminAccess(command.secretKey)
         val messageParser = SMSParser.of(command.type)
         val message = messageParser.parse(message = command.message)
+        Notification.notifyIssueTicketByBankDepositSms(message)
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
+        if (ticket == 0) {
+            Notification.notifyIssueFailedTicketByBankDepositSms(message.depositAmount)
+        }
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)
     }

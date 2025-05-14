@@ -12,8 +12,10 @@ import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
+import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.deposit.SMSMessage
 import com.yourssu.signal.infrastructure.deposit.SMSParser
 import org.springframework.stereotype.Service
 
@@ -51,14 +53,24 @@ class ViewerService(
         Notification.notifyIssueTicketByBankDepositSms(message)
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
-        if (ticket == 0) {
-            Notification.notifyIssueFailedTicketByDepositAmount(message)
-        }
-        if (!verificationReader.existsByCode(code)) {
-            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
-        }
+        notifyError(ticket, message, code)
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)
+    }
+
+    private fun notifyError(
+        ticket: Int,
+        message: SMSMessage,
+        code: VerificationCode
+    ) {
+        if (!verificationReader.existsByCode(code)) {
+            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
+            throw TicketIssuedFailedException()
+        }
+        if (ticket == 0) {
+            Notification.notifyIssueFailedTicketByDepositAmount(message)
+            throw TicketIssuedFailedException()
+        }
     }
 
     fun getViewer(command: ViewerFoundCommand): ViewerDetailResponse {

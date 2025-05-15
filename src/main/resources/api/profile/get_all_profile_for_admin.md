@@ -16,6 +16,8 @@
 |------------------|----------|--------------------------------------|
 | `profileId`      | integer  | The unique identifier of the profile |
 | `gender`         | string   | Gender of the profile owner          |
+| `department`     | string   | Department of the profile owner                           |
+| `birthYear`      | integer  | Birth year of the profile owner                           |
 | `animal`         | string   | Animal representing the profile      |
 | `mbti`           | string   | MBTI personality type                |
 | `nickname`       | string   | Profile's nickname                   |
@@ -30,6 +32,8 @@
     {
       "profileId": 1,
       "gender": "FEMALE",
+      "department": "학과",
+      "birthYear": 2000,
       "animal": "DOG",
       "mbti": "ISTJ",
       "nickname": "leopold",
@@ -38,6 +42,8 @@
     {
       "profileId": 2,
       "gender": "FEMALE",
+      "department": "학과",
+      "birthYear": 2000,
       "animal": "DOG",
       "mbti": "ISTJ",
       "nickname": "leopold",
@@ -46,6 +52,8 @@
     {
       "profileId": 3,
       "gender": "FEMALE",
+      "department": "학과",
+      "birthYear": 2000,
       "animal": "DOG",
       "mbti": "ISTJ",
       "nickname": "leopold",

@@ -18,6 +18,8 @@
 |------------------|----------|-----------------------------------------------------------|
 | `profileId`      | integer  | The unique identifier of the created profile              |
 | `gender`         | string   | Gender of the profile owner                               |
+| `department`     | string   | Department of the profile owner                           |
+| `birthYear`      | integer  | Birth year of the profile owner                           |
 | `animal`         | string   | Animal representing the profile                           |
 | `contact`        | string   | Contact information                                       |
 | `mbti`           | string   | MBTI personality type                                     |
@@ -32,6 +34,8 @@
   "result": {
     "profileId": 1,
     "gender": "MALE",
+    "department": "학과",
+    "birthYear": 2000,
     "animal": "DOG",
     "contact": "@leo",
     "mbti": "ISTJ",

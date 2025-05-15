@@ -18,6 +18,8 @@
 |------------------|----------|---------------------------------------------|
 | `profileId`      | integer  | The unique identifier of the random profile |
 | `gender`         | string   | Gender of the random profile                |
+| `department`     | string   | Department of the random profile            |
+| `birthYear`      | integer  | Birth year of the random profile            |
 | `animal`         | string   | Animal representing the profile             |
 | `mbti`           | string   | MBTI personality type                       |
 | `nickname`       | string   | Profile's nickname                          |
@@ -31,6 +33,8 @@
   "result": {
     "profileId": 1,
     "gender": "FEMALE",
+    "department": "학과",
+    "birthYear": 2000,
     "animal": "DOG",
     "mbti": "ISTJ",
     "nickname": "leopold",

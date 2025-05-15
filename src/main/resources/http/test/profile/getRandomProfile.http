@@ -8,6 +8,8 @@ Content-Type: application/json
 
 {
   "gender": "FEMALE",
+  "department": "학과",
+  "birthYear": 2000,
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
@@ -30,6 +32,8 @@ Content-Type: application/json
 
 {
   "gender": "MALE",
+  "department": "학과",
+  "birthYear": 2000,
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",

@@ -7,6 +7,8 @@
 | Name             | Type     | Required | Constraint                                                                       |
 |------------------|----------|----------|----------------------------------------------------------------------------------|
 | `gender`         | string   | true     | only "MALE" or "FEMALE"                                                          |
+| `department`     | string   | Department of the profile owner                           |
+| `birthYear`      | integer  | Birth year of the profile owner                           |
 | `animal`         | string   | true     | @NotBlank                                                                        |
 | `contact`        | string   | true     | only "^010\\d{8}\$" or "^@[a-zA-Z0-9._]{1,30}\$"                                 |
 | `mbti`           | string   | true     | @NotBlank                                                                        |
@@ -23,6 +25,8 @@
 | `profileId`      | integer  | The unique identifier of the created profile              |
 | `uuid`           | string   | Generated Unique identifier string of the created profile |
 | `gender`         | string   | Gender of the profile owner                               |
+| `department`     | string   | Department of the profile owner                           |
+| `birthYear`      | integer  | Birth year of the profile owner                           |
 | `animal`         | string   | Animal representing the profile                           |
 | `contact`        | string   | Contact information                                       |
 | `mbti`           | string   | MBTI personality type                                     |
@@ -38,6 +42,8 @@
     "profileId": 1,
     "uuid": "26eaadba-a2a0-4de3-ae7c-ea98cd14a014",
     "gender": "FEMALE",
+    "department": "학과",
+    "birthYear": 2000,
     "animal": "DOG",
     "contact": "@leo",
     "mbti": "ISTJ",

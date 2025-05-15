@@ -17,6 +17,8 @@
 | `profileId`      | integer  | The unique identifier of the profile              |
 | `uuid`           | string   | Generated Unique identifier string of the profile |
 | `gender`         | string   | Gender of the profile owner                       |
+| `department`     | string   | Department of the profile owner                   |
+| `birthYear`      | integer  | Birth year of the profile owner                   |
 | `animal`         | string   | Animal representing the profile                   |
 | `contact`        | string   | Contact information                               |
 | `mbti`           | string   | MBTI personality type                             |
@@ -32,6 +34,8 @@
     "profileId": 2,
     "uuid": "ec5ea893-8540-42c5-958a-ce69ed7f9f63",
     "gender": "FEMALE",
+    "department": "학과",
+    "birthYear": 2000,
     "animal": "DOG",
     "contact": "@leo",
     "mbti": "ISTJ",
@@ -48,6 +52,7 @@
 ### 404 Not Found
 
 - the uuid does not exist in all profiles
+
 ```json
 {
   "timestamp": "2025-04-27T14:19:15.75724+09:00",

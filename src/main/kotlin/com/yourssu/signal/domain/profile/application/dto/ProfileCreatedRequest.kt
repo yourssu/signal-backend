@@ -2,12 +2,20 @@ package com.yourssu.signal.domain.profile.application.dto
 
 import com.yourssu.signal.domain.profile.business.command.ProfileCreatedCommand
 import com.yourssu.signal.domain.profile.support.ContactFormat
+import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.springframework.format.annotation.NumberFormat
 
 data class ProfileCreatedRequest(
     @field:NotBlank
     val gender: String,
+
+//    @field:NotBlank
+    val department: String = "학과",
+
+//    @field:Min(1900)
+    val birthYear: Int = 2000,
 
     @field:NotBlank
     val animal: String,
@@ -30,6 +38,8 @@ data class ProfileCreatedRequest(
         return ProfileCreatedCommand(
             uuid = uuid,
             gender = gender,
+            department = department,
+            birthYear = birthYear,
             animal = animal,
             contact = contact,
             mbti = mbti,

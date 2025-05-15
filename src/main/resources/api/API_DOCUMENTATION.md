@@ -22,4 +22,5 @@
 [전체 프로필 조회 (GET /api/profiles)](profile/get_all_profile_for_admin.md)  
 [전체 뷰어 조회 (GET /api/viewers)](viewer/get_all_viewer_for_admin.md)  
 [티켓 발급 (POST /api/viewers)](viewer/issue_ticket.md)  
-[은행 입금 문자 티켓 발급 (POST /api/viewers/sms)](viewer/issue_ticket_by_bank_deposit_sms.md)  
+[은행 입금 문자 티켓 발급 (POST /api/viewers/sms)](viewer/issue_ticket_by_bank_deposit_sms.md)
+[은행 입금 확인 요청(POST /api/viewers/notification)](viewer/notificate_bank_deposit.md)

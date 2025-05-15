@@ -22,6 +22,12 @@ class ProfileEntity(
     var gender: Gender,
 
     @Column(nullable = false)
+    val department: String,
+
+    @Column(nullable = false)
+    val birthYear: Int,
+
+    @Column(nullable = false)
     val animal: String,
 
     @Column(nullable = false)
@@ -39,6 +45,8 @@ class ProfileEntity(
                 id = profile.id,
                 gender = profile.gender,
                 uuid = profile.uuid.value,
+                department = profile.department,
+                birthYear = profile.birthYear,
                 animal = profile.animal,
                 contact = encryptedContact,
                 mbti = profile.mbti,
@@ -52,6 +60,8 @@ class ProfileEntity(
             id = id,
             gender = gender,
             uuid = Uuid(uuid),
+            department = department,
+            birthYear = birthYear,
             animal = animal,
             contact = contact,
             mbti = mbti,

@@ -25,7 +25,7 @@ domain:
       contact-secret-key : "ThisIsASecretKeyForContact"
   policy:
     contact-price: 1
-    ticket-price-policy: "1500=1&3500=3&5000=5"
+    ticket-price-policy: 1n1&2n2&3n3&4n4&5n5&6n6&7n7&8n8&9n9&10n10
 
 infra:
   openai:

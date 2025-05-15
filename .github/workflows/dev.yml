@@ -1,0 +1,88 @@
+name: Dev - Build and Deploy to EC2
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+
+    defaults:
+      run:
+        working-directory: ./
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Clean Build with Gradle (with Testing)
+        run: |
+          ./gradlew clean build
+
+      - name: Deploy to EC2
+        env:
+          YOURSSU_PEM: ${{ secrets.YOURSSU_PEM }}
+          HOST: ${{ secrets.HOST_URL }}
+
+          SERVER_PORT: ${{ vars.SERVER_PORT }}
+
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+          ADMIN_ACCESS_KEY: ${{ secrets.ADMIN_ACCESS_KEY }}
+          CONTACT_SECRET_KEY: ${{ secrets.CONTACT_SECRET_KEY }}
+
+          TICKET_COST: ${{ vars.TICKET_COST }}
+          TICKET_PRICE_POLICY: ${{ vars.TICKET_PRICE_POLICY }}
+
+          OPENAI_URL: ${{ vars.OPENAI_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          OPENAI_PROMPT: ${{ vars.OPENAI_PROMPT }}
+          USER_INPUT_LIMIT: ${{ vars.USER_INPUT_LIMIT }}
+
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          echo "$YOURSSU_PEM" > yourssu.pem
+          chmod 600 yourssu.pem
+          mv build/libs/signal-0.0.1-SNAPSHOT.jar yourssu-signal-application.jar
+          scp -i yourssu.pem yourssu-signal-application.jar ubuntu@$HOST:/home/ubuntu/signal-api
+          
+          echo "SERVER_PORT=$SERVER_PORT" >> .env
+          
+          echo "DB_URL=$DB_URL" >> .env
+          echo "DB_USERNAME=$DB_USERNAME" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          
+          echo "ADMIN_ACCESS_KEY=$ADMIN_ACCESS_KEY" >> .env
+          echo "CONTACT_SECRET_KEY=$CONTACT_SECRET_KEY" >> .env
+          
+          echo "TICKET_COST=$TICKET_COST" >> .env
+          echo "TICKET_PRICE_POLICY=$TICKET_PRICE_POLICY" >> .env
+          
+          echo "OPENAI_URL=$OPENAI_URL" >> .env
+          echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
+          echo "OPENAI_MODEL=$OPENAI_MODEL" >> .env
+          echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
+          echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
+          
+          echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
+          echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
+          
+          scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
+          ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"

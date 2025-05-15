@@ -28,6 +28,11 @@ object Notification {
     }
 
     fun notifyDeposit(message: String) {
-        logger.info { "PayNotification&$message" }
+        logger.info { "PayNotification&${validateMessage(message)}" }
+    }
+
+    fun validateMessage(message: String): String {
+        val sanitizedMessage = message.replace(Regex("[\\r\\n\\t\\x0b\\x0c]+"), " ")
+        return sanitizedMessage.filter { it.isISOControl().not() }
     }
 }

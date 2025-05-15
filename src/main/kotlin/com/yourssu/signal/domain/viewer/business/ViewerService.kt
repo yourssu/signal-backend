@@ -51,22 +51,30 @@ class ViewerService(
         val messageParser = SMSParser.of(command.type)
         val message = messageParser.parse(message = command.message)
         Notification.notifyIssueTicketByBankDepositSms(message)
+        validateSenderName(message)
         val code = VerificationCode.from(message.name)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
-        validateMessage(ticket, message, code)
+        validateAmount(ticket, message)
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)
     }
 
-    private fun validateMessage(
-        ticket: Int,
-        message: SMSMessage,
-        code: VerificationCode
-    ) {
+    private fun validateSenderName(message: SMSMessage) {
+        if (message.name.toIntOrNull() == null) {
+            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
+            throw TicketIssuedFailedException()
+        }
+        val code = VerificationCode.from(message.name)
         if (!verificationReader.existsByCode(code)) {
             Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
             throw TicketIssuedFailedException()
         }
+    }
+
+    private fun validateAmount(
+        ticket: Int,
+        message: SMSMessage,
+    ) {
         if (ticket == 0) {
             Notification.notifyIssueFailedTicketByDepositAmount(message)
             throw TicketIssuedFailedException()

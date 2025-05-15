@@ -26,4 +26,8 @@ object Notification {
     fun notifyIssueFailedTicketByUnMatchedVerification(message: SMSMessage) {
         logger.info { "IssueFailedTicketByUnMatchedVerification&${message.name} ${message.depositAmount}" }
     }
+
+    fun notifyDeposit(message: String) {
+        logger.info { "PayNotification&$message" }
+    }
 }

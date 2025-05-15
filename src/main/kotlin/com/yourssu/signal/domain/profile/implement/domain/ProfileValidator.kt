@@ -32,7 +32,7 @@ object ProfileValidator {
     }
 
     fun validateBirthYear(birthYear: Int) {
-        if (birthYear < MINIMUM_BIRTH_YEAR || birthYear > LocalDate.now().year - MINIMUM_AGE) {
+        if (birthYear < MINIMUM_BIRTH_YEAR || birthYear > LocalDate.now().year - MINIMUM_AGE + 1) {
             throw BirthYearViolatedException()
         }
     }

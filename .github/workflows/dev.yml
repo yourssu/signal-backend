@@ -53,6 +53,7 @@ jobs:
           OPENAI_PROMPT: ${{ vars.OPENAI_PROMPT }}
           USER_INPUT_LIMIT: ${{ vars.USER_INPUT_LIMIT }}
 
+          ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
         run: |
@@ -81,6 +82,7 @@ jobs:
           echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
           echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
           
+          echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
           

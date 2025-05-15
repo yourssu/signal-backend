@@ -7,7 +7,7 @@ import com.yourssu.signal.utils.GaussianDistributionUtils.calculateProbabilities
 import com.yourssu.signal.utils.GaussianDistributionUtils.selectIndexByProbabilityDistribution
 import org.springframework.stereotype.Component
 
-private const val STANDARD_DEVIATION = 5.0
+private const val STANDARD_DEVIATION = 10.0
 
 @Component
 class ProfilePriorityManager(

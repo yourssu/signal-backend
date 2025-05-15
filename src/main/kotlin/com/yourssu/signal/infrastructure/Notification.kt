@@ -32,7 +32,7 @@ object Notification {
     }
 
     fun validateMessage(message: String): String {
-        val sanitizedMessage = message.replace(Regex("[\\r\\n\\t\\x0b\\x0c]+"), " ")
+        val sanitizedMessage = message.replace(Regex("[\\r\\n\\t\\x0b\\x0c]+"), "")
         return sanitizedMessage.filter { it.isISOControl().not() }
     }
 }

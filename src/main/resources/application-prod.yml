@@ -1,0 +1,35 @@
+server:
+  port: ${SERVER_PORT}
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      max-lifetime: 175000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+domain:
+  permission:
+    admin:
+      access-key: ${ADMIN_ACCESS_KEY}
+      contact-secret-key: ${CONTACT_SECRET_KEY}
+  policy:
+    contact-price: ${TICKET_COST}
+    ticket-price-policy: ${TICKET_PRICE_POLICY}
+
+infra:
+  openai:
+    url: ${OPENAI_URL}
+    api-key: ${OPENAI_API_KEY}
+    model: ${OPENAI_MODEL}
+    prompt: ${OPENAI_PROMPT}
+    user-input: ${USER_INPUT_LIMIT}

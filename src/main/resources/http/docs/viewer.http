@@ -105,7 +105,7 @@ POST {{host}}/api/viewers/deposit
 Content-Type: application/json
 
 {
-  "message": "홍길동",
+  "message": "홍길동\n입금 5000원",
   "verificationCode": 1000
 }
 ###

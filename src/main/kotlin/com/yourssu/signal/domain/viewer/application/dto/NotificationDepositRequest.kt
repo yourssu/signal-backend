@@ -2,10 +2,12 @@ package com.yourssu.signal.domain.viewer.application.dto
 
 import com.yourssu.signal.domain.viewer.business.command.NotificationDepositCommand
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
 import org.springframework.format.annotation.NumberFormat
 
 data class NotificationDepositRequest(
     @field:NotBlank
+    @field:Size(max = 20)
     val message: String,
 
     @field:NumberFormat

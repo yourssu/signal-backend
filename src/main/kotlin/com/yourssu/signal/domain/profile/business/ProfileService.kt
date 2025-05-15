@@ -50,7 +50,6 @@ class ProfileService(
         return ProfileResponse.from(profile)
     }
 
-    @Transactional
     fun consumeTicket(command: TicketConsumedCommand): ProfileContactResponse {
         val viewer = viewerReader.get(command.toUuid())
         val targetProfile = profileReader.getById(command.profileId)

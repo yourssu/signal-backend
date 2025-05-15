@@ -27,8 +27,8 @@ object Notification {
         logger.info { "IssueFailedTicketByUnMatchedVerification&${message.name} ${message.depositAmount}" }
     }
 
-    fun notifyDeposit(message: String) {
-        logger.info { "PayNotification&${validateMessage(message)}" }
+    fun notifyDeposit(message: String, verificationCode: Int) {
+        logger.info { "PayNotification&${validateMessage(message)} $verificationCode" }
     }
 
     fun validateMessage(message: String): String {

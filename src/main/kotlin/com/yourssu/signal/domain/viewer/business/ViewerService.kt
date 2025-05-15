@@ -3,20 +3,13 @@ package com.yourssu.signal.domain.viewer.business
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
-import com.yourssu.signal.domain.viewer.business.command.AllViewersFoundCommand
-import com.yourssu.signal.domain.viewer.business.command.TicketIssuedCommand
-import com.yourssu.signal.domain.viewer.business.command.VerificationCommand
-import com.yourssu.signal.domain.viewer.business.command.ViewerFoundCommand
+import com.yourssu.signal.domain.viewer.business.command.*
 import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
-import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
-import com.yourssu.signal.infrastructure.deposit.SMSMessage
-import com.yourssu.signal.infrastructure.deposit.SMSParser
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,7 +20,7 @@ class ViewerService(
     private val viewerReader: ViewerReader,
     private val purchasedProfileReader: PurchasedProfileReader,
     private val adminAccessChecker: AdminAccessChecker,
-    private val ticketPricePolicy: TicketPricePolicy,
+    private val depositManager: DepositManager,
 ) {
     fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
         val code = verificationWriter.issueVerificationCode(uuid = command.toUuid())
@@ -48,37 +41,9 @@ class ViewerService(
 
     fun issueTicket(command: ProcessDepositSmsCommand): ViewerResponse {
         adminAccessChecker.validateAdminAccess(command.secretKey)
-        val messageParser = SMSParser.of(command.type)
-        val message = messageParser.parse(message = command.message)
-        Notification.notifyIssueTicketByBankDepositSms(message)
-        validateSenderName(message)
-        val code = VerificationCode.from(message.name)
-        val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
-        validateAmount(ticket, message)
+        val (code, ticket) = depositManager.processDepositSms(type = command.type, message = command.message)
         val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
         return issueTicket(ticketIssuedCommand)
-    }
-
-    private fun validateSenderName(message: SMSMessage) {
-        if (message.name.toIntOrNull() == null) {
-            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
-            throw TicketIssuedFailedException()
-        }
-        val code = VerificationCode.from(message.name)
-        if (!verificationReader.existsByCode(code)) {
-            Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
-            throw TicketIssuedFailedException()
-        }
-    }
-
-    private fun validateAmount(
-        ticket: Int,
-        message: SMSMessage,
-    ) {
-        if (ticket == 0) {
-            Notification.notifyIssueFailedTicketByDepositAmount(message)
-            throw TicketIssuedFailedException()
-        }
     }
 
     fun getViewer(command: ViewerFoundCommand): ViewerDetailResponse {
@@ -92,5 +57,9 @@ class ViewerService(
         adminAccessChecker.validateAdminAccess(command.secretKey)
         val viewers = viewerReader.findAll()
         return viewers.map { ViewerResponse.from(it) }
+    }
+
+    fun notifyDeposit(command: NotificationDepositCommand) {
+        Notification.notifyDeposit(command.message, command.verificationCode)
     }
 }

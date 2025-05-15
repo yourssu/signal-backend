@@ -1,11 +1,7 @@
 package com.yourssu.signal.domain.viewer.application
 
 import com.yourssu.signal.domain.common.business.dto.Response
-import com.yourssu.signal.domain.viewer.application.dto.FoundSelfRequest
-import com.yourssu.signal.domain.viewer.application.dto.BankDepositSmsRequest
-import com.yourssu.signal.domain.viewer.application.dto.TicketIssuedRequest
-import com.yourssu.signal.domain.viewer.application.dto.VerificationRequest
-import com.yourssu.signal.domain.viewer.application.dto.ViewersFoundRequest
+import com.yourssu.signal.domain.viewer.application.dto.*
 import com.yourssu.signal.domain.viewer.business.ViewerService
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
@@ -58,5 +54,11 @@ class ViewerController(
     fun findAllViewers(@Valid @ModelAttribute request: ViewersFoundRequest): ResponseEntity<Response<List<ViewerResponse>>> {
         val response = viewerService.findAllViewers(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
+    }
+
+    @PostMapping("/deposit")
+    fun notifyDeposit(@Valid @RequestBody request: NotificationDepositRequest): ResponseEntity<Void> {
+        viewerService.notifyDeposit(request.toCommand())
+        return ResponseEntity.ok().build()
     }
 }

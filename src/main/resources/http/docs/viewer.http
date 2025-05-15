@@ -97,3 +97,15 @@ Content-Type: application/json
 GET {{host}}/api/profiles/{{profileId}}?uuid={{uuid}}
 
 ###
+
+
+// Notify deposit
+###
+POST {{host}}/api/viewers/deposit
+Content-Type: application/json
+
+{
+  "message": "홍길동",
+  "verificationCode": 1000
+}
+###

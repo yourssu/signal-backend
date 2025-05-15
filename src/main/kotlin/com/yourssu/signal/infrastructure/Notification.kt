@@ -8,7 +8,7 @@ private val logger = KotlinLogging.logger {}
 
 object Notification {
     fun notifyTicketIssued(verification: Verification, ticket: Int, availableTicket: Int) {
-        logger.info { "Issued ticket&${verification.verificationCode.value} ${verification.uuid.value} $ticket $availableTicket" }
+        logger.info { "Issued ticket&${verification.verificationCode.value} ${verification.uuid.value.take(8)} $ticket $availableTicket" }
     }
 
     fun notifyConsumedTicket(nickname: String, ticket: Int) {

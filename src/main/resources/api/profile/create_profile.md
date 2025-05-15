@@ -7,8 +7,8 @@
 | Name             | Type     | Required | Constraint                                                                       |
 |------------------|----------|----------|----------------------------------------------------------------------------------|
 | `gender`         | string   | true     | only "MALE" or "FEMALE"                                                          |
-| `department`     | string   | Department of the profile owner                           |
-| `birthYear`      | integer  | Birth year of the profile owner                           |
+| `department`     | string   | true     | Department of the profile owner                                                  |
+| `birthYear`      | integer  | true     | Birth year of the profile owner                                                  |
 | `animal`         | string   | true     | @NotBlank                                                                        |
 | `contact`        | string   | true     | only "^010\\d{8}\$" or "^@[a-zA-Z0-9._]{1,30}\$"                                 |
 | `mbti`           | string   | true     | @NotBlank                                                                        |

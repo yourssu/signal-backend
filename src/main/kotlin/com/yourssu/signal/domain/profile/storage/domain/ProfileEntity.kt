@@ -24,7 +24,7 @@ class ProfileEntity(
     @Column(nullable = false)
     val department: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "birth_year")
     val birthYear: Int,
 
     @Column(nullable = false)

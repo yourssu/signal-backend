@@ -1,6 +1,7 @@
 package com.yourssu.signal.infrastructure
 
 import com.yourssu.signal.domain.verification.implement.domain.Verification
+import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import com.yourssu.signal.infrastructure.deposit.SMSMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 
@@ -27,11 +28,15 @@ object Notification {
         logger.info { "IssueFailedTicketByUnMatchedVerification&${message.name} ${message.depositAmount}" }
     }
 
+    fun notifyNoFirstPurchasedTicket(price: Int, code: VerificationCode) {
+        logger.info { "NoFirstPurchasedTicket&${code.value} $price" }
+    }
+
     fun notifyDeposit(message: String, verificationCode: Int) {
         logger.info { "PayNotification&${validateMessage(message)} $verificationCode" }
     }
 
-    fun validateMessage(message: String): String {
+    private fun validateMessage(message: String): String {
         val sanitizedMessage = message.replace(Regex("[\\r\\n\\t\\x0b\\x0c\\s]+"), "")
         return sanitizedMessage.filter { it.isISOControl().not() }
     }

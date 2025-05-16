@@ -16,23 +16,23 @@ class DepositManager(
         val messageParser = SMSParser.of(type)
         val message = messageParser.parse(message = message)
         Notification.notifyIssueTicketByBankDepositSms(message)
-        validateSenderName(message)
-        val code = VerificationCode.from(message.name)
-        val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount)
+        val code = toVerificationCode(message)
+        val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount, code)
         validateAmount(ticket, message)
         return Pair(code, ticket)
     }
 
-    private fun validateSenderName(message: SMSMessage) {
+    private fun toVerificationCode(message: SMSMessage): VerificationCode {
         if (message.name.toIntOrNull() == null) {
             Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
-            throw TicketIssuedFailedException()
+            throw TicketIssuedFailedException("${message.name} is not a number")
         }
         val code = VerificationCode.from(message.name)
         if (!verificationReader.existsByCode(code)) {
             Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
-            throw TicketIssuedFailedException()
+            throw TicketIssuedFailedException("${message.name} is not in verification code list")
         }
+        return code
     }
 
     private fun validateAmount(
@@ -41,7 +41,7 @@ class DepositManager(
     ) {
         if (ticket == 0) {
             Notification.notifyIssueFailedTicketByDepositAmount(message)
-            throw TicketIssuedFailedException()
+            throw TicketIssuedFailedException("${message.depositAmount} is not a valid ticket amount")
         }
     }
 }

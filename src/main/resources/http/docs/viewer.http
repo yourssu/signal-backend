@@ -1,4 +1,5 @@
 @uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
+@host=http://localhost:9011
 
 // Issue a verification code for uuid - 200 OK
 ###
@@ -34,7 +35,7 @@ Content-Type: application/json
 
 // Verify the uuid with the verification code - 200 OK
 
-@deposit=5000
+@deposit=2
 ###
 POST {{host}}/api/viewers/sms
 Content-Type: application/json

@@ -12,6 +12,10 @@ class ViewerReader(
         return viewerRepository.getByUuid(uuid)
     }
 
+    fun existsByUuid(uuid: Uuid): Boolean {
+        return viewerRepository.existsByUuid(uuid)
+    }
+
     fun findAll(): List<Viewer> {
         return viewerRepository.findAll()
     }

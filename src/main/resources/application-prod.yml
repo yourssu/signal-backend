@@ -25,6 +25,7 @@ domain:
   policy:
     contact-price: ${TICKET_COST}
     ticket-price-policy: ${TICKET_PRICE_POLICY}
+    ticket-price-registered-policy: ${TICKET_PRICE_REGISTERED_POLICY}
 
 infra:
   openai:

@@ -68,8 +68,8 @@ class ViewerService(
             throw TicketIssuedFailedException("${command.message} is not a valid deposit name")
         }
         val code = command.toCode()
-        val ticket = depositManager.retryDepositSms(command.message, code)
         val verification = verificationReader.findByCode(code)
+        val ticket = depositManager.retryDepositSms(command.message, code)
         val viewer = viewerWriter.issueTicket(
             uuid = verification.uuid,
             ticket = ticket,

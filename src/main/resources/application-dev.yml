@@ -7,8 +7,7 @@ spring:
       on-profile: dev
     import: optional:file:.env[.properties]
   cors:
-    allowed-origins:
-      - ${CORS_ALLOWED_ORIGIN}
+    allowed-origin: ${CORS_ALLOWED_ORIGIN}
   datasource:
     url: ${DB_URL}
     driver-class-name: com.mysql.cj.jdbc.Driver

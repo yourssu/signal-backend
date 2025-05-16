@@ -36,6 +36,7 @@ jobs:
           HOST: ${{ vars.HOST_URL }}
 
           SERVER_PORT: ${{ vars.SERVER_PORT }}
+          CORS_ALLOWED_ORIGIN: ${{ vars.CORS_ALLOWED_ORIGIN }}
 
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -66,6 +67,7 @@ jobs:
           scp -i yourssu.pem yourssu-signal-application.jar ubuntu@$HOST:/home/ubuntu/signal-api
           
           echo "SERVER_PORT=$SERVER_PORT" >> .env
+          echo "CORS_ALLOWED_ORIGIN=$CORS_ALLOWED_ORIGIN" >> .env
           
           echo "DB_URL=$DB_URL" >> .env
           echo "DB_USERNAME=$DB_USERNAME" >> .env

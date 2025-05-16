@@ -6,6 +6,8 @@ spring:
     activate:
       on-profile: prod
     import: optional:file:.env[.properties]
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN}
   datasource:
     url: ${DB_URL}
     driver-class-name: com.mysql.cj.jdbc.Driver

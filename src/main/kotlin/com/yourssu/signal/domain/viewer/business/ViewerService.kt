@@ -63,19 +63,22 @@ class ViewerService(
 
     @Transactional
     fun issueTicketByDepositName(command: NotificationDepositCommand): ViewerResponse {
-        if (!depositManager.existsByMessage(command.message)) {
-            Notification.notifyDeposit(command.message, command.verificationCode)
-            throw TicketIssuedFailedException("${command.message} is not a valid deposit name")
-        }
-        val code = command.toCode()
-        val verification = verificationReader.findByCode(code)
-        val ticket = depositManager.retryDepositSms(command.message, code)
+        notifyUnMatchedDeposit(command)
+        val verification = verificationReader.findByCode(command.toCode())
+        val ticket = depositManager.retryDepositSms(command.message, command.toCode())
         val viewer = viewerWriter.issueTicket(
             uuid = verification.uuid,
             ticket = ticket,
         )
         verificationWriter.remove(verification.uuid)
-        Notification.notifyTicketIssued(verification, ticket, viewer.ticket - viewer.usedTicket)
+        Notification.notifyRetryTicketIssued(command.message, verification, ticket, viewer.ticket - viewer.usedTicket)
         return ViewerResponse.from(viewer)
+    }
+
+    private fun notifyUnMatchedDeposit(command: NotificationDepositCommand) {
+        if (!depositManager.existsByMessage(command.message)) {
+            Notification.notifyDeposit(command.message, command.verificationCode)
+            throw TicketIssuedFailedException("${command.message} is not a valid deposit name")
+        }
     }
 }

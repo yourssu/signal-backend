@@ -12,6 +12,10 @@ object Notification {
         logger.info { "Issued ticket&${verification.verificationCode.value} ${verification.uuid.value.take(8)} $ticket $availableTicket" }
     }
 
+    fun notifyRetryTicketIssued(message: String, verification: Verification, ticket: Int, availableTicket: Int) {
+        logger.info { "RetryIssuedTicket&${verification.verificationCode.value} ${verification.uuid.value.take(8)} $ticket $availableTicket ${message.trim()}" }
+    }
+
     fun notifyConsumedTicket(nickname: String, ticket: Int) {
         logger.info { "Consumed ticket&$nickname $ticket" }
     }

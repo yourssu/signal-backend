@@ -90,3 +90,4 @@ jobs:
           
           scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
           ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"
+          ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/observer_run.sh"

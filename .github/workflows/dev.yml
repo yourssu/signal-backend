@@ -46,6 +46,7 @@ jobs:
 
           TICKET_COST: ${{ vars.TICKET_COST }}
           TICKET_PRICE_POLICY: ${{ vars.TICKET_PRICE_POLICY }}
+          TICKET_PRICE_REGISTERED_POLICY: ${{ vars.TICKET_PRICE_REGISTERED_POLICY }}
 
           OPENAI_URL: ${{ vars.OPENAI_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -75,6 +76,7 @@ jobs:
           
           echo "TICKET_COST=$TICKET_COST" >> .env
           echo "TICKET_PRICE_POLICY=$TICKET_PRICE_POLICY" >> .env
+          echo "TICKET_PRICE_REGISTERED_POLICY=$TICKET_PRICE_REGISTERED_POLICY" >> .env
           
           echo "OPENAI_URL=$OPENAI_URL" >> .env
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env

@@ -8,7 +8,7 @@
 |------------------|----------|----------|----------------------------------------------------------------------------------|
 | `gender`         | string   | true     | only "MALE" or "FEMALE"                                                          |
 | `department`     | string   | true     | Department of the profile owner                                                  |
-| `birthYear`      | integer  | true     | Birth year of the profile owner                                                  |
+| `birthYear`      | integer  | true     | (birthYear < 1900 or birthYear > LocalDate.now().year                            |
 | `animal`         | string   | true     | @NotBlank                                                                        |
 | `contact`        | string   | true     | only "^010\\d{8}\$" or "^@[a-zA-Z0-9._]{1,30}\$"                                 |
 | `mbti`           | string   | true     | @NotBlank                                                                        |

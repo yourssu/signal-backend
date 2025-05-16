@@ -57,8 +57,8 @@ class ViewerController(
     }
 
     @PostMapping("/deposit")
-    fun notifyDeposit(@Valid @RequestBody request: NotificationDepositRequest): ResponseEntity<Void> {
-        viewerService.notifyDeposit(request.toCommand())
-        return ResponseEntity.ok().build()
+    fun notifyDeposit(@Valid @RequestBody request: NotificationDepositRequest): ResponseEntity<Response<ViewerResponse>?> {
+        val response = viewerService.issueTicketByDepositName(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
     }
 }

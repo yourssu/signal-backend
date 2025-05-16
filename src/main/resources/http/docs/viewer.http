@@ -42,12 +42,26 @@ Content-Type: application/json
 {
   "secretKey": "{{secretKey}}",
   "message":"[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\/14 11:30\n입금 {{deposit}}원\n{{verificationCode}}\n잔액 6원",
-  "type": "kakao"
+  "type": "kakao_sms"
 }
 
 ###
 // The verification code is able to be used only once.
 
+// Verify the uuid with the verification code - 200 OK
+
+@name=남궁현
+###
+POST {{host}}/api/viewers/sms
+Content-Type: application/json
+
+{
+  "secretKey": "{{secretKey}}",
+  "message":"[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\/14 11:30\n입금 {{deposit}}원\n{{name}}\n잔액 6원",
+  "type": "kakao_sms"
+}
+
+###
 
 // sse for issued ticket
 ###
@@ -98,14 +112,13 @@ GET {{host}}/api/profiles/{{profileId}}?uuid={{uuid}}
 
 ###
 
-
 // Notify deposit
 ###
 POST {{host}}/api/viewers/deposit
 Content-Type: application/json
 
 {
-  "message": "남궁현",
-  "verificationCode": 709
+  "message": "{{name}}",
+  "verificationCode": {{verificationCode}}
 }
 ###

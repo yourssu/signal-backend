@@ -8,9 +8,11 @@ import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
+import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ViewerService(
@@ -59,7 +61,21 @@ class ViewerService(
         return viewers.map { ViewerResponse.from(it) }
     }
 
-    fun notifyDeposit(command: NotificationDepositCommand) {
-        Notification.notifyDeposit(command.message, command.verificationCode)
+    @Transactional
+    fun issueTicketByDepositName(command: NotificationDepositCommand): ViewerResponse {
+        if (!depositManager.existsByMessage(command.message)) {
+            Notification.notifyDeposit(command.message, command.verificationCode)
+            throw TicketIssuedFailedException("${command.message} is not a valid deposit name")
+        }
+        val code = command.toCode()
+        val ticket = depositManager.retryDepositSms(command.message, code)
+        val verification = verificationReader.findByCode(code)
+        val viewer = viewerWriter.issueTicket(
+            uuid = verification.uuid,
+            ticket = ticket,
+        )
+        verificationWriter.remove(verification.uuid)
+        Notification.notifyTicketIssued(verification, ticket, viewer.ticket - viewer.usedTicket)
+        return ViewerResponse.from(viewer)
     }
 }

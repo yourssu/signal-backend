@@ -11,7 +11,7 @@ data class ProfileCreatedRequest(
     @field:NotBlank
     val gender: String,
 
-//    @field:NotBlank
+    @field:Size(min = 1, max = 20)
     val department: String = "학과",
 
 //    @field:Min(1900)

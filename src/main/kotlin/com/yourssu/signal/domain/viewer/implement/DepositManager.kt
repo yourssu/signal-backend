@@ -57,7 +57,7 @@ class DepositManager(
         ticket: Int,
         message: SMSMessage,
     ) {
-        if (ticket == 0) {
+        if (ticket == NO_MATCH_TICKET_AMOUNT) {
             Notification.notifyIssueFailedTicketByDepositAmount(message)
             throw TicketIssuedFailedException("${message.depositAmount} is not a valid ticket amount")
         }

@@ -7,7 +7,7 @@ import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Component
 
-private const val NO_MATCH_TICKET_AMOUNT = 0
+public const val NO_MATCH_TICKET_AMOUNT = 0
 
 @Component
 class TicketPricePolicy(

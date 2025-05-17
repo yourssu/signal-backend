@@ -16,6 +16,8 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
+private const val DEFAULT_STATEMENTS_SIZE = 3
+
 @Component
 @Profile("prod", "dev")
 class OpenAIModel(
@@ -29,11 +31,7 @@ class OpenAIModel(
     }
 
     private fun request(statements: List<String>): Request {
-        val contents = listOf(
-            ContentRequest.of("developer", properties.prompt),
-            ContentRequest.of("user", statements.joinToString()
-                .take(properties.userInput)),
-        )
+        val contents = toRequestBody(statements)
         val requestBody = Json.encodeToString(NicknameSuggestedRequest.from(properties.model, contents))
             .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
         return Request.Builder()
@@ -42,6 +40,26 @@ class OpenAIModel(
             .addHeader("Authorization", "Bearer ${properties.apiKey}")
             .post(requestBody)
             .build()
+    }
+
+    private fun toRequestBody(statements: List<String>): List<ContentRequest> {
+        if (statements.size >= DEFAULT_STATEMENTS_SIZE) {
+            return listOf(
+                ContentRequest.of("developer", properties.prompt),
+                ContentRequest.of(
+                    "user", statements.subList(0, DEFAULT_STATEMENTS_SIZE - 1)
+                        .joinToString()
+                        .take(properties.userInput)
+                ),
+            )
+        }
+        return listOf(
+            ContentRequest.of("developer", properties.prompt),
+            ContentRequest.of(
+                "user", statements.joinToString()
+                    .take(properties.userInput)
+            ),
+        )
     }
 
     private fun parse(responseBody: ResponseBody): String {

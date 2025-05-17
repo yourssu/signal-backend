@@ -37,7 +37,7 @@ class LoggingFilter : OncePerRequestFilter() {
         val responseStatus = responseWrapper.status
         val responsePayload = String(responseWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         log.info {
-            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Headers": {$headers},"Payload":$requestPayload},"Reply":{"Payload":$responsePayload}}"""
+            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Payload":$requestPayload},"Headers": {$headers},"Reply":{"Payload":$responsePayload}}"""
                 .replace("\n", "")
         }
         log.info {

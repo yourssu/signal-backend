@@ -26,7 +26,9 @@ class DepositManager(
     fun retryDepositSms(message: String, verificationCode: VerificationCode): Int {
         val smsMessage = smsRecord[message] ?: throw TicketIssuedFailedException("No message found for $message")
         smsRecord.remove(message)
-        return ticketPricePolicy.calculateTicketQuantity(smsMessage.depositAmount, verificationCode)
+        val ticket = ticketPricePolicy.calculateTicketQuantity(smsMessage.depositAmount, verificationCode)
+        validateAmount(ticket, smsMessage)
+        return ticket
     }
 
     private fun toCodeAndTicket(message: SMSMessage): Pair<VerificationCode, Int> {

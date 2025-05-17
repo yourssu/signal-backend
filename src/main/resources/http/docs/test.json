@@ -1,12 +1,39 @@
 {
-  "Reply": {
-    "Method": "POST /api/profiles - 76ms",
-    "Status": 201,
+  "Request": {
+    "Method": "POST /api/profiles - 139ms",
+    "Headers": {
+      "content-type": "application/json",
+      "content-length": "281",
+      "user-agent": "IntelliJ HTTP Client/IntelliJ IDEA 2025.1",
+      "accept-encoding": "br, deflate, gzip, x-gzip",
+      "accept": "*/*",
+      "cookie": "JSESSIONID=2DFA70E6A0E32017CF2D8FD21474E95F",
+      "host": "localhost:8080"
+    },
     "Payload": {
-      "timestamp": "2025-04-18T08:30:56.889336+09:00",
+      "gender": "MALE",
+      "department": "학과",
+      "birthYear": 2000,
+      "animal": "DOG",
+      "contact": "@leo",
+      "mbti": "ISTJ",
+      "nickname": "leopold",
+      "introSentences": [
+        "나는 딸기를 좋아해",
+        "나는 포도도 좋아해",
+        "제일 좋아하는 음식은 치킨이야"
+      ]
+    }
+  },
+  "Reply": {
+    "Payload": {
+      "timestamp": "2025-05-17T23:48:51.596759+09:00",
       "result": {
         "profileId": 1,
-        "gender": "FEMALE",
+        "uuid": "fed77ca4-07f6-44d9-9a6d-c5ddfdbeb33f",
+        "gender": "MALE",
+        "department": "학과",
+        "birthYear": 2000,
         "animal": "DOG",
         "contact": "@leo",
         "mbti": "ISTJ",

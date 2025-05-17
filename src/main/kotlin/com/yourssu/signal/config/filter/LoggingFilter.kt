@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets
 
 private val log = KotlinLogging.logger {}
 
-@Profile("!prod")
+//@Profile("!prod")
 @Component
 class LoggingFilter : OncePerRequestFilter() {
     override fun doFilterInternal(
@@ -30,11 +30,14 @@ class LoggingFilter : OncePerRequestFilter() {
 
         val method = requestWrapper.method
         val requestUri = requestWrapper.requestURI
+        val headers = requestWrapper.headerNames.toList()
+            .associateWith { requestWrapper.getHeader(it) }
+            .entries.joinToString(", ") { "\"${it.key}\": \"${it.value}\"" }
         val requestPayload = String(requestWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         val responseStatus = responseWrapper.status
         val responsePayload = String(responseWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         log.info {
-            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Payload":$requestPayload},"Reply":{"Payload":$responsePayload}}"""
+            """{"Request":{"Method":"$method $requestUri - ${duration}ms","Headers": {$headers},"Payload":$requestPayload},"Reply":{"Payload":$responsePayload}}"""
                 .replace("\n", "")
         }
         log.info {

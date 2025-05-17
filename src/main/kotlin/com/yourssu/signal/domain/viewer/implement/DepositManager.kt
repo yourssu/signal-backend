@@ -22,7 +22,6 @@ class DepositManager(
         return toCodeAndTicket(message)
     }
 
-    @Transactional
     fun retryDepositSms(message: String, verificationCode: VerificationCode): Int {
         val smsMessage = smsRecord[message] ?: throw TicketIssuedFailedException("No message found for $message")
         smsRecord.remove(message)

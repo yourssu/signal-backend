@@ -12,7 +12,6 @@ import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedExc
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ViewerService(
@@ -61,9 +60,8 @@ class ViewerService(
         return viewers.map { ViewerResponse.from(it) }
     }
 
-    @Transactional
     fun issueTicketByDepositName(command: NotificationDepositCommand): ViewerResponse {
-        notifyUnMatchedDeposit(command)
+        validateUnMatchedDeposit(command)
         val verification = verificationReader.findByCode(command.toCode())
         val ticket = depositManager.retryDepositSms(command.message, command.toCode())
         val viewer = viewerWriter.issueTicket(
@@ -75,7 +73,7 @@ class ViewerService(
         return ViewerResponse.from(viewer)
     }
 
-    private fun notifyUnMatchedDeposit(command: NotificationDepositCommand) {
+    private fun validateUnMatchedDeposit(command: NotificationDepositCommand) {
         if (!depositManager.existsByMessage(command.message)) {
             Notification.notifyDeposit(command.message, command.verificationCode)
             throw TicketIssuedFailedException("${command.message} is not a valid deposit name")

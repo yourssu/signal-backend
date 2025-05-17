@@ -33,7 +33,7 @@ class LoggingFilter : OncePerRequestFilter() {
         val headers = requestWrapper.headerNames.toList()
             .associateWith { requestWrapper.getHeader(it) }
             .entries.joinToString(", ") { "\"${it.key.replace("\"", "\\\"")}\": \"${it.value.replace("\"", "\\\"")}\"" }
-        val requestPayload = String(requestWrapper.contentAsByteArray, StandardCharsets.UTF_8)
+        val requestPayload = String(requestWrapper.contentAsByteArray, StandardCharsets.UTF_8).ifEmpty { "{}" }
         val responseStatus = responseWrapper.status
         val responsePayload = String(responseWrapper.contentAsByteArray, StandardCharsets.UTF_8)
         log.info {

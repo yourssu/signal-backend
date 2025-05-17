@@ -1,12 +1,13 @@
 package com.yourssu.signal.domain.viewer.implement
 
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import com.yourssu.signal.domain.viewer.implement.exception.NotFoundDepositNameException
+import com.yourssu.signal.domain.viewer.implement.exception.NotFoundVerificationCode
 import com.yourssu.signal.domain.viewer.implement.exception.TicketIssuedFailedException
 import com.yourssu.signal.infrastructure.Notification
 import com.yourssu.signal.infrastructure.deposit.SMSMessage
 import com.yourssu.signal.infrastructure.deposit.SMSParser
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -23,7 +24,7 @@ class DepositManager(
     }
 
     fun retryDepositSms(message: String, verificationCode: VerificationCode): Int {
-        val smsMessage = smsRecord[message] ?: throw TicketIssuedFailedException("No message found for $message")
+        val smsMessage = smsRecord[message] ?: throw NotFoundDepositNameException()
         smsRecord.remove(message)
         val ticket = ticketPricePolicy.calculateTicketQuantity(smsMessage.depositAmount, verificationCode)
         validateAmount(ticket, smsMessage)
@@ -47,7 +48,7 @@ class DepositManager(
         val code = VerificationCode.from(message.name)
         if (!verificationReader.existsByCode(code)) {
             Notification.notifyIssueFailedTicketByUnMatchedVerification(message)
-            throw TicketIssuedFailedException("${message.name} is not in verification code list")
+            throw NotFoundVerificationCode(message.name)
         }
         return code
     }

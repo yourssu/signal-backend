@@ -1,8 +1,8 @@
 name: Prod - Build and Deploy to EC2
 
 on:
-  push:
-    branches: [ "main" ]
+  tags:
+    - "release-*"
 
 jobs:
   build-and-deploy:

@@ -3,6 +3,7 @@ name: Dev - Build and Deploy to EC2
 on:
   push:
     branches: [ "dev" ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:

@@ -12,10 +12,10 @@ data class ProfileCreatedRequest(
     val gender: String,
 
     @field:Size(min = 1, max = 20)
-    val department: String = "학과",
+    val department: String,
 
-//    @field:Min(1900)
-    val birthYear: Int = 2000,
+    @field:Min(1900)
+    val birthYear: Int,
 
     @field:NotBlank
     val animal: String,

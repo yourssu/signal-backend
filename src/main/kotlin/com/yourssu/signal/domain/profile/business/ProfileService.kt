@@ -31,7 +31,9 @@ class ProfileService(
         val countContact = profileReader.countContact(profile.contact)
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit)
         ProfileValidator.checkContactLimitWarning(countContact, policy.contactLimitWarning)
-        return MyProfileResponse.from(profileWriter.createProfile(profile))
+        val createdProfile = profileWriter.createProfile(profile)
+        Notification.notifyCreatedProfile(createdProfile.copy(profile.introSentences))
+        return MyProfileResponse.from(createdProfile)
     }
 
     fun getProfile(command: MtProfileFoundCommand): MyProfileResponse {

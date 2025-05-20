@@ -1,5 +1,6 @@
 package com.yourssu.signal.infrastructure
 
+import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.verification.implement.domain.Verification
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import com.yourssu.signal.infrastructure.deposit.SMSMessage
@@ -8,6 +9,16 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 object Notification {
+    fun notifyCreatedProfile(profile: Profile) {
+        logger.info {
+            "CreateProfile&${profile.id}" +
+                    "&${profile.department}" +
+                    "&${profile.contact}" +
+                    "&${profile.nickname}" +
+                    "&${profile.introSentences.joinToString(",")}"
+        }
+    }
+
     fun notifyContactExceedsLimitWarning(contactLimitPolicy: Int) {
         logger.info { "ContactExceedsLimitWarning&$contactLimitPolicy" }
     }

@@ -81,6 +81,8 @@ jobs:
           echo "ADMIN_ACCESS_KEY=$ADMIN_ACCESS_KEY" >> .env
           echo "CONTACT_SECRET_KEY=$CONTACT_SECRET_KEY" >> .env
           
+          echo "CONTACT_LIMIT=$CONTACT_LIMIT" >> .env
+          echo "CONTACT_LIMIT_WARNING=$CONTACT_LIMIT_WARNING" >> .env
           echo "TICKET_COST=$TICKET_COST" >> .env
           echo "TICKET_PRICE_POLICY=$TICKET_PRICE_POLICY" >> .env
           echo "TICKET_PRICE_REGISTERED_POLICY=$TICKET_PRICE_REGISTERED_POLICY" >> .env

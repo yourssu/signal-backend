@@ -62,6 +62,8 @@ jobs:
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
+          SLACK_ADMIN_CHANNEL: ${{ vars.SLACK_ADMIN_CHANNEL }}
+          SLACK_LOG_CHANNEL: ${{ vars.SLACK_LOG_CHANNEL }}
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
@@ -95,6 +97,8 @@ jobs:
           echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
+          echo "SLACK_ADMIN_CHANNEL=$SLACK_ADMIN_CHANNEL" >> .env
+          echo "SLACK_LOG_CHANNEL=$SLACK_LOG_CHANNEL" >> .env
           
           scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
           ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"

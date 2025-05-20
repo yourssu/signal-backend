@@ -25,6 +25,8 @@ domain:
       access-key: ${ADMIN_ACCESS_KEY}
       contact-secret-key: ${CONTACT_SECRET_KEY}
   policy:
+    contact-limit: ${CONTACT_LIMIT}
+    contact-limit-warning: ${CONTACT_LIMIT_WARNING}
     contact-price: ${TICKET_COST}
     ticket-price-policy: ${TICKET_PRICE_POLICY}
     ticket-price-registered-policy: ${TICKET_PRICE_REGISTERED_POLICY}

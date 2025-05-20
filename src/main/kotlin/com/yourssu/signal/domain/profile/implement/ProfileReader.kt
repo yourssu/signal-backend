@@ -26,6 +26,10 @@ class ProfileReader(
         return profile.copy(introSentences = introSentences)
     }
 
+    fun countContact(contact: String): Int {
+        return profileRepository.countContacts(contact)
+    }
+
     fun getAll(): List<Profile> {
         return profileRepository.findAll()
     }

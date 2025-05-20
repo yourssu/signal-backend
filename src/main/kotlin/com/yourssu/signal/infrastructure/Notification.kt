@@ -8,6 +8,14 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 object Notification {
+    fun notifyContactExceedsLimitWarning(contactLimitPolicy: Int) {
+        logger.info { "ContactExceedsLimitWarning&$contactLimitPolicy" }
+    }
+
+    fun notifyFailedProfileContactExceedsLimit(contactLimitPolicy: Int) {
+        logger.info { "FailedProfileContactExceedsLimit&$contactLimitPolicy" }
+    }
+
     fun notifyTicketIssued(verification: Verification, ticket: Int, availableTicket: Int) {
         logger.info { "Issued ticket&${verification.verificationCode.value} ${verification.uuid.value.take(8)} $ticket $availableTicket" }
     }

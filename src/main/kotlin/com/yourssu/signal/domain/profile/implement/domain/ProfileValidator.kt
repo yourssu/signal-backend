@@ -1,9 +1,11 @@
 package com.yourssu.signal.domain.profile.implement.domain
 
 import com.yourssu.signal.domain.profile.implement.domain.exception.BirthYearViolatedException
+import com.yourssu.signal.domain.profile.implement.domain.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLengthViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.NicknameLengthViolatedException
+import com.yourssu.signal.infrastructure.Notification
 import java.time.LocalDate
 
 private const val MAXIMUM_NICKNAME_LENGTH = 15
@@ -12,6 +14,8 @@ private const val MAXIMUM_INTRO_SENTENCE_LENGTH = 20
 
 private const val MINIMUM_BIRTH_YEAR = 1900
 private const val MINIMUM_AGE = 20
+
+private const val UNLIMITED_CONTACT_POLICY = 0
 
 object ProfileValidator {
     fun validateNickname(nickname: String) {
@@ -34,6 +38,25 @@ object ProfileValidator {
     fun validateBirthYear(birthYear: Int) {
         if (birthYear < MINIMUM_BIRTH_YEAR || birthYear > LocalDate.now().year) {
             throw BirthYearViolatedException()
+        }
+    }
+
+    fun checkContactLimit(countContact: Int, contactLimitPolicy: Int) {
+        if (contactLimitPolicy == UNLIMITED_CONTACT_POLICY) {
+            return
+        }
+        if (countContact >= contactLimitPolicy) {
+            Notification.notifyFailedProfileContactExceedsLimit(contactLimitPolicy)
+            throw ContactLimitExceededException(contactLimitPolicy)
+        }
+    }
+
+    fun checkContactLimitWarning(countContact: Int, contactLimitWarning: Int) {
+        if (contactLimitWarning == UNLIMITED_CONTACT_POLICY) {
+            return
+        }
+        if (countContact >= contactLimitWarning) {
+            Notification.notifyContactExceedsLimitWarning(contactLimitWarning)
         }
     }
 }

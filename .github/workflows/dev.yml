@@ -46,6 +46,9 @@ jobs:
           ADMIN_ACCESS_KEY: ${{ secrets.ADMIN_ACCESS_KEY }}
           CONTACT_SECRET_KEY: ${{ secrets.CONTACT_SECRET_KEY }}
 
+          CONTACT_LIMIT: ${{ vars.CONTACT_LIMIT }}
+          CONTACT_LIMIT_WARNING: ${{ vars.CONTACT_LIMIT_WARNING }}
+          CONTACT_PRICE: ${{ vars.CONTACT_PRICE }}
           TICKET_COST: ${{ vars.TICKET_COST }}
           TICKET_PRICE_POLICY: ${{ vars.TICKET_PRICE_POLICY }}
           TICKET_PRICE_REGISTERED_POLICY: ${{ vars.TICKET_PRICE_REGISTERED_POLICY }}

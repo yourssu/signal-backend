@@ -24,6 +24,8 @@ domain:
       access-key: "DonaEmilyEatSteakLeopold"
       contact-secret-key : "ThisIsASecretKeyForContact"
   policy:
+    contact-limit: 4
+    contact-limit-warning: 2
     contact-price: 1
     ticket-price-policy: 2n20.4n40.6n60.8n80.10n100
     ticket-price-registered-policy: 1n10.3n30.5n50.7n70.9n90

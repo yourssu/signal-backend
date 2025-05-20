@@ -50,6 +50,13 @@ class ProfileRepositoryImpl(
         return profileJpaRepository.findAll().map { decryptContact(it.toDomain()) }
     }
 
+    override fun countContacts(contact: String): Int {
+        return profileJpaRepository.findAll()
+            .map { decryptContact(it.toDomain()) }
+            .filter { contact == it.contact }
+            .size
+    }
+
     @Cacheable(cacheNames = ["profileCache"], key = "#gender.name")
     override fun findIdsByGender(gender: Gender): List<Long> {
         return jpaQueryFactory.select(profileEntity.id)

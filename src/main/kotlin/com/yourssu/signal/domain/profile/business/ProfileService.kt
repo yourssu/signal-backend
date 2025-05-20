@@ -1,22 +1,20 @@
 package com.yourssu.signal.domain.profile.business
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
-import com.yourssu.signal.domain.profile.business.command.AllProfilesFoundCommand
-import com.yourssu.signal.domain.profile.business.command.MtProfileFoundCommand
-import com.yourssu.signal.domain.profile.business.command.RandomProfileFoundCommand
-import com.yourssu.signal.domain.profile.business.command.TicketConsumedCommand
-import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
-import com.yourssu.signal.domain.profile.business.command.ProfileCreatedCommand
-import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
+import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
+import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
-import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.profile.implement.ProfilePriorityManager
+import com.yourssu.signal.domain.profile.implement.ProfileReader
+import com.yourssu.signal.domain.profile.implement.ProfileWriter
+import com.yourssu.signal.domain.profile.implement.UsedTicketManager
 import com.yourssu.signal.domain.profile.implement.domain.Gender
+import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProfileService(
@@ -30,6 +28,9 @@ class ProfileService(
 ) {
     fun createProfile(command: ProfileCreatedCommand): MyProfileResponse {
         val profile = command.toDomain()
+        val countContact = profileReader.countContact(profile.contact)
+        ProfileValidator.checkContactLimit(countContact, policy.contactLimit)
+        ProfileValidator.checkContactLimitWarning(countContact, policy.contactLimitWarning)
         return MyProfileResponse.from(profileWriter.createProfile(profile))
     }
 

@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.profile.implement
 
+import com.yourssu.signal.domain.blacklist.implement.BlacklistReader
 import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.profile.implement.exception.RandomProfileNotFoundException
@@ -13,6 +14,7 @@ private const val STANDARD_DEVIATION = 50.0
 class ProfilePriorityManager(
     private val profileReader: ProfileReader,
     private val purchasedProfileReader: PurchasedProfileReader,
+    private val blacklistReader: BlacklistReader,
 ) {
     fun pickRandomProfile(
         excludeProfileIds: HashSet<Long>,
@@ -20,8 +22,9 @@ class ProfilePriorityManager(
     ): Profile {
         val profileIdsByGender = profileReader.findIdsByGender(targetGender).toSet()
         val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc().toSet()
-        val candidateProfileId = profileIdsByGender.filter { it !in purchasedProfileIds && it !in excludeProfileIds }.shuffled() +
-                purchasedProfileIds.filter { it !in excludeProfileIds && it in profileIdsByGender }
+        val blacklistProfileIds = blacklistReader.getAllBlacklistIds()
+        val candidateProfileId = profileIdsByGender.filter { it !in purchasedProfileIds && it !in excludeProfileIds && it !in blacklistProfileIds}.shuffled() +
+                purchasedProfileIds.filter { it !in excludeProfileIds && it in profileIdsByGender && it !in blacklistProfileIds}
         validateEmpty(candidateProfileId)
         val probabilities = calculateProbabilities(size = candidateProfileId.size, stdDev = STANDARD_DEVIATION)
         val profileIndex = selectIndexByProbabilityDistribution(probabilities)

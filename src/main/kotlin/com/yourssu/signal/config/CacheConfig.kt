@@ -18,6 +18,7 @@ class CacheConfig {
                 ConcurrentMapCache("profileCache"),
                 ConcurrentMapCache("purchasedProfileCache"),
                 ConcurrentMapCache("nicknameCache"),
+                ConcurrentMapCache("blacklistCache"),
             )
         )
         return cacheManager

@@ -14,4 +14,8 @@ class BlacklistReader(
     fun getByProfileId(profileId: Long): Blacklist {
         return blacklistRepository.getByProfileId(profileId)
     }
+
+    fun getAllBlacklistIds(): Set<Long> {
+        return blacklistRepository.findAll()
+    }
 }

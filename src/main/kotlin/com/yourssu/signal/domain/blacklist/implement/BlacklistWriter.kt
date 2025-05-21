@@ -10,11 +10,14 @@ class BlacklistWriter(
 ) {
     @Transactional
     fun save(blacklist: Blacklist): Blacklist {
-        return blacklistRepository.save(blacklist)
+        val savedBlacklist = blacklistRepository.save(blacklist)
+        blacklistRepository.updateCache()
+        return savedBlacklist
     }
 
     @Transactional
     fun deleteByProfileId(profileId: Long) {
         blacklistRepository.deleteByProfileId(profileId)
+        blacklistRepository.updateCache()
     }
 }

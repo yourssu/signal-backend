@@ -6,6 +6,8 @@ import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
 import com.yourssu.signal.domain.blacklist.storage.domain.BlacklistEntity
 import com.yourssu.signal.domain.blacklist.storage.domain.QBlacklistEntity.blacklistEntity
 import com.yourssu.signal.domain.blacklist.storage.exception.BlacklistNotFoundException
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
@@ -37,6 +39,20 @@ class BlacklistRepositoryImpl(
         jpaQueryFactory.delete(blacklistEntity)
             .where(blacklistEntity.profileId.eq(profileId))
             .execute()
+    }
+
+    @Cacheable(cacheNames = ["blacklistCache"])
+    override fun findAll(): Set<Long> {
+        return blacklistJpaRepository.findAll()
+            .map { it.profileId }
+            .toSet()
+    }
+
+    @CachePut(cacheNames = ["blacklistCache"])
+    override fun updateCache(): Set<Long> {
+        return blacklistJpaRepository.findAll()
+            .map { it.profileId }
+            .toSet()
     }
 }
 

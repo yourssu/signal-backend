@@ -1,4 +1,4 @@
-@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
+@uuid=edf2d717-12ac-4e74-b1ce-bad3221b3f60
 
 
 @gender=MALE
@@ -90,3 +90,20 @@ Content-Type: application/json
 }
 ###
 // Responses are cached
+
+
+@profileId = 1
+// add blacklist - 200 OK
+###
+POST {{host}}/api/profiles/blacklists
+Content-Type: application/json
+
+{
+    "profileId": {{profileId}},
+    "secretKey": "{{secretKey}}"
+}
+
+###
+// Delete blacklist - 204 No Content
+DELETE {{host}}/api/profiles/blacklists/{{profileId}}?secretKey={{secretKey}}
+###

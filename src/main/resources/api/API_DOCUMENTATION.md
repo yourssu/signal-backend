@@ -11,6 +11,9 @@
 [랜덤 프로필 조회 (GET /api/profiles/random)](profile/get_random_profile.md)  
 [연락처 구매 (POST /api/profiles/ticket)](profile/consume_ticket.md)
 
+[블랙리스트 추가 (POST /api/profiles/blacklists)](profile/add_blacklist.md)  
+[블랙리스트 삭제 (DELETE /api/profiles/blacklists)](profile/delete_blacklist.md)  
+
 ## Viewer
 
 [인증번호 발급 (POST /api/viewers/verification)](viewer/issue_verification.md)  

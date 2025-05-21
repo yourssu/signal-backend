@@ -11,5 +11,6 @@ data class PolicyConfigurationProperties(
     val contactPrice: Int,
     val ticketPricePolicy: String,
     val ticketPriceRegisteredPolicy: String,
+    val whitelist: Boolean = false,
 ) {
 }

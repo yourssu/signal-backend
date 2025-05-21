@@ -1,6 +1,8 @@
 package com.yourssu.signal.domain.profile.business
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
+import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
+import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
@@ -25,6 +27,7 @@ class ProfileService(
     private val profilePriorityManager: ProfilePriorityManager,
     private val policy: PolicyConfigurationProperties,
     private val adminAccessChecker: AdminAccessChecker,
+    private val blacklistWriter: BlacklistWriter,
 ) {
     fun createProfile(command: ProfileCreatedCommand): MyProfileResponse {
         val profile = command.toDomain()
@@ -33,6 +36,9 @@ class ProfileService(
         ProfileValidator.checkContactLimitWarning(countContact, policy.contactLimitWarning)
         val createdProfile = profileWriter.createProfile(profile)
         Notification.notifyCreatedProfile(createdProfile.copy(profile.introSentences))
+        if (policy.whitelist) {
+            blacklistWriter.save(Blacklist(profileId = createdProfile.id!!))
+        }
         return MyProfileResponse.from(createdProfile)
     }
 

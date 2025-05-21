@@ -47,6 +47,7 @@ jobs:
           ADMIN_ACCESS_KEY: ${{ secrets.ADMIN_ACCESS_KEY }}
           CONTACT_SECRET_KEY: ${{ secrets.CONTACT_SECRET_KEY }}
 
+          WHITELIST: ${{ vars.WHITELIST }}
           CONTACT_LIMIT: ${{ vars.CONTACT_LIMIT }}
           CONTACT_LIMIT_WARNING: ${{ vars.CONTACT_LIMIT_WARNING }}
           CONTACT_PRICE: ${{ vars.CONTACT_PRICE }}
@@ -83,6 +84,7 @@ jobs:
           echo "ADMIN_ACCESS_KEY=$ADMIN_ACCESS_KEY" >> .env
           echo "CONTACT_SECRET_KEY=$CONTACT_SECRET_KEY" >> .env
           
+          echo "WHITELIST=$WHITELIST" >> .env
           echo "CONTACT_LIMIT=$CONTACT_LIMIT" >> .env
           echo "CONTACT_LIMIT_WARNING=$CONTACT_LIMIT_WARNING" >> .env
           echo "TICKET_COST=$TICKET_COST" >> .env

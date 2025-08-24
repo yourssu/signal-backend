@@ -47,5 +47,5 @@ infra:
 
 jwt:
   secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"
-  access-token-expiration: 1800000
-  refresh-token-expiration: 604800000
+  access-token-expiration: 1800000  # 30 minutes
+  refresh-token-expiration: 2592000000  # 30 days

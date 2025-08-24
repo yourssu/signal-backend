@@ -1,0 +1,9 @@
+### Approve KakaoPay payment
+POST {{host}}/api/viewers/payment/kakaopay/approve
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "tid": "T5e0b3b0f461d47a6a8c2",
+  "pgToken": "SIMULATED_PG_TOKEN_12345"
+}

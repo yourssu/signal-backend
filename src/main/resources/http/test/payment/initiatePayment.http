@@ -1,0 +1,9 @@
+### Initiate KakaoPay payment
+POST {{host}}/api/viewers/payment/kakaopay/initiate
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "quantity": 3,
+  "price": 1500
+}

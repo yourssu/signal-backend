@@ -1,0 +1,34 @@
+### Get development token (dev environment only)
+POST {{host}}/api/auth/dev/token
+Content-Type: application/json
+
+{
+  "uuid": "{{uuid}}"
+}
+
+> {%
+    client.test("Dev token retrieved", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
+    });
+    
+    // Store dev token globally (optional - can be used for testing)
+    client.global.set("devAccessToken", response.body.result.accessToken);
+%}
+
+### Expected Response:
+# 200 OK
+# {
+#   "timestamp": "2025-04-27T12:16:55.043588+09:00",
+#   "result": {
+#     "uuid": "26eaadba-a2a0-4de3-ae7c-ea98cd14a014",
+#     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#     "refreshToken": null
+#   }
+# }
+
+### Note:
+# - This endpoint is only available in development environment
+# - Returns 404 in production
+# - Refresh token is not provided for dev tokens
+# - UUID must be an existing user's UUID

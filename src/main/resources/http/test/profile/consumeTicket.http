@@ -1,20 +1,19 @@
-### Get my profile
-GET {{host}}/api/profiles/uuid
+### Consume ticket to view contact information
+POST {{host}}/api/profiles/contact
 Authorization: Bearer {{accessToken}}
+Content-Type: application/json
 
-###
-
-### Get purchased profile by ID
-GET {{host}}/api/profiles/1
-Authorization: Bearer {{accessToken}}
+{
+  "profileId": 1
+}
 
 ### Expected Response:
-# 200 OK - If profile was purchased
+# 200 OK - Returns profile with contact information
 # {
-#   "timestamp": "2025-04-27T14:47:59.730735+09:00",
+#   "timestamp": "2025-04-27T15:21:07.318735+09:00",
 #   "result": {
 #     "profileId": 1,
-#     "gender": "FEMALE",
+#     "gender": "MALE",
 #     "department": "학과",
 #     "birthYear": 2000,
 #     "animal": "DOG",
@@ -30,5 +29,6 @@ Authorization: Bearer {{accessToken}}
 # }
 
 ### Error Cases:
-# 403 Forbidden - Profile not purchased
-# 404 Not Found - Profile doesn't exist
+# 400 Bad Request - Insufficient tickets
+# 404 Not Found - Profile not found
+# 404 Not Found - Viewer not found

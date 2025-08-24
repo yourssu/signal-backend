@@ -1,0 +1,38 @@
+### Refresh access token
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    client.test("Refresh successful", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
+        client.assert(response.body.result.refreshToken !== undefined, "Refresh token is missing");
+    });
+    
+    // Update stored tokens globally
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
+%}
+
+### Expected Response:
+# 200 OK
+# {
+#   "timestamp": "2025-04-27T12:16:55.043588+09:00",
+#   "result": {
+#     "uuid": "26eaadba-a2a0-4de3-ae7c-ea98cd14a014",
+#     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+#     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+#   }
+# }
+
+### Error Cases:
+# 400 Bad Request - Invalid or expired refresh token
+# {
+#   "timestamp": "2025-04-27T12:17:31.904463+09:00",
+#   "status": 400,
+#   "message": "Invalid refresh token"
+# }

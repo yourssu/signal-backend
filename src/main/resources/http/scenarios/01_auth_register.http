@@ -1,10 +1,6 @@
-### 1. Register new user - MALE
+### 1. Register user
 POST {{host}}/api/auth/register
 Content-Type: application/json
-
-{
-  "gender": "MALE"
-}
 
 > {%
     client.test("Register successful", function() {
@@ -14,20 +10,16 @@ Content-Type: application/json
     });
     
     // Store tokens for later use
-    client.global.set("maleAccessToken", response.body.result.accessToken);
-    client.global.set("maleRefreshToken", response.body.result.refreshToken);
-    client.global.set("maleUuid", response.body.result.uuid);
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
+    client.global.set("uuid", response.body.result.uuid);
 %}
 
 ###
 
-### 2. Register new user - FEMALE
-POST {{host}}/api/auth/register
+### 2. Register another user
+POST {{host}}/api/auth/register  
 Content-Type: application/json
-
-{
-  "gender": "FEMALE"
-}
 
 > {%
     client.test("Register successful", function() {
@@ -37,19 +29,19 @@ Content-Type: application/json
     });
     
     // Store tokens for later use
-    client.global.set("femaleAccessToken", response.body.result.accessToken);
-    client.global.set("femaleRefreshToken", response.body.result.refreshToken);
-    client.global.set("femaleUuid", response.body.result.uuid);
+    client.global.set("accessToken2", response.body.result.accessToken);
+    client.global.set("refreshToken2", response.body.result.refreshToken);
+    client.global.set("uuid2", response.body.result.uuid);
 %}
 
 ###
 
-### 3. Refresh token - MALE user
+### 3. Refresh token
 POST {{host}}/api/auth/refresh
 Content-Type: application/json
 
 {
-  "refreshToken": "{{maleRefreshToken}}"
+  "refreshToken": "{{refreshToken}}"
 }
 
 > {%
@@ -60,14 +52,14 @@ Content-Type: application/json
     });
     
     // Update stored tokens
-    client.global.set("maleAccessToken", response.body.result.accessToken);
-    client.global.set("maleRefreshToken", response.body.result.refreshToken);
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
 %}
 
 ###
 
 ### 4. Get development token (dev environment only)
-GET {{host}}/api/auth/dev-token?uuid={{maleUuid}}
+GET {{host}}/api/auth/dev-token?uuid={{uuid}}
 
 > {%
     client.test("Dev token retrieved", function() {

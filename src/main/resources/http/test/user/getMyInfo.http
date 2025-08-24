@@ -1,0 +1,31 @@
+### Get my UUID from token
+GET {{host}}/api/users/me
+Authorization: Bearer {{accessToken}}
+
+> {%
+    client.test("My info retrieved", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.uuid !== undefined, "UUID is missing");
+    });
+    
+    // Can verify this matches the stored UUID
+    const storedUuid = client.global.get("uuid");
+    if (storedUuid) {
+        client.assert(response.body.result.uuid === storedUuid, "UUID mismatch with stored value");
+    }
+    
+    console.log("My UUID: " + response.body.result.uuid);
+%}
+
+### Expected Response:
+# 200 OK
+# {
+#   "timestamp": "2025-04-27T12:16:55.043588+09:00",
+#   "result": {
+#     "uuid": "ec5ea893-8540-42c5-958a-ce69ed7f9f63"
+#   }
+# }
+
+### Error Cases:
+# 401 Unauthorized - No token provided
+# 403 Forbidden - Invalid or expired token

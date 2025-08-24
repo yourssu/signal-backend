@@ -33,9 +33,9 @@ class ProfileController(
             .body(Response(result = response))
     }
 
-    @GetMapping("/uuid")
+    @GetMapping("/me")
     @RequireAuth
-    fun getProfile(@UserUuid uuid: String): ResponseEntity<Response<MyProfileResponse>> {
+    fun getMyProfile(@UserUuid uuid: String): ResponseEntity<Response<MyProfileResponse>> {
         val response = profileService.getProfile(uuid)
         return ResponseEntity.ok(Response(result = response))
     }

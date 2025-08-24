@@ -1,4 +1,4 @@
-# getProfileUuid (GET /api/profiles/uuid)
+# getMyProfile (GET /api/profiles/me)
 
 ## Authentication
 Requires Bearer token authentication. UUID is extracted from the authenticated user's token.

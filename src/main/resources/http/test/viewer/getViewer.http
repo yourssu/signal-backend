@@ -1,5 +1,5 @@
-### Get viewer details
-GET {{host}}/api/viewers/uuid
+### Get my viewer details
+GET {{host}}/api/viewers/me
 Authorization: Bearer {{accessToken}}
 
 ###

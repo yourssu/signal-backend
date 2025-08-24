@@ -5,7 +5,7 @@ Content-Type: application/json
 
 {
   "uuid": "f3436152-47f7-4ec1-8dc0-17cd911526b6",
-  "accessKey": "{{access-key}}"
+  "accessKey": "{{accessKey}}"
 }
 
 > {%

@@ -26,9 +26,3 @@ Content-Type: application/json
 #     "refreshToken": null
 #   }
 # }
-
-### Note:
-# - This endpoint is only available in development environment
-# - Returns 404 in production
-# - Refresh token is not provided for dev tokens
-# - UUID must be an existing user's UUID

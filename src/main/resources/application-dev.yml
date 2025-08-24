@@ -39,3 +39,9 @@ infra:
     model: ${OPENAI_MODEL}
     prompt: ${OPENAI_PROMPT}
     user-input: ${USER_INPUT_LIMIT}
+  kakaopay:
+    admin-key: ${KAKAOPAY_ADMIN_KEY}
+    cid: ${KAKAOPAY_CID}
+    approval-url: ${KAKAOPAY_APPROVAL_URL}
+    cancel-url: ${KAKAOPAY_CANCEL_URL}
+    fail-url: ${KAKAOPAY_FAIL_URL}

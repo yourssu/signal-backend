@@ -1,9 +1,4 @@
-@host=localhost:8080
-@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
-
-// Issue a verification code for uuid - 400 Bad Request
-###
+### Issue verification code
 POST {{host}}/api/viewers/verification
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
-
-###

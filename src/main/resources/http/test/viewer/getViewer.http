@@ -1,7 +1,5 @@
-@host = localhost:8080
-
-// Get a Viewer by uuid - 200 OK
-###
-GET {{host}}/api/viewers/uuid?uuid=invalid-uuid
+### Get viewer details
+GET {{host}}/api/viewers/uuid
+Authorization: Bearer {{accessToken}}
 
 ###

@@ -1,6 +1,6 @@
-### 1. Create profile - Male user
+### 1. Create profile
 POST {{host}}/api/profiles
-Authorization: Bearer {{maleAccessToken}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -31,9 +31,9 @@ Content-Type: application/json
 
 ###
 
-### 2. Create profile - Female user
+### 2. Create profile
 POST {{host}}/api/profiles
-Authorization: Bearer {{femaleAccessToken}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -65,7 +65,7 @@ Content-Type: application/json
 
 ### 3. Get my profile - Male user
 GET {{host}}/api/profiles/uuid
-Authorization: Bearer {{maleAccessToken}}
+Authorization: Bearer {{accessToken}}
 
 > {%
     client.test("Profile retrieved", function() {
@@ -73,34 +73,6 @@ Authorization: Bearer {{maleAccessToken}}
         client.assert(response.body.result.profileId === client.global.get("maleProfileId"), "Profile ID mismatch");
         client.assert(response.body.result.gender === "MALE", "Gender mismatch");
     });
-%}
-
-###
-
-### 4. Get my profile - Female user  
-GET {{host}}/api/profiles/uuid
-Authorization: Bearer {{femaleAccessToken}}
-
-> {%
-    client.test("Profile retrieved", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-        client.assert(response.body.result.profileId === client.global.get("femaleProfileId"), "Profile ID mismatch");
-        client.assert(response.body.result.gender === "FEMALE", "Gender mismatch");
-    });
-%}
-
-###
-
-### 5. Suggest nickname
-GET {{host}}/api/profiles/nickname/suggestion
-
-> {%
-    client.test("Nickname suggested", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-        client.assert(response.body.result.nickname !== undefined, "Nickname is missing");
-    });
-    
-    console.log("Suggested nickname: " + response.body.result.nickname);
 %}
 
 ###
@@ -134,7 +106,7 @@ GET {{host}}/api/profiles/count?gender=MALE
 ###
 
 ### 8. Get all profiles (Admin only - dev environment)
-GET {{host}}/api/profiles?secretKey={{adminSecretKey}}
+GET {{host}}/api/profiles?secretKey={{access-key}}
 
 > {%
     client.test("All profiles retrieved", function() {

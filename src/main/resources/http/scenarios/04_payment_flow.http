@@ -1,6 +1,6 @@
 ### 1. Initiate KakaoPay payment - Male user buying 3 tickets
 POST {{host}}/api/viewers/payment/kakaopay/initiate
-Authorization: Bearer {{maleAccessToken}}
+Authorization: Bearer {{accessKey}}
 Content-Type: application/json
 
 {

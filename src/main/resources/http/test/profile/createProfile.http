@@ -1,8 +1,28 @@
-@host=localhost:8080
-
-// When the gender is blank, return 400 Bad Request
-###
+### Create profile - Success case
 POST {{host}}/api/profiles
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "gender": "MALE",
+  "department": "컴퓨터학부3",
+  "birthYear": 2000,
+  "animal": "DOG",
+  "contact": "@myinstagram",
+  "mbti": "INTJ",
+  "nickname": "코딩하는강아지",
+  "introSentences": [
+    "개발을 좋아하는 3학년입니다",
+    "주로 백엔드 개발을 합니다",
+    "커피 마시면서 코딩하는 걸 좋아해요"
+  ]
+}
+
+###
+
+### Error case - Gender is blank
+POST {{host}}/api/profiles
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -13,32 +33,14 @@ Content-Type: application/json
   "contact": "@leo",
   "mbti": "ISTJ",
   "nickname": "nickname",
-  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
+  "introSentences": ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
 
-// When the animal is blank, return 400 Bad Request
-###
+### Error case - Invalid contact format
 POST {{host}}/api/profiles
-Content-Type: application/json
-
-{
-  "gender": "MALE",
-  "department": "학과",
-  "birthYear": 2000,
-  "animal": "",
-  "contact": "@leo",
-  "mbti": "ISTJ",
-  "nickname": "nickname",
-  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
-}
-
-###
-
-// When the contact is blank, return 400 Bad Request
-###
-POST {{host}}/api/profiles
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -46,35 +48,17 @@ Content-Type: application/json
   "department": "학과",
   "birthYear": 2000,
   "animal": "DOG",
-  "contact": "",
+  "contact": "invalid-contact",
   "mbti": "ISTJ",
   "nickname": "nickname",
-  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
+  "introSentences": ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
 
-// When the MBTI value is blank, return 400 Bad Request
-###
+### Error case - Nickname exceeds maximum length (15 characters)
 POST {{host}}/api/profiles
-Content-Type: application/json
-
-{
-  "gender": "MALE",
-  "department": "학과",
-  "birthYear": 2000,
-  "animal": "DOG",
-  "contact": "@leo",
-  "mbti": "",
-  "nickname": "nickname",
-  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
-}
-
-###
-
-// When the nickname exceeds the maximum length, return 400 Bad Request
-###
-POST {{host}}/api/profiles
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -84,14 +68,15 @@ Content-Type: application/json
   "animal": "DOG",
   "contact": "@leo",
   "mbti": "ISTJ",
-  "nickname": "Maximum length is 15",
-  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
+  "nickname": "This nickname exceeds maximum length",
+  "introSentences": ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
 }
 
 ###
 
-// When any introSenteces exceeds the maximum length, return 400 Bad Request
+### Error case - Introduction sentence exceeds maximum length (20 characters)
 POST {{host}}/api/profiles
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -102,5 +87,5 @@ Content-Type: application/json
   "contact": "@leo",
   "mbti": "ISTJ",
   "nickname": "nickname",
-  "introSentences" : ["제일 좋아하는 음식은 치킨이야 제일 좋아하는 음식은 치킨이야 제일 좋아하는 음식은 치킨이야 제일 좋아하는 음식은 치킨이야"]
+  "introSentences": ["이 문장은 20자를 초과하는 매우 긴 자기소개 문장입니다"]
 }

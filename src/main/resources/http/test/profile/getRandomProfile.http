@@ -1,57 +1,33 @@
-@host=localhost:8080
-@uuid=it-means-the-uuid-is-optional
-
-// Create a new profile with Uuid - 201 Created
-###
-POST {{host}}/api/profiles
-Content-Type: application/json
-
-{
-  "gender": "FEMALE",
-  "department": "학과",
-  "birthYear": 2000,
-  "animal": "DOG",
-  "contact": "@leo",
-  "mbti": "ISTJ",
-  "nickname": "leopold",
-  "uuid": "{{uuid}}"
-}
+### Get random profile - Looking for FEMALE profiles
+GET {{host}}/api/profiles/random?gender=FEMALE
+Authorization: Bearer {{accessToken}}
 
 ###
 
-// Not Found Random Profile - 404 Not Found
-###
-GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=
+### Get random profile with exclusions
+GET {{host}}/api/profiles/random?gender=MALE&excludeProfiles=1,2,3
+Authorization: Bearer {{accessToken}}
 
-###
+### Expected Response:
+# 200 OK
+# {
+#   "timestamp": "2025-04-27T14:59:57.30334+09:00",
+#   "result": {
+#     "profileId": 4,
+#     "gender": "MALE",
+#     "department": "학과",
+#     "birthYear": 2000,
+#     "animal": "DOG",
+#     "mbti": "ISTJ",
+#     "nickname": "leopold",
+#     "introSentences": [
+#       "나는 딸기를 좋아해",
+#       "나는 포도도 좋아해",
+#       "제일 좋아하는 음식은 치킨이야"
+#     ]
+#   }
+# }
 
-// Create a new profile - 201 Created
-###
-POST {{host}}/api/profiles
-Content-Type: application/json
-
-{
-  "gender": "MALE",
-  "department": "학과",
-  "birthYear": 2000,
-  "animal": "DOG",
-  "contact": "@leo",
-  "mbti": "ISTJ",
-  "nickname": "leopold"
-}
-
-###
-
-// Not Found Random Profile - 404 Not Found
-###
-GET {{host}}/api/profiles/random?uuid={{uuid}}&excludeProfiles=2,3
-
-###
-
-###
-
-// Not Found My Profile - 404 Not Found
-###
-GET {{host}}/api/profiles/random?uuid=invalid-uuid&excludeProfiles=2,3
-
-###
+### Error Cases:
+# 404 Not Found - No random profiles available
+# 404 Not Found - Viewer doesn't exist

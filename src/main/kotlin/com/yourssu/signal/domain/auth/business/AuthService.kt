@@ -39,6 +39,7 @@ class AuthService(
             throw InvalidJwtTokenException()
         }
         val uuid = jwtUtils.getUserUuidFromToken(refreshToken)
+        userReader.getByUuid(Uuid(uuid))
         val accessToken = jwtUtils.generateAccessToken(uuid)
         val newRefreshToken = jwtUtils.generateRefreshToken(uuid)
         return TokenResponse(

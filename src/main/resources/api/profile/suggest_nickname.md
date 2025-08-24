@@ -4,6 +4,9 @@
 - Use OpenAI APIs in development and production environments.
 - Local environments should be isolated.
 
+## Authentication
+Requires Bearer token authentication.
+
 ## Request
 
 ### Request Body

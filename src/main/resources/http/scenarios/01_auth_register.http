@@ -1,0 +1,80 @@
+### 1. Register new user - MALE
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "gender": "MALE"
+}
+
+> {%
+    client.test("Register successful", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
+        client.assert(response.body.result.refreshToken !== undefined, "Refresh token is missing");
+    });
+    
+    // Store tokens for later use
+    client.global.set("maleAccessToken", response.body.result.accessToken);
+    client.global.set("maleRefreshToken", response.body.result.refreshToken);
+    client.global.set("maleUuid", response.body.result.uuid);
+%}
+
+###
+
+### 2. Register new user - FEMALE
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "gender": "FEMALE"
+}
+
+> {%
+    client.test("Register successful", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
+        client.assert(response.body.result.refreshToken !== undefined, "Refresh token is missing");
+    });
+    
+    // Store tokens for later use
+    client.global.set("femaleAccessToken", response.body.result.accessToken);
+    client.global.set("femaleRefreshToken", response.body.result.refreshToken);
+    client.global.set("femaleUuid", response.body.result.uuid);
+%}
+
+###
+
+### 3. Refresh token - MALE user
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{maleRefreshToken}}"
+}
+
+> {%
+    client.test("Refresh successful", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
+        client.assert(response.body.result.refreshToken !== undefined, "Refresh token is missing");
+    });
+    
+    // Update stored tokens
+    client.global.set("maleAccessToken", response.body.result.accessToken);
+    client.global.set("maleRefreshToken", response.body.result.refreshToken);
+%}
+
+###
+
+### 4. Get development token (dev environment only)
+GET {{host}}/api/auth/dev-token?uuid={{maleUuid}}
+
+> {%
+    client.test("Dev token retrieved", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
+    });
+    
+    // Can use this token for testing
+    client.global.set("devAccessToken", response.body.result.accessToken);
+%}

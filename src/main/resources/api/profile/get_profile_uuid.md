@@ -1,12 +1,11 @@
 # getProfileUuid (GET /api/profiles/uuid)
 
+## Authentication
+Requires Bearer token authentication. UUID is extracted from the authenticated user's token.
+
 ## Request
 
-### Query Parameters
-
-| Name   | Type   | Required | Constraint |
-|--------|--------|----------|------------|
-| `uuid` | string | true     | @NotBlank  |
+No parameters required. User's UUID is extracted from the authentication token.
 
 ## Reply
 

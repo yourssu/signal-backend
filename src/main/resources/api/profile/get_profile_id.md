@@ -1,5 +1,8 @@
 # getPurchasedProfile (GET /api/profiles/{profileId})
 
+## Authentication
+Requires Bearer token authentication.
+
 ## Request
 
 ### Path Variables
@@ -8,11 +11,7 @@
 |-------------|---------|----------|------------|
 | `profileId` | integer | true     | @NotNull   |
 
-### Query Parameters
-
-| Name   | Type   | Required | Constraint |
-|--------|--------|----------|------------|
-| `uuid` | string | true     | @NotBlank  |
+No query parameters required. User's UUID is extracted from the authentication token.
 
 ## Reply
 

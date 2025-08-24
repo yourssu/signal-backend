@@ -1,5 +1,10 @@
 # API Documentation
 
+## Auth
+
+[회원가입 (POST /api/auth/register)](auth/register.md)  
+[토큰 갱신 (POST /api/auth/refresh)](auth/refresh.md)
+
 ## Profile
 
 [닉네임 추천 (POST /api/profiles/nickname)](profile/suggest_nickname.md)  
@@ -22,6 +27,7 @@
 
 ## Admin
 
+[개발용 토큰 발급 (POST /api/auth/dev/token)](auth/dev-token.md)  
 [전체 프로필 조회 (GET /api/profiles)](profile/get_all_profile_for_admin.md)  
 [전체 뷰어 조회 (GET /api/viewers)](viewer/get_all_viewer_for_admin.md)  
 [티켓 발급 (POST /api/viewers)](viewer/issue_ticket.md)  

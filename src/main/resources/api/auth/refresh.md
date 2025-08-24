@@ -48,13 +48,13 @@ Refreshes JWT tokens using a valid refresh token. This endpoint validates the pr
 ## Error Cases
 
 ### 400 Bad Request
-When the request body is malformed or missing required fields.
+When the refresh token field is empty or missing.
 
 ```json
 {
   "timestamp": "2025-01-24T15:35:12.456789+09:00",
   "status": 400,
-  "message": "Invalid request body"
+  "message": "Invalid Input: [Refresh token is required]"
 }
 ```
 
@@ -70,24 +70,3 @@ When the refresh token is invalid, expired, or malformed.
 }
 ```
 
-### Token Format Error Cases
-
-#### Expired Token
-```json
-{
-  "timestamp": "2025-01-24T15:35:12.456789+09:00",
-  "status": 401,
-  "error": "Unauthorized",
-  "message": "JWT token has expired"
-}
-```
-
-#### Malformed Token
-```json
-{
-  "timestamp": "2025-01-24T15:35:12.456789+09:00",
-  "status": 401,
-  "error": "Unauthorized",
-  "message": "Invalid token format"
-}
-```

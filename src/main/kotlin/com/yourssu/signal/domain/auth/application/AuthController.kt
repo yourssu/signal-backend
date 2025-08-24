@@ -1,10 +1,12 @@
 package com.yourssu.signal.domain.auth.application
 
+import com.yourssu.signal.domain.auth.application.dto.DevTokenRequest
 import com.yourssu.signal.domain.auth.application.dto.RefreshTokenRequest
 import com.yourssu.signal.domain.auth.application.dto.TokenResponse
 import com.yourssu.signal.domain.auth.business.AuthService
 import com.yourssu.signal.domain.common.business.dto.Response
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -25,7 +27,16 @@ class AuthController(
     fun refreshToken(
         @Valid @RequestBody request: RefreshTokenRequest
     ): ResponseEntity<Response<TokenResponse>> {
-        val response = authService.refreshToken(request)
+        val response = authService.refreshToken(request.refreshToken)
+        return ResponseEntity.ok(Response(result = response))
+    }
+    
+    @Profile("!prod")
+    @PostMapping("/dev/token")
+    fun generateDevToken(
+        @Valid @RequestBody request: DevTokenRequest
+    ): ResponseEntity<Response<TokenResponse>> {
+        val response = authService.generateDevToken(request)
         return ResponseEntity.ok(Response(result = response))
     }
 }

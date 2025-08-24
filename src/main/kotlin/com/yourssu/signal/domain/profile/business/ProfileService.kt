@@ -42,7 +42,7 @@ class ProfileService(
         return MyProfileResponse.from(createdProfile)
     }
 
-    fun getProfile(command: MtProfileFoundCommand): MyProfileResponse {
+    fun getProfile(command: MyProfileFoundCommand): MyProfileResponse {
         val profile = profileReader.getByUuid(command.toDomain())
         return MyProfileResponse.from(profile)
     }

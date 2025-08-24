@@ -12,7 +12,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtAuthenticationFilter(
     private val jwtUtils: JwtUtils
 ) : OncePerRequestFilter() {
-
     companion object {
         const val AUTHORIZATION_HEADER = "Authorization"
         const val BEARER_PREFIX = "Bearer "
@@ -24,11 +23,10 @@ class JwtAuthenticationFilter(
         filterChain: FilterChain
     ) {
         val token = extractTokenFromRequest(request)
-
         if (token != null && jwtUtils.validateToken(token)) {
-            val viewerUuid = jwtUtils.getViewerUuidFromToken(token)
+            val userUuid = jwtUtils.getUserUuidFromToken(token)
             val authentication = UsernamePasswordAuthenticationToken(
-                viewerUuid,
+                userUuid,
                 null,
                 emptyList()
             )

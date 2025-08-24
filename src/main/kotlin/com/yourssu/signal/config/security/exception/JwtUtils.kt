@@ -43,7 +43,7 @@ class JwtUtils(
         }
     }
 
-    fun getViewerUuidFromToken(token: String): String {
+    fun getUserUuidFromToken(token: String): String {
         return getClaims(token).subject
     }
 

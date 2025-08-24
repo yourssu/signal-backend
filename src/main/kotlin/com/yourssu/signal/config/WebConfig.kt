@@ -1,7 +1,7 @@
 package com.yourssu.signal.config
 
 import com.yourssu.signal.config.properties.CorsProperties
-import com.yourssu.signal.config.resolver.ViewerUuidArgumentResolver
+import com.yourssu.signal.config.resolver.UserArgumentResolver
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,7 +13,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 @EnableConfigurationProperties(CorsProperties::class)
 class WebConfig(
-    private val viewerUuidArgumentResolver: ViewerUuidArgumentResolver
+    private val userArgumentResolver: UserArgumentResolver
 ) {
     @Bean
     fun webMvcConfigurer(corsProperties: CorsProperties): WebMvcConfigurer {
@@ -27,7 +27,7 @@ class WebConfig(
             }
 
             override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
-                resolvers.add(viewerUuidArgumentResolver)
+                resolvers.add(userArgumentResolver)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.profile.application
 
+import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.profile.application.dto.NicknameSuggestedRequest
 import com.yourssu.signal.infrastructure.dto.NicknameSuggestedResponse
@@ -18,6 +19,7 @@ class NicknameGeneratedController(
     private val chatModel: ChatModel,
 ) {
     @PostMapping("/nickname")
+    @RequireAuth
     fun suggestedNickname(@Valid @RequestBody request: NicknameSuggestedRequest): ResponseEntity<Response<NicknameSuggestedResponse>> {
         val response = chatModel.suggestNickname(request.introSentences)
         return ResponseEntity.status(HttpStatus.CREATED)

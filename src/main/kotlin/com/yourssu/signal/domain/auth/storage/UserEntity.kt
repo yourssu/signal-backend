@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.auth.storage
 
 import com.yourssu.signal.domain.auth.implement.User
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.common.storage.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -16,7 +17,7 @@ class UserEntity(
 
     @Column(nullable = false, unique = true)
     val uuid: String,
-) {
+): BaseEntity(){
     fun toDomain(): User {
         return User(
             id = id,

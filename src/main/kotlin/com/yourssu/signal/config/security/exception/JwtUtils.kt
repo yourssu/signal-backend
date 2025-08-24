@@ -14,20 +14,20 @@ class JwtUtils(
 ) {
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray())
 
-    fun generateAccessToken(viewerUuid: String): String {
-        return generateToken(viewerUuid, jwtProperties.accessTokenExpiration)
+    fun generateAccessToken(userUuid: String): String {
+        return generateToken(userUuid, jwtProperties.accessTokenExpiration)
     }
 
-    fun generateRefreshToken(viewerUuid: String): String {
-        return generateToken(viewerUuid, jwtProperties.refreshTokenExpiration)
+    fun generateRefreshToken(userUuid: String): String {
+        return generateToken(userUuid, jwtProperties.refreshTokenExpiration)
     }
 
-    private fun generateToken(viewerUuid: String, expirationTime: Long): String {
+    private fun generateToken(userUuid: String, expirationTime: Long): String {
         val now = Date()
         val expiryDate = Date(now.time + expirationTime)
 
         return Jwts.builder()
-            .subject(viewerUuid)
+            .subject(userUuid)
             .issuedAt(now)
             .expiration(expiryDate)
             .signWith(secretKey)

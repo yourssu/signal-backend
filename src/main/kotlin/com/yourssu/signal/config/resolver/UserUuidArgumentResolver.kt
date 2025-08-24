@@ -1,6 +1,6 @@
 package com.yourssu.signal.config.resolver
 
-import com.yourssu.signal.domain.user.User
+import com.yourssu.signal.domain.auth.implement.User
 import org.springframework.core.MethodParameter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -11,7 +11,6 @@ import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
 class UserUuidArgumentResolver : HandlerMethodArgumentResolver {
-    
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.parameterType == String::class.java &&
                 parameter.hasParameterAnnotation(UserUuid::class.java)

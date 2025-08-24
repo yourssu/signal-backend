@@ -1,5 +1,7 @@
 package com.yourssu.signal.domain.profile.application
 
+import com.yourssu.signal.config.resolver.UserUuid
+import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.profile.application.dto.*
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
@@ -26,8 +28,8 @@ class ProfileController(
     }
 
     @GetMapping("/uuid")
-    fun getProfile(@Valid @ModelAttribute request: MyProfileFoundRequest): ResponseEntity<Response<MyProfileResponse>> {
-        val response = profileService.getProfile(request.toCommand())
+    fun getProfile(@UserUuid uuid: String): ResponseEntity<Response<MyProfileResponse>> {
+        val response = profileService.getProfile(uuid)
         return ResponseEntity.ok(Response(result = response))
     }
 

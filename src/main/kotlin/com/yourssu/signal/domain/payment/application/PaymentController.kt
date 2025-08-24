@@ -1,5 +1,7 @@
 package com.yourssu.signal.domain.payment.application
 
+import com.yourssu.signal.config.resolver.UserUuid
+import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.payment.application.dto.PaymentApprovalRequest
 import com.yourssu.signal.domain.payment.application.dto.PaymentInitiationRequest
@@ -20,15 +22,23 @@ class PaymentController(
     private val paymentService: PaymentService,
 ) {
     @PostMapping("/initiate")
-    fun initiate(@Valid @RequestBody request: PaymentInitiationRequest): ResponseEntity<Response<PaymentInitiationResponse>> {
-        val response = paymentService.initiate(request.toCommand())
+    @RequireAuth
+    fun initiate(
+        @Valid @RequestBody request: PaymentInitiationRequest,
+        @UserUuid uuid: String
+    ): ResponseEntity<Response<PaymentInitiationResponse>> {
+        val response = paymentService.initiate(request.toCommand(uuid))
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(Response(result = response))
     }
 
     @PostMapping("/approve")
-    fun approve(@Valid @RequestBody request: PaymentApprovalRequest): ResponseEntity<Response<PaymentCompletionResponse>> {
-        val paymentResponse = paymentService.approve(request.toCommand())
+    @RequireAuth
+    fun approve(
+        @Valid @RequestBody request: PaymentApprovalRequest,
+        @UserUuid uuid: String
+    ): ResponseEntity<Response<PaymentCompletionResponse>> {
+        val paymentResponse = paymentService.approve(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = paymentResponse))
     }
 }

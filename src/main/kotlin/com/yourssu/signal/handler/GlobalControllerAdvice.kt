@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -43,6 +44,16 @@ class ControllerAdvice {
         logger.error { e }
         return ResponseEntity.status(e.status)
             .body(ErrorResponse.from(e))
+    }
+    
+    @ExceptionHandler(AuthorizationDeniedException::class)
+    fun handleAuthorizationDenied(e: AuthorizationDeniedException): ResponseEntity<ErrorResponse> {
+        logger.error { e }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(ErrorResponse(
+                status = HttpStatus.UNAUTHORIZED.value(),
+                message = "Authentication required to access this resource"
+            ))
     }
 
     @ExceptionHandler(ForbiddenException::class)

@@ -23,7 +23,8 @@ class AuthService(
         return TokenResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            expiresIn = jwtProperties.accessTokenExpiration
+            accessTokenExpiresIn = jwtProperties.accessTokenExpiration,
+            refreshTokenExpiresIn = jwtProperties.refreshTokenExpiration
         )
     }
     
@@ -37,7 +38,8 @@ class AuthService(
         return TokenResponse(
             accessToken = accessToken,
             refreshToken = refreshToken,
-            expiresIn = jwtProperties.accessTokenExpiration
+            accessTokenExpiresIn = jwtProperties.accessTokenExpiration,
+            refreshTokenExpiresIn = jwtProperties.refreshTokenExpiration
         )
     }
 }

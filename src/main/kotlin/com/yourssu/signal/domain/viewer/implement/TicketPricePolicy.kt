@@ -20,6 +20,9 @@ class TicketPricePolicy(
     companion object {
         private const val PRICE_DELIMITER = "."
         private const val KEY_VALUE_DELIMITER = "n"
+
+        private const val PRICE_INDEX = 0
+        private const val QUANTITY_INDEX = 1
     }
 
     private val priceToTicketMap: Map<Int, Int> = initializeMap()
@@ -29,14 +32,14 @@ class TicketPricePolicy(
         return configProperties.ticketPricePolicy
             .split(PRICE_DELIMITER)
             .map { it.split(KEY_VALUE_DELIMITER) }
-            .associate { it[NO_MATCH_TICKET_AMOUNT].toInt() to it[1].toInt() }
+            .associate { it[PRICE_INDEX].toInt() to it[QUANTITY_INDEX].toInt() }
     }
 
     private fun initializeRegisteredMap(): Map<Int, Int> {
         return configProperties.ticketPriceRegisteredPolicy
             .split(PRICE_DELIMITER)
             .map { it.split(KEY_VALUE_DELIMITER) }
-            .associate { it[NO_MATCH_TICKET_AMOUNT].toInt() to it[1].toInt() }
+            .associate { it[PRICE_INDEX].toInt() to it[QUANTITY_INDEX].toInt() }
     }
 
     fun calculateTicketQuantity(price: Int, code: VerificationCode): Int {

@@ -1,5 +1,10 @@
 # getAllProfilesForAdmin (GET /api/profiles)
 
+## Description
+Development-only endpoint that retrieves all profiles in the system. Requires admin secret key for authentication.
+
+**Note: This endpoint is disabled in production environments.**
+
 ## Request
 
 ### Query Parameters
@@ -65,12 +70,25 @@
 
 ### 403 Forbidden
 
-- invalid secretKey
+When the secret key is invalid.
 
-````json
+```json
 {
   "timestamp": "2025-04-27T14:41:27.810708+09:00",
   "status": 403,
   "message": "올바르지 않은 관리자 기능 접근 토큰입니다."
 }
-````
+```
+
+### 404 Not Found (Production Environment)
+
+This endpoint returns 404 in production environments as it is not registered.
+
+```json
+{
+  "timestamp": "2025-04-27T14:41:27.810708+09:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "No static resource api/profiles."
+}
+```

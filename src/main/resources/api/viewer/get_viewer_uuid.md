@@ -1,12 +1,11 @@
 # getViewerUuid (GET /api/viewers/uuid)
 
+## Authentication
+Requires Bearer token authentication.
+
 ## Request
 
-### Query Parameters
-
-| Name   | Type   | Required | Constraint |
-|--------|--------|----------|------------|
-| `uuid` | string | true     | @NotBlank  |
+No parameters required. User's UUID is extracted from the authentication token.
 
 ## Reply
 

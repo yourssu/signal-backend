@@ -1,12 +1,14 @@
 # getRandomProfile (GET /api/profiles/random)
 
+## Authentication
+Requires Bearer token authentication.
+
 ## Request
 
 ### Query Parameters
 
 | Name              | Type      | Required | Constraint | Description                  |
 |-------------------|-----------|----------|------------|------------------------------|
-| `uuid`            | string    | true     | @NotBlank  | Viewer's uuid                |
 | `gender`          | string    | true     | @NotBlank  | Gender of the random profile | 
 | `excludeProfiles` | integer[] | false    |            | excluded Ids                 |
 

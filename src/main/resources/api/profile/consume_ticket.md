@@ -1,6 +1,9 @@
 # consumeTicket (POST /api/profiles/ticket)
 - If the viewer bought a profile, then tickets don't be consumed
 
+## Authentication
+Requires Bearer token authentication.
+
 ## Request
 
 ### Request Body
@@ -8,7 +11,6 @@
 | Name        | Type    | Required | Constraint |
 |-------------|---------|----------|------------|
 | `profileId` | integer | true     | @NotNull   |
-| `uuid`      | string  | true     | @NotBlank  |
 
 ## Reply
 
@@ -52,8 +54,7 @@
 ### 400 Bad Request
 
 - the profileId is blank
-- this uuid is blank
-- 
+
 ```json
 {
   "timestamp": "2025-04-27T15:26:17.368726+09:00",

@@ -1,0 +1,77 @@
+### 1. Issue verification code for male user
+POST {{host}}/api/viewers/verification
+Authorization: Bearer {{maleAccessToken}}
+Content-Type: application/json
+
+> {%
+    client.test("Verification code issued", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.verificationCode !== undefined, "Verification code is missing");
+    });
+    
+    client.global.set("maleVerificationCode", response.body.result.verificationCode);
+    console.log("Male verification code: " + response.body.result.verificationCode);
+%}
+
+###
+
+### 2. Issue verification code for female user  
+POST {{host}}/api/viewers/verification
+Authorization: Bearer {{femaleAccessToken}}
+Content-Type: application/json
+
+> {%
+    client.test("Verification code issued", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.verificationCode !== undefined, "Verification code is missing");
+    });
+    
+    client.global.set("femaleVerificationCode", response.body.result.verificationCode);
+    console.log("Female verification code: " + response.body.result.verificationCode);
+%}
+
+###
+
+### 3. Get viewer details - Male user
+GET {{host}}/api/viewers/uuid
+Authorization: Bearer {{maleAccessToken}}
+
+> {%
+    client.test("Viewer details retrieved", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.uuid === client.global.get("maleUuid"), "UUID mismatch");
+    });
+    
+    console.log("Male viewer tickets: " + response.body.result.ticket);
+    console.log("Male viewer used tickets: " + response.body.result.usedTicket);
+%}
+
+###
+
+### 4. Get viewer details - Female user
+GET {{host}}/api/viewers/uuid
+Authorization: Bearer {{femaleAccessToken}}
+
+> {%
+    client.test("Viewer details retrieved", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.result.uuid === client.global.get("femaleUuid"), "UUID mismatch");
+    });
+    
+    console.log("Female viewer tickets: " + response.body.result.ticket);
+    console.log("Female viewer used tickets: " + response.body.result.usedTicket);
+%}
+
+###
+
+### 5. Get all viewers (Admin only - dev environment)
+GET {{host}}/api/viewers?secretKey={{adminSecretKey}}
+
+> {%
+    client.test("All viewers retrieved", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(Array.isArray(response.body.result), "Result is not an array");
+    });
+    
+    console.log("Total viewers: " + response.body.result.length);
+%}

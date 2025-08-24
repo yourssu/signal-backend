@@ -1,5 +1,8 @@
 # createProfile (POST /api/profiles)
 
+## Authentication
+Requires Bearer token authentication.
+
 ## Request
 
 ### Request Body
@@ -14,7 +17,6 @@
 | `mbti`           | string   | true     | @NotBlank                                                                        |
 | `nickname`       | string   | true     | @Size(min = 1, max = 15)                                                         |
 | `introSentences` | string[] | true     | @Size(min = 0, max = 3)List<@Size(min = 0, max = 20) String>                     |
-| `uuid`           | string   | false    | validate the gender of a viewer. if null, then generate a new uuid for a profile |
 
 ## Reply
 
@@ -108,6 +110,18 @@
   "timestamp": "2025-04-27T12:27:22.975561+09:00",
   "status": 400,
   "message": "잘못된 요청입니다."
+}
+```
+
+### 401 Unauthorized
+
+When no valid authentication token is provided.
+
+```json
+{
+  "timestamp": "2025-04-27T16:04:52.613191+09:00",
+  "status": 401,
+  "message": "Unauthorized"
 }
 ```
 

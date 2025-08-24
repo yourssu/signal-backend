@@ -1,5 +1,10 @@
 # getAllViewersForAdmin (GET /api/viewers)
 
+## Description
+Development-only endpoint that retrieves all viewers in the system. Requires admin secret key for authentication.
+
+**Note: This endpoint is disabled in production environments.**
+
 ## Request
 
 ### Query Parameters

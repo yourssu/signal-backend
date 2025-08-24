@@ -8,7 +8,7 @@ import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "kakaopay_payment")
+@Table(name = "kakaopay_order")
 class KakaoPayOrderEntity(
     @Id
     val id: Long? = null,

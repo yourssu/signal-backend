@@ -8,13 +8,17 @@
 [회원 가입 (POST /api/auth/register)](auth/register.md)  
 [토큰 갱신 (POST /api/auth/refresh)](auth/refresh.md)
 
+## User
+
+[🔐 내 정보 조회 (GET /api/users/me)](user/get_my_info.md)
+
 ## Profile
 
 [전체 프로필 개수 조회 (GET /api/profiles/count)](profile/count_profile.md)  
 [성별 프로필 개수 조회 (GET /api/profiles/count?gender={gender})](profile/count_profile_by_gender.md)
 [🔐 닉네임 추천 (GET /api/profiles/nickname/suggestion)](profile/suggest_nickname.md)  
 [🔐 프로필 생성 (POST /api/profiles)](profile/create_profile.md)  
-[🔐 나의 프로필 조회 (GET /api/profiles/uuid)](profile/get_profile_uuid.md)   
+[🔐 나의 프로필 조회 (GET /api/profiles/me)](profile/get_profile_uuid.md)   
 [🔐 구매한 프로필 아이디 조회 (GET /api/profiles/{profileId})](profile/get_profile_id.md)  
 [🔐 랜덤 프로필 조회 (GET /api/profiles/random)](profile/get_random_profile.md)  
 [🔐 연락처 구매 (POST /api/profiles/contact)](profile/consume_ticket.md)
@@ -23,7 +27,7 @@
 
 [🔐 인증번호 발급 (POST /api/viewers/verification)](viewer/issue_verification.md)
 [🔐 은행 입금 확인 요청 (POST /api/viewers/deposit)](viewer/issue_ticket_by_deposit_name.md)
-[🔐 뷰어 조회 (GET /api/viewers/uuid)](viewer/get_viewer_uuid.md)
+[🔐 뷰어 조회 (GET /api/viewers/me)](viewer/get_viewer_uuid.md)
 
 ## Payment
 

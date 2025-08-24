@@ -1,5 +1,5 @@
 ### Get my profile
-GET {{host}}/api/profiles/uuid
+GET {{host}}/api/profiles/me
 Authorization: Bearer {{accessToken}}
 
 ###

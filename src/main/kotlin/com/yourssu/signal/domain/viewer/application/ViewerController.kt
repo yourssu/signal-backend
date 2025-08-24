@@ -49,9 +49,9 @@ class ViewerController(
         return ticketSseManager.streamTicketEvents(request.toCommand())
     }
 
-    @GetMapping("/uuid")
+    @GetMapping("/me")
     @RequireAuth
-    fun getViewer(@UserUuid uuid: String): ResponseEntity<Response<ViewerDetailResponse>> {
+    fun getMyViewer(@UserUuid uuid: String): ResponseEntity<Response<ViewerDetailResponse>> {
         val response = viewerService.getViewer(uuid)
         return ResponseEntity.ok(Response(result = response))
     }

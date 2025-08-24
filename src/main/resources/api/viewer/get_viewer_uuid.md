@@ -1,4 +1,4 @@
-# getViewerUuid (GET /api/viewers/uuid)
+# getMyViewer (GET /api/viewers/me)
 
 ## Authentication
 Requires Bearer token authentication.

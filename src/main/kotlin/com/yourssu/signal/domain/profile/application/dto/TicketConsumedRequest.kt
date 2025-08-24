@@ -7,11 +7,8 @@ import jakarta.validation.constraints.NotNull
 data class TicketConsumedRequest(
     @field:NotNull
     val profileId: Long,
-
-    @field:NotBlank
-    val uuid: String,
 ){
-    fun toCommand(): TicketConsumedCommand {
+    fun toCommand(uuid: String): TicketConsumedCommand {
         return TicketConsumedCommand(
             profileId = profileId,
             uuid = uuid,

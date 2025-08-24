@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.viewer.business
 
+import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
@@ -12,6 +13,7 @@ import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedExc
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Service
+import org.yaml.snakeyaml.Yaml
 
 @Service
 class ViewerService(
@@ -23,8 +25,8 @@ class ViewerService(
     private val adminAccessChecker: AdminAccessChecker,
     private val depositManager: DepositManager,
 ) {
-    fun issueVerificationCode(command: VerificationCommand): VerificationResponse {
-        val code = verificationWriter.issueVerificationCode(uuid = command.toUuid())
+    fun issueVerificationCode(uuid: String): VerificationResponse {
+        val code = verificationWriter.issueVerificationCode(uuid = Uuid(uuid))
         return VerificationResponse.from(code)
     }
 
@@ -47,8 +49,8 @@ class ViewerService(
         return issueTicket(ticketIssuedCommand)
     }
 
-    fun getViewer(command: ViewerFoundCommand): ViewerDetailResponse {
-        val viewer = viewerReader.get(command.toDomain())
+    fun getViewer(uuid: String): ViewerDetailResponse {
+        val viewer = viewerReader.get(Uuid(uuid))
         val purchasedProfiles = purchasedProfileReader.findByViewerId(viewer.id!!)
             .map { PurchasedProfileResponse.from(it) }
         return ViewerDetailResponse.from(viewer, purchasedProfiles)

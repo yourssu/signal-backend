@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.profile.business
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
+import com.yourssu.signal.domain.auth.implement.UserReader
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
 import com.yourssu.signal.domain.common.implement.Uuid
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service
 class ProfileService(
     private val profileWriter: ProfileWriter,
     private val profileReader: ProfileReader,
+    private val userReader: UserReader,
     private val viewerReader: ViewerReader,
     private val usedTicketManager: UsedTicketManager,
     private val profilePriorityManager: ProfilePriorityManager,
@@ -31,6 +33,7 @@ class ProfileService(
     private val blacklistWriter: BlacklistWriter,
 ) {
     fun createProfile(command: ProfileCreatedCommand): MyProfileResponse {
+        userReader.getByUuid(command.toUuid())
         val profile = command.toDomain()
         val countContact = profileReader.countContact(profile.contact)
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit)

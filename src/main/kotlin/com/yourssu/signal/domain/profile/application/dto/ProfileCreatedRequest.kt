@@ -31,13 +31,11 @@ data class ProfileCreatedRequest(
 
     @field:Size(min = 0, max = 3)
     val introSentences: List<String>,
-
-    val uuid: String? = null,
 ) {
-    fun toCommand(): ProfileCreatedCommand {
+    fun toCommand(uuid: String): ProfileCreatedCommand {
         return ProfileCreatedCommand(
-            uuid = uuid,
             gender = gender,
+            uuid = uuid,
             department = department,
             birthYear = birthYear,
             animal = animal,

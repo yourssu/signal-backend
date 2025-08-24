@@ -5,7 +5,7 @@ import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 
 class ProfileCreatedCommand(
-    val uuid: String?,
+    val uuid: String,
     val gender: String,
     val department: String,
     val birthYear: Int,
@@ -15,25 +15,17 @@ class ProfileCreatedCommand(
     val nickname: String,
     val introSentences: List<String>
 ) {
+    fun toUuid(): Uuid {
+        return Uuid(uuid)
+    }
+
     fun toDomain(): Profile {
-        if (uuid != null) {
-            return Profile(
-                uuid = Uuid(uuid),
-                gender = Gender.of(gender),
-                department = department,
-                birthYear = birthYear,
-                animal = animal,
-                contact = contact,
-                mbti = mbti,
-                nickname = nickname,
-                introSentences = introSentences,
-            )
-        }
-        return Profile.ofNewProfile(
+        return Profile(
+            uuid = Uuid(uuid),
             gender = Gender.of(gender),
-            animal = animal,
             department = department,
             birthYear = birthYear,
+            animal = animal,
             contact = contact,
             mbti = mbti,
             nickname = nickname,

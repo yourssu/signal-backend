@@ -1,9 +1,13 @@
 # generateDevToken (POST /api/auth/dev/token)
 
 ## Description
-Development-only endpoint that generates JWT tokens for a specific UUID. This endpoint is only available in non-production environments and is useful for testing and development purposes. Requires admin access key for authentication.
+Development-only endpoint that generates JWT tokens for a specific UUID. If the provided UUID doesn't exist in the system, a new user will be automatically created with that UUID. This endpoint is only available in non-production environments and is useful for testing and development purposes. Requires admin access key for authentication.
 
 **Note: This endpoint is disabled in production environments.**
+
+## Behavior
+- If the UUID exists: Returns tokens for the existing user
+- If the UUID doesn't exist: Creates a new user with the provided UUID and returns tokens
 
 ## Request
 
@@ -85,9 +89,3 @@ This endpoint returns 404 in production environments as it is not registered.
   "message": "No static resource api/auth/dev/token."
 }
 ```
-
-## Notes
-- This endpoint is protected by `@Profile("!prod")` annotation
-- It bypasses user registration and directly generates tokens for the provided UUID
-- Useful for testing authenticated endpoints without going through the registration flow
-- The provided UUID should match the format of existing user UUIDs in the system

@@ -54,7 +54,11 @@ class AuthService(
         if (!adminProperties.isValidAccessKey(request.accessKey)) {
             throw AdminPermissionDeniedException()
         }
-        val user = userReader.getByUuid(Uuid(request.uuid))
+        val user = try {
+            userReader.getByUuid(Uuid(request.uuid))
+        } catch (_: Exception) {
+            userWriter.generateUser(request.uuid)
+        }
         val accessToken = jwtUtils.generateAccessToken(user.uuid.value)
         val refreshToken = jwtUtils.generateRefreshToken(user.uuid.value)
         return TokenResponse(

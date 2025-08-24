@@ -1,0 +1,51 @@
+### Register - Create new user and get tokens
+POST {{host}}/api/auth/register
+
+> {%
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
+%}
+
+###
+
+### Refresh - Get new tokens with refresh token  
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
+%}
+
+###
+
+### Test Protected Endpoint - With token
+GET {{host}}/api/profiles/uuid
+Authorization: Bearer {{accessToken}}
+
+###
+
+### Test Protected Endpoint - Without token (401 expected)
+GET {{host}}/api/profiles/uuid
+
+###
+
+### Test with Invalid Token
+GET {{host}}/api/profiles/uuid
+Authorization: Bearer invalid.token.here
+
+###
+
+### Test Invalid Refresh Token
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+    "refreshToken": "invalid.refresh.token"
+}
+
+###

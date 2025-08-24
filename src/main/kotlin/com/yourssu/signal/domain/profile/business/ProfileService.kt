@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.profile.business
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
@@ -42,8 +43,8 @@ class ProfileService(
         return MyProfileResponse.from(createdProfile)
     }
 
-    fun getProfile(command: MyProfileFoundCommand): MyProfileResponse {
-        val profile = profileReader.getByUuid(command.toDomain())
+    fun getProfile(uuid: String): MyProfileResponse {
+        val profile = profileReader.getByUuid(Uuid(uuid))
         return MyProfileResponse.from(profile)
     }
 

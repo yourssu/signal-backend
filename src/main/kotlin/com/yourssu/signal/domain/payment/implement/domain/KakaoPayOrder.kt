@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.payment.implement.domain
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.common.storage.BaseEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -18,7 +17,7 @@ class KakaoPayOrder(
     var approvedTime: LocalDateTime? = null,
     var canceledTime: LocalDateTime? = null,
     var failedTime: LocalDateTime? = null
-): BaseEntity() {
+) {
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyMMddHHmmss")
         

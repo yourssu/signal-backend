@@ -44,3 +44,8 @@ infra:
     approval-url: "http://localhost:3000/payment/approve"
     cancel-url: "http://localhost:3000/payment/cancel"
     fail-url: "http://localhost:3000/payment/fail"
+
+jwt:
+  secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"
+  access-token-expiration: 1800000  # 30 minutes
+  refresh-token-expiration: 2592000000  # 30 days

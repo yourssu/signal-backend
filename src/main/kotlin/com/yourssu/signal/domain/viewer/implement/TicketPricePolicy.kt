@@ -5,7 +5,9 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.viewer.implement.exception.InvalidTicketQuantityException
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import com.yourssu.signal.domain.viewer.implement.exception.TicketIssuedFailedException
 import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.deposit.SMSMessage
 import org.springframework.stereotype.Component
 
 const val NO_MATCH_TICKET_AMOUNT = 0
@@ -64,6 +66,9 @@ class TicketPricePolicy(
         uuid: Uuid
     ) {
         val quantity = calculateTicketQuantity(price, uuid)
+        if (quantity == NO_MATCH_TICKET_AMOUNT) {
+            throw TicketIssuedFailedException("There is no matching ticket quantity for the price: $price")
+        }
         if (requestQuantity != quantity) {
             throw InvalidTicketQuantityException(
                 requestedQuantity = requestQuantity,

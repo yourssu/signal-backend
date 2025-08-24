@@ -26,6 +26,7 @@ val springCloudVersion = "2024.0.0"
 val mockitoKotlinVersion = "3.2.0"
 val loggingVersion = "7.0.3"
 val okhttpVersion = "5.0.0-alpha.14"
+val jjwtVersion = "0.12.6"
 
 java {
     toolchain {
@@ -44,6 +45,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
 
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:$feignVersion")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer:$feignVersion")
@@ -81,6 +83,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.0")
 
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    
+    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 }
 
 kotlin {

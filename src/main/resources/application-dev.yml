@@ -45,3 +45,8 @@ infra:
     approval-url: ${KAKAOPAY_APPROVAL_URL}
     cancel-url: ${KAKAOPAY_CANCEL_URL}
     fail-url: ${KAKAOPAY_FAIL_URL}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}

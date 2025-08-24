@@ -55,15 +55,15 @@ class ProfileController(
         return ResponseEntity.ok(Response(result = response))
     }
 
-//    @GetMapping("/random")
-//    fun getRandomProfile(@Valid @ModelAttribute request: RandomProfileRequest): ResponseEntity<Response<ProfileResponse>> {
-//        val response = profileService.getRandomProfile(request.toCommand())
-//        return ResponseEntity.ok(Response(result = response))
-//    }
-//
-//    @PostMapping("/contact")
-//    fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest): ResponseEntity<Response<ProfileContactResponse>> {
-//        val response = profileService.consumeTicket(request.toCommand())
-//        return ResponseEntity.ok(Response(result = response))
-//    }
+    @GetMapping("/random")
+    fun getRandomProfile(@Valid @ModelAttribute request: RandomProfileRequest): ResponseEntity<Response<ProfileResponse>> {
+        val response = profileService.getRandomProfile(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @PostMapping("/contact")
+    fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest): ResponseEntity<Response<ProfileContactResponse>> {
+        val response = profileService.consumeTicket(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
 }

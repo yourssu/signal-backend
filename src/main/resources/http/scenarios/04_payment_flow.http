@@ -1,11 +1,13 @@
+@accessKey = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MTFhYmM4OS0wMDJkLTQ3ZDctOThlYS1jZWI0MzcxMjlmYzkiLCJpYXQiOjE3NTYxMzk4NDAsImV4cCI6MTc1NjE0MTY0MH0.YyP5VpfLAhsOy1Ryu6gZ_vUkhFYhcMtm4YX1CAFcrsA1mIG89HAoJ5JXKc9MRIgzMimdzG9oxmqRD8oq6h1neA
+
 ### 1. Initiate KakaoPay payment - Male user buying 3 tickets
 POST {{host}}/api/viewers/payment/kakaopay/initiate
 Authorization: Bearer {{accessKey}}
 Content-Type: application/json
 
 {
-  "quantity": 3,
-  "price": 1500
+  "quantity": 20,
+  "price": 2
 }
 
 > {%
@@ -27,7 +29,7 @@ Content-Type: application/json
 # Note: pgToken is received from KakaoPay redirect after user approval
 # This is a simulation - in real scenario, pgToken comes from KakaoPay callback
 POST {{host}}/api/viewers/payment/kakaopay/approve
-Authorization: Bearer {{maleAccessToken}}
+Authorization: Bearer {{accessKey}}
 Content-Type: application/json
 
 {

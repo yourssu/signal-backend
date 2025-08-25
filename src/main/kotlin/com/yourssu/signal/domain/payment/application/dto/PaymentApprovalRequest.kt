@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 
 data class PaymentApprovalRequest(
     @field:NotBlank
-    val tid: String,
+    val orderId: String,
     
     @field:NotBlank
     val pgToken: String
@@ -13,7 +13,7 @@ data class PaymentApprovalRequest(
     fun toCommand(uuid: String): PaymentApprovalCommand {
         return PaymentApprovalCommand(
             uuid = uuid,
-            tid = tid,
+            orderId = orderId,
             pgToken = pgToken
         )
     }

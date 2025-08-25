@@ -31,6 +31,12 @@ class KakaoPayOrderRepositoryImpl(
             ?: throw NotFoundKakaoPayOrderException()
         return entity.toDomain()
     }
+
+    override fun getByOrderId(orderId: String): KakaoPayOrder {
+        val entity = jpaRepository.findById(orderId)
+            .orElseThrow { NotFoundKakaoPayOrderException() }
+        return entity.toDomain()
+    }
 }
 
 interface KakaoPayPaymentJpaRepository : JpaRepository<KakaoPayOrderEntity, String> {

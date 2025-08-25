@@ -19,8 +19,9 @@ class PaymentService(
     private val kakaoPayOrderReader: KakaoPayOrderReader,
 ) {
     fun initiate(command: PaymentInitiationCommand): PaymentInitiationResponse {
+        val viewer = viewerReader.get(command.toUuid())
         val result = paymentManager.initiate(
-            viewerUuid = command.toUuid(),
+            viewerUuid = viewer.uuid,
             requestQuantity = command.quantity,
             price = command.price
         )
@@ -30,8 +31,10 @@ class PaymentService(
     @Transactional
     fun approve(command: PaymentApprovalCommand): PaymentCompletionResponse {
         val viewer = viewerReader.get(command.toUuid())
-        val kakaoPayOrder = kakaoPayOrderReader.getByViewerAndTid(viewer = viewer, tid = command.tid)
-        viewerWriter.issueTicket(viewer.uuid, kakaoPayOrder.quantity)
+        val kakaoPayOrder = kakaoPayOrderReader.getByOrderId(orderId = command.orderId)
+        val orderedViewer = viewerReader.get(kakaoPayOrder.viewerUuid)
+        viewer.ensureSameViewer(orderedViewer)
+        viewerWriter.issueTicket(orderedViewer.uuid, kakaoPayOrder.quantity)
         val result = paymentManager.approve(
             kakaoPayOrder = kakaoPayOrder,
             pgToken = command.pgToken

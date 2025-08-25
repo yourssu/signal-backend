@@ -20,7 +20,7 @@ class KakaoPayOrder(
 ) {
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyMMddHHmmss")
-        
+
         fun generateOrderId(viewerUuid: String): String {
             val timestamp = LocalDateTime.now().format(DATE_TIME_FORMATTER)
             return "${viewerUuid}_${timestamp}"
@@ -30,21 +30,27 @@ class KakaoPayOrder(
             return "시그널 티켓 ${quantity}장 (${price}원)"
         }
     }
-    
+
     fun complete(aid: String, approvedTime: LocalDateTime) {
         this.status = OrderStatus.COMPLETED
         this.aid = aid
         this.approvedTime = approvedTime
     }
-    
+
     fun cancel() {
         this.status = OrderStatus.CANCELED
         this.canceledTime = LocalDateTime.now()
     }
-    
+
     fun fail() {
         this.status = OrderStatus.FAILED
         this.failedTime = LocalDateTime.now()
+    }
+
+    fun validateReady() {
+        if (status != OrderStatus.READY) {
+            throw InvalidOrderStatusException()
+        }
     }
 }
 

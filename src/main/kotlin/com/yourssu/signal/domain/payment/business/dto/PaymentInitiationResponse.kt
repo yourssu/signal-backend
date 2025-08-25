@@ -1,18 +1,18 @@
 package com.yourssu.signal.domain.payment.business.dto
 
-import com.yourssu.signal.domain.payment.implement.dto.KakaoPayReadyResponse
+import com.yourssu.signal.domain.payment.implement.dto.PaymentInitiation
 
 data class PaymentInitiationResponse(
-    val tid: String,
-    val redirectUrl: String,
-    val mobileRedirectUrl: String
+    val orderId: String,
+    val nextRedirectPcUrl: String,
+    val nextRedirectMobileUrl: String
 ) {
     companion object {
-        fun from(result: KakaoPayReadyResponse): PaymentInitiationResponse {
+        fun from(result: PaymentInitiation): PaymentInitiationResponse {
             return PaymentInitiationResponse(
-                tid = result.tid,
-                redirectUrl = result.nextRedirectPcUrl,
-                mobileRedirectUrl = result.nextRedirectMobileUrl
+                orderId = result.orderId,
+                nextRedirectPcUrl = result.nextRedirectPcUrl,
+                nextRedirectMobileUrl = result.nextRedirectMobileUrl
             )
         }
     }

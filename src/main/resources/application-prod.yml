@@ -50,3 +50,9 @@ jwt:
   secret: ${JWT_SECRET}
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:1800000}  # 30 minutes default
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:2592000000}  # 30 days default
+
+springdoc:
+  api-docs:
+    enabled: false  # Disable in production for security
+  swagger-ui:
+    enabled: false  # Disable in production for security

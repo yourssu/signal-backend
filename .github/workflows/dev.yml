@@ -65,6 +65,17 @@ jobs:
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
           SLACK_ADMIN_CHANNEL: ${{ vars.SLACK_ADMIN_CHANNEL }}
           SLACK_LOG_CHANNEL: ${{ vars.SLACK_LOG_CHANNEL }}
+
+          KAKAOPAY_ADMIN_KEY: ${{ secrets.KAKAOPAY_ADMIN_KEY }}
+          KAKAOPAY_CID: ${{ vars.KAKAOPAY_CID }}
+          KAKAOPAY_APPROVAL_URL: ${{ vars.KAKAOPAY_APPROVAL_URL }}
+          KAKAOPAY_CANCEL_URL: ${{ vars.KAKAOPAY_CANCEL_URL }}
+          KAKAOPAY_FAIL_URL: ${{ vars.KAKAOPAY_FAIL_URL }}
+
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_TOKEN_EXPIRATION: ${{ vars.JWT_ACCESS_TOKEN_EXPIRATION }}
+          JWT_REFRESH_TOKEN_EXPIRATION: ${{ vars.JWT_REFRESH_TOKEN_EXPIRATION }}
+
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
@@ -101,6 +112,16 @@ jobs:
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
           echo "SLACK_ADMIN_CHANNEL=$SLACK_ADMIN_CHANNEL" >> .env
           echo "SLACK_LOG_CHANNEL=$SLACK_LOG_CHANNEL" >> .env
+          
+          echo "KAKAOPAY_ADMIN_KEY" >> .env
+          echo "KAKAOPAY_CID" >> .env
+          echo "KAKAOPAY_APPROVAL_URL" >> .env
+          echo "KAKAOPAY_CANCEL_URL" >> .env
+          echo "KAKAOPAY_FAIL_URL" >> .env
+          
+          echo "JWT_SECRET" >> .env
+          echo "JWT_ACCESS_TOKEN_EXPIRATION" >> .env
+          echo "JWT_REFRESH_TOKEN_EXPIRATION" >> .env
           
           scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
           ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"

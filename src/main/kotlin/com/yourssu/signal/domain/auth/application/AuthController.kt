@@ -46,7 +46,6 @@ class AuthController(
     @Operation(
         summary = "개발용 토큰 발급",
         description = "특정 UUID에 대한 JWT 토큰을 생성하는 개발 전용 엔드포인트입니다. 제공된 UUID가 시스템에 존재하지 않는 경우, 해당 UUID로 새로운 사용자가 자동으로 생성됩니다. 이 엔드포인트는 프로덕션이 아닌 환경에서만 사용 가능하며 테스트 및 개발 목적으로 유용합니다. 인증을 위해 관리자 액세스 키가 필요합니다.",
-        security = [SecurityRequirement(name = "secretKey")]
     )
     @Profile("!prod")
     @PostMapping("/dev/token")

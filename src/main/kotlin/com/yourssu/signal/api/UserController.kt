@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.user.application
+package com.yourssu.signal.api
 
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth

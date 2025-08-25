@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.payment.application.dto
+package com.yourssu.signal.api.dto.dto
 
 import com.yourssu.signal.domain.payment.business.command.PaymentInitiationCommand
 import jakarta.validation.constraints.Positive

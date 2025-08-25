@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.profile.application.dto
+package com.yourssu.signal.api.dto
 
 import com.yourssu.signal.domain.profile.business.command.AllProfilesFoundCommand
 import jakarta.validation.constraints.NotBlank

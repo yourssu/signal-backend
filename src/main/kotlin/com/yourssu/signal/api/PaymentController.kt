@@ -1,10 +1,10 @@
-package com.yourssu.signal.domain.payment.application
+package com.yourssu.signal.api
 
+import com.yourssu.signal.api.dto.dto.PaymentApprovalRequest
+import com.yourssu.signal.api.dto.dto.PaymentInitiationRequest
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
-import com.yourssu.signal.domain.payment.application.dto.PaymentApprovalRequest
-import com.yourssu.signal.domain.payment.application.dto.PaymentInitiationRequest
 import com.yourssu.signal.domain.payment.business.PaymentService
 import com.yourssu.signal.domain.payment.business.dto.PaymentCompletionResponse
 import com.yourssu.signal.domain.payment.business.dto.PaymentInitiationResponse

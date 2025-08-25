@@ -30,15 +30,14 @@ class PaymentService(
 
     @Transactional
     fun approve(command: PaymentApprovalCommand): PaymentCompletionResponse {
-        val viewer = viewerReader.get(command.toUuid())
         val kakaoPayOrder = kakaoPayOrderReader.getByOrderId(orderId = command.orderId)
-        val orderedViewer = viewerReader.get(kakaoPayOrder.viewerUuid)
-        viewer.ensureSameViewer(orderedViewer)
-        viewerWriter.issueTicket(orderedViewer.uuid, kakaoPayOrder.quantity)
+        kakaoPayOrder.validateOwner(command.toUuid())
         val result = paymentManager.approve(
             kakaoPayOrder = kakaoPayOrder,
             pgToken = command.pgToken
         )
+        // TODO: 결제 실패하는 경우 롤백 처리 필요, 현재는 결제 승인 후 티켓 발급에서 실패하는 경우가 없음
+        viewerWriter.issueTicket(kakaoPayOrder.viewerUuid, kakaoPayOrder.quantity)
         return PaymentCompletionResponse.from(result)
     }
 }

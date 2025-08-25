@@ -52,6 +52,12 @@ class KakaoPayOrder(
             throw InvalidOrderStatusException()
         }
     }
+    
+    fun validateOwner(requestViewerUuid: Uuid) {
+        if (viewerUuid != requestViewerUuid) {
+            throw OrderOwnerMismatchException()
+        }
+    }
 }
 
 

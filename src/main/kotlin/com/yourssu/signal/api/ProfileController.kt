@@ -1,9 +1,11 @@
-package com.yourssu.signal.domain.profile.application
+package com.yourssu.signal.api
 
+import com.yourssu.signal.api.dto.ProfileCreatedRequest
+import com.yourssu.signal.api.dto.ProfilesFoundRequest
+import com.yourssu.signal.api.dto.TicketConsumedRequest
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
-import com.yourssu.signal.domain.profile.application.dto.*
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.business.ProfileService
 import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand

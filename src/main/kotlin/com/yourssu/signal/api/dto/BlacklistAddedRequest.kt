@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.blacklist.application.dto
+package com.yourssu.signal.api.dto
 
 import com.yourssu.signal.domain.blacklist.business.command.BlacklistAddedCommand
 import jakarta.validation.constraints.NotBlank

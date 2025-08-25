@@ -1,12 +1,11 @@
-package com.yourssu.signal.domain.auth.application
+package com.yourssu.signal.api
 
-import com.yourssu.signal.domain.auth.application.dto.DevTokenRequest
-import com.yourssu.signal.domain.auth.application.dto.RefreshTokenRequest
-import com.yourssu.signal.domain.auth.application.dto.TokenResponse
+import com.yourssu.signal.api.dto.DevTokenRequest
+import com.yourssu.signal.api.dto.RefreshTokenRequest
+import com.yourssu.signal.domain.auth.business.dto.TokenResponse
 import com.yourssu.signal.domain.auth.business.AuthService
 import com.yourssu.signal.domain.common.business.dto.Response
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile

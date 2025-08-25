@@ -66,10 +66,7 @@ class TicketPricePolicy(
         uuid: Uuid
     ) {
         val quantity = calculateTicketQuantity(price, uuid)
-        if (quantity == NO_MATCH_TICKET_AMOUNT) {
-            throw TicketIssuedFailedException("There is no matching ticket quantity for the price: $price")
-        }
-        if (requestQuantity != quantity) {
+        if (quantity == NO_MATCH_TICKET_AMOUNT || requestQuantity != quantity) {
             throw InvalidTicketQuantityException(
                 requestedQuantity = requestQuantity,
                 expectedQuantity = quantity,

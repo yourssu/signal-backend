@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 @Table(name = "kakaopay_order")
 class KakaoPayOrderEntity(
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
     @Column(nullable = false)

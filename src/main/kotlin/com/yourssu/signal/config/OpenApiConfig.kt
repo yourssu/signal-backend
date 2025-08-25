@@ -1,4 +1,4 @@
-package com.yourssu.signal.global.config
+package com.yourssu.signal.config
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI

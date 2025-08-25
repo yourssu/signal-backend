@@ -39,11 +39,11 @@ infra:
     prompt: "prompt for a developer"
     user-input: 100
   kakaopay:
-    admin-key: "YOUR_KAKAO_ADMIN_KEY"
+    admin-key: "DEV4FF69BE65A3296232BCF721254981D9C38784"
     cid: "TC0ONETIME"
-    approval-url: "http://localhost:3000/payment/approve"
-    cancel-url: "http://localhost:3000/payment/cancel"
-    fail-url: "http://localhost:3000/payment/fail"
+    "approval_url": "https://yourssu.signal.com/payment/success"
+    "cancel_url": "https://yourssu.signal.com/payment/cancel"
+    "fail_url": "https://yourssu.signal.com/payment/fail"
 
 jwt:
   secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"

@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.viewer.implement.domain
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.viewer.implement.domain.exception.ViewerNotSameException
 import com.yourssu.signal.domain.viewer.implement.exception.ViolatedAddedTicketException
 import com.yourssu.signal.domain.viewer.implement.exception.ViolatedExceedUsedTicketException
 import java.time.ZonedDateTime
@@ -48,6 +49,12 @@ class Viewer(
     private fun validateOverUsedTicket(ticket: Int) {
         if (this.usedTicket + ticket > this.ticket) {
             throw ViolatedExceedUsedTicketException()
+        }
+    }
+
+    fun ensureSameViewer(orderedViewer: Viewer) {
+        if (this != orderedViewer) {
+            throw ViewerNotSameException()
         }
     }
 }

@@ -18,4 +18,12 @@ data class KakaoPayReadyResponse(
             quantity = request.quantity,
         )
     }
+
+    fun toPaymentInitiation(orderId: String): PaymentInitiation {
+        return PaymentInitiation(
+            orderId = orderId,
+            nextRedirectPcUrl = nextRedirectPcUrl,
+            nextRedirectMobileUrl = nextRedirectMobileUrl
+        )
+    }
 }

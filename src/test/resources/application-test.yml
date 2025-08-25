@@ -24,7 +24,10 @@ domain:
       access-key: "DonaEmilyEatSteakLeopold"
       contact-secret-key : "ThisIsASecretKeyForContact"
   policy:
-    contact-price: 2
+    whitelist: false
+    contact-limit: 4
+    contact-limit-warning: 2
+    contact-price: 1
     ticket-price-policy: 2n20.4n40.6n60.8n80.10n100
     ticket-price-registered-policy: 1n10.3n30.5n50.7n70.9n90
 
@@ -35,3 +38,24 @@ infra:
     model: "gpt-4o-mini"
     prompt: "prompt for a developer"
     user-input: 100
+  kakaopay:
+    admin-key: "DEV4FF69BE65A3296232BCF721254981D9C38784"
+    cid: "TC0ONETIME"
+    "approval_url": "https://yourssu.signal.com/payment/success"
+    "cancel_url": "https://yourssu.signal.com/payment/cancel"
+    "fail_url": "https://yourssu.signal.com/payment/fail"
+
+jwt:
+  secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"
+  access-token-expiration: 1800000  # 30 minutes
+  refresh-token-expiration: 2592000000  # 30 days
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

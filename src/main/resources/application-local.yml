@@ -49,3 +49,13 @@ jwt:
   secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"
   access-token-expiration: 1800000  # 30 minutes
   refresh-token-expiration: 2592000000  # 30 days
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

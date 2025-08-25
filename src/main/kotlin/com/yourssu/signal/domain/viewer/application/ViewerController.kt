@@ -3,29 +3,28 @@ package com.yourssu.signal.domain.viewer.application
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
-import com.yourssu.signal.domain.viewer.application.dto.*
+import com.yourssu.signal.domain.viewer.application.dto.BankDepositSmsRequest
+import com.yourssu.signal.domain.viewer.application.dto.NotificationDepositRequest
+import com.yourssu.signal.domain.viewer.application.dto.TicketIssuedRequest
+import com.yourssu.signal.domain.viewer.application.dto.ViewersFoundRequest
 import com.yourssu.signal.domain.viewer.business.ViewerService
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
-import com.yourssu.signal.infrastructure.TicketSseManager
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
 
 @Tag(name = "Viewer", description = "Viewer management APIs")
 @RestController
 @RequestMapping("/api/viewers")
 class ViewerController(
     private val viewerService: ViewerService,
-    private val ticketSseManager: TicketSseManager,
 ) {
     @Operation(
         summary = "인증번호 발급",
@@ -46,7 +45,6 @@ class ViewerController(
     @PostMapping
     fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest): ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.issueTicket(request.toCommand())
-        ticketSseManager.notifyTicketIssued(response)
         return ResponseEntity.ok(Response(result = response))
     }
 
@@ -57,19 +55,7 @@ class ViewerController(
     @PostMapping("/sms")
     fun issueTicketByBankDepositSms(@Valid @RequestBody request: BankDepositSmsRequest): ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.issueTicket(request.toCommand())
-        ticketSseManager.notifyTicketIssued(response)
         return ResponseEntity.ok(Response(result = response))
-    }
-
-    @Operation(
-        summary = "티켓 이벤트 구독",
-        description = "Subscribe to real-time ticket events using Server-Sent Events (SSE)",
-        security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    @GetMapping("/tickets/events", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
-    @RequireAuth
-    fun subscribeToTicketEvents(@Valid @ModelAttribute request: FoundSelfRequest): SseEmitter {
-        return ticketSseManager.streamTicketEvents(request.toCommand())
     }
 
     @Operation(

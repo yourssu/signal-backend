@@ -4,8 +4,8 @@ import com.yourssu.signal.config.properties.AdminConfigurationProperties
 import com.yourssu.signal.config.properties.JwtProperties
 import com.yourssu.signal.config.security.exception.InvalidJwtTokenException
 import com.yourssu.signal.config.security.exception.JwtUtils
-import com.yourssu.signal.domain.auth.application.dto.DevTokenRequest
-import com.yourssu.signal.domain.auth.application.dto.TokenResponse
+import com.yourssu.signal.api.dto.DevTokenRequest
+import com.yourssu.signal.domain.auth.business.dto.TokenResponse
 import com.yourssu.signal.domain.auth.implement.UserReader
 import com.yourssu.signal.domain.auth.implement.UserWriter
 import com.yourssu.signal.domain.common.implement.Uuid

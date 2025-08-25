@@ -1,8 +1,8 @@
-package com.yourssu.signal.domain.profile.application
+package com.yourssu.signal.api
 
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
-import com.yourssu.signal.domain.profile.application.dto.NicknameSuggestedRequest
+import com.yourssu.signal.api.dto.NicknameSuggestedRequest
 import com.yourssu.signal.infrastructure.dto.NicknameSuggestedResponse
 import com.yourssu.signal.infrastructure.ChatModel
 import io.swagger.v3.oas.annotations.Operation

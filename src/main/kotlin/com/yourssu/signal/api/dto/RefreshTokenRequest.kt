@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.auth.application.dto
+package com.yourssu.signal.api.dto
 
 import jakarta.validation.constraints.NotBlank
 

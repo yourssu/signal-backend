@@ -19,9 +19,8 @@ class PaymentService(
     private val kakaoPayOrderReader: KakaoPayOrderReader,
 ) {
     fun initiate(command: PaymentInitiationCommand): PaymentInitiationResponse {
-        val viewer = viewerReader.get(command.toUuid())
         val result = paymentManager.initiate(
-            viewerUuid = viewer.uuid,
+            uuid = command.toUuid(),
             requestQuantity = command.quantity,
             price = command.price
         )
@@ -37,7 +36,7 @@ class PaymentService(
             pgToken = command.pgToken
         )
         // TODO: 결제 실패하는 경우 롤백 처리 필요, 현재는 결제 승인 후 티켓 발급에서 실패하는 경우가 없음
-        viewerWriter.issueTicket(kakaoPayOrder.viewerUuid, kakaoPayOrder.quantity)
+        viewerWriter.issueTicket(kakaoPayOrder.uuid, kakaoPayOrder.quantity)
         return PaymentCompletionResponse.from(result)
     }
 }

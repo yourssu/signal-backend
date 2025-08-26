@@ -24,7 +24,7 @@ class KakaoPayOrderRepositoryImpl(
     override fun getByViewerUuidAndTid(viewer: Viewer, tid: String): KakaoPayOrder {
         val entity = jpaQueryFactory.selectFrom(kakaoPayOrderEntity)
             .where(
-                kakaoPayOrderEntity.viewerUuid.eq(viewer.uuid.value),
+                kakaoPayOrderEntity.uuid.eq(viewer.uuid.value),
                 kakaoPayOrderEntity.tid.eq(tid)
             )
             .fetchOne()
@@ -33,8 +33,10 @@ class KakaoPayOrderRepositoryImpl(
     }
 
     override fun getByOrderId(orderId: String): KakaoPayOrder {
-        val entity = jpaRepository.findById(orderId)
-            .orElseThrow { NotFoundKakaoPayOrderException() }
+        val entity = jpaQueryFactory.selectFrom(kakaoPayOrderEntity)
+            .where(kakaoPayOrderEntity.orderId.eq(orderId))
+            .fetchOne()
+            ?: throw NotFoundKakaoPayOrderException()
         return entity.toDomain()
     }
 }

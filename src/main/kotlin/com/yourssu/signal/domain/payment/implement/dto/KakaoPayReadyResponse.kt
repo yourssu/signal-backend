@@ -11,7 +11,7 @@ data class KakaoPayReadyResponse(
     fun toOrder(request: OrderReadyRequest): KakaoPayOrder {
         return KakaoPayOrder(
             tid = tid,
-            viewerUuid = Uuid(request.viewerUuid),
+            uuid = Uuid(request.uuid),
             orderId = request.orderId,
             itemName = request.itemName,
             amount = request.price,

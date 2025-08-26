@@ -3,7 +3,6 @@ package com.yourssu.signal.domain.payment.implement
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
 import com.yourssu.signal.domain.payment.implement.dto.KakaoPayApprovalResponse
-import com.yourssu.signal.domain.payment.implement.dto.KakaoPayReadyResponse
 import com.yourssu.signal.domain.payment.implement.dto.OrderApprovalRequest
 import com.yourssu.signal.domain.payment.implement.dto.OrderReadyRequest
 import com.yourssu.signal.domain.payment.implement.dto.PaymentInitiation
@@ -19,18 +18,18 @@ class PaymentManager(
 ) {
     @Transactional
     fun initiate(
-        viewerUuid: Uuid,
+        uuid: Uuid,
         requestQuantity: Int,
         price: Int
     ): PaymentInitiation {
         ticketPricePolicy.validateTicketQuantity(
             requestQuantity = requestQuantity,
             price = price,
-            uuid = viewerUuid
+            uuid = uuid
         )
         val request = OrderReadyRequest(
-            viewerUuid = viewerUuid.value,
-            orderId = KakaoPayOrder.generateOrderId(viewerUuid.value),
+            uuid = uuid.value,
+            orderId = KakaoPayOrder.generateOrderId(uuid.value),
             itemName = KakaoPayOrder.generateItemName(requestQuantity, price),
             quantity = requestQuantity,
             price = price
@@ -49,10 +48,10 @@ class PaymentManager(
         ticketPricePolicy.validateTicketQuantity(
             requestQuantity = kakaoPayOrder.quantity,
             price = kakaoPayOrder.amount,
-            uuid = kakaoPayOrder.viewerUuid,
+            uuid = kakaoPayOrder.uuid,
         )
         val request = OrderApprovalRequest(
-            viewerUuid = kakaoPayOrder.viewerUuid.value,
+            uuid = kakaoPayOrder.uuid.value,
             orderId = kakaoPayOrder.orderId,
             tid = kakaoPayOrder.tid,
             pgToken = pgToken

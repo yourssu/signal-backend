@@ -22,7 +22,7 @@ class OpenApiConfig {
             .servers(
                 listOf(
                     Server().url("http://localhost:8080").description("Local Development Server"),
-                    Server().url("https://api.dev.signal.com").description("Development Server"),
+                    Server().url("https://api.dev.signal.yourssu.com").description("Development Server"),
                 )
             )
             .components(

@@ -14,6 +14,7 @@ class JwtAuthenticationFilter(
 ) : OncePerRequestFilter() {
     companion object {
         const val AUTHORIZATION_HEADER = "Authorization"
+        const val X_AUTH_TOKEN_HEADER = "X-Auth-Token"
         const val BEARER_PREFIX = "Bearer "
     }
 
@@ -37,11 +38,14 @@ class JwtAuthenticationFilter(
     }
 
     private fun extractTokenFromRequest(request: HttpServletRequest): String? {
-        val bearerToken = request.getHeader(AUTHORIZATION_HEADER)
-        return if (bearerToken != null && bearerToken.startsWith(BEARER_PREFIX)) {
-            bearerToken.substring(BEARER_PREFIX.length)
-        } else {
-            null
+        val authHeader = request.getHeader(AUTHORIZATION_HEADER)
+        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+            return authHeader.substring(BEARER_PREFIX.length)
         }
+        val xAuthToken = request.getHeader(X_AUTH_TOKEN_HEADER)
+        if (xAuthToken != null && xAuthToken.startsWith(BEARER_PREFIX)) {
+            return xAuthToken.substring(BEARER_PREFIX.length)
+        }
+        return null
     }
 }

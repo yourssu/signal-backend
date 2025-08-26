@@ -117,7 +117,7 @@ CREATE TABLE verification (
 -- 8. KakaoPay Order table
 CREATE TABLE kakaopay_order (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    viewer_uuid VARCHAR(36) NOT NULL,
+    uuid VARCHAR(36) NOT NULL,
     tid VARCHAR(255) NOT NULL,
     order_id VARCHAR(255) NOT NULL,
     item_name VARCHAR(255) NOT NULL,
@@ -132,7 +132,7 @@ CREATE TABLE kakaopay_order (
     updated_time DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_kakaopay_order_tid (tid),
-    INDEX idx_kakaopay_order_viewer_uuid (viewer_uuid),
+    INDEX idx_kakaopay_order_uuid (uuid),
     INDEX idx_kakaopay_order_order_id (order_id),
     INDEX idx_kakaopay_order_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -32,7 +32,7 @@ data class KakaoPayApprovalResponse(
             aid = aid,
             tid = tid,
             orderId = partnerOrderId,
-            viewerUuid = partnerUserId,
+            uuid = partnerUserId,
             itemName = itemName,
             totalAmount = amount.total,
             approvedTime = approvedAt

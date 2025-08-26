@@ -6,7 +6,7 @@ data class KakaoPayApprovalResponse(
     val aid: String,
     val tid: String,
     val orderId: String,
-    val viewerUuid: String,
+    val uuid: String,
     val itemName: String,
     val totalAmount: Int,
     val approvedTime: LocalDateTime

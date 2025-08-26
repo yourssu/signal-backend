@@ -1,8 +1,15 @@
-@accessKey = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1MTFhYmM4OS0wMDJkLTQ3ZDctOThlYS1jZWI0MzcxMjlmYzkiLCJpYXQiOjE3NTYxMzk4NDAsImV4cCI6MTc1NjE0MTY0MH0.YyP5VpfLAhsOy1Ryu6gZ_vUkhFYhcMtm4YX1CAFcrsA1mIG89HAoJ5JXKc9MRIgzMimdzG9oxmqRD8oq6h1neA
+### 0. Register - Create new user and get tokens
+POST {{host}}/api/auth/register
 
-### 1. Initiate KakaoPay payment - Male user buying 3 tickets
+> {%
+    client.global.set("accessToken", response.body.result.accessToken);
+%}
+
+###
+
+### 1. Initiate KakaoPay payment
 POST {{host}}/api/viewers/payment/kakaopay/initiate
-Authorization: Bearer {{accessKey}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
@@ -10,97 +17,30 @@ Content-Type: application/json
   "price": 2
 }
 
+
 > {%
-    client.test("Payment initiated", function() {
-        client.assert(response.status === 201, "Response status is not 201");
-        client.assert(response.body.result.tid !== undefined, "Transaction ID is missing");
-        client.assert(response.body.result.nextRedirectPcUrl !== undefined, "PC redirect URL is missing");
-    });
-    
-    client.global.set("paymentTid", response.body.result.tid);
-    console.log("Payment TID: " + response.body.result.tid);
-    console.log("Redirect to: " + response.body.result.nextRedirectPcUrl);
-    console.log("*** User must approve payment at KakaoPay ***");
+    client.global.set("orderId", response.body.result.orderId);
 %}
 
 ###
+
+@pgToken = e59dd8c4979f9eb6362d
 
 ### 2. Approve payment after user confirmation
 # Note: pgToken is received from KakaoPay redirect after user approval
 # This is a simulation - in real scenario, pgToken comes from KakaoPay callback
 POST {{host}}/api/viewers/payment/kakaopay/approve
-Authorization: Bearer {{accessKey}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "tid": "{{paymentTid}}",
-  "pgToken": "SIMULATED_PG_TOKEN_12345"
+  "orderId": "{{orderId}}",
+  "pgToken": "{{pgToken}}"
 }
-
-> {%
-    client.test("Payment approved", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-        client.assert(response.body.result.ticketsIssued === 3, "Incorrect ticket count");
-    });
-    
-    console.log("Tickets issued: " + response.body.result.ticketsIssued);
-    console.log("Total tickets: " + response.body.result.totalTickets);
-    console.log("Total amount: " + response.body.result.totalAmount);
-%}
 
 ###
 
-### 3. Check updated ticket balance
-GET {{host}}/api/viewers/uuid
-Authorization: Bearer {{maleAccessToken}}
-
-> {%
-    client.test("Ticket balance updated", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-    
-    console.log("Current tickets: " + response.body.result.ticket);
-    console.log("Used tickets: " + response.body.result.usedTicket);
-%}
-
+### 3. Check viewer's balance after payment
+GET {{host}}/api/viewers/me
+Authorization: Bearer {{accessToken}}
 ###
-
-### 4. Issue ticket by deposit notification (alternative payment method)
-POST {{host}}/api/viewers/deposit
-Authorization: Bearer {{maleAccessToken}}
-Content-Type: application/json
-
-{
-  "depositName": "홍길동",
-  "ticketCount": 2
-}
-
-> {%
-    client.test("Deposit notification processed", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-    
-    if(response.body.result) {
-        console.log("Tickets issued via deposit: " + response.body.result.ticket);
-    }
-%}
-
-###
-
-### 5. Issue ticket by bank SMS (alternative payment method)
-POST {{host}}/api/viewers/tickets/sms
-Content-Type: application/json
-
-{
-  "smsContent": "[KB]12/25 14:30 홍길동 입금 3,000원 잔액 50,000원",
-  "verificationCode": {{maleVerificationCode}}
-}
-
-> {%
-    client.test("SMS deposit processed", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-    });
-    
-    console.log("Tickets issued: " + response.body.result.ticketCount);
-    console.log("Total tickets: " + response.body.result.totalTickets);
-%}

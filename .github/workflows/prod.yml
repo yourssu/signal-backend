@@ -76,6 +76,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_ACCESS_TOKEN_EXPIRATION: ${{ vars.JWT_ACCESS_TOKEN_EXPIRATION }}
           JWT_REFRESH_TOKEN_EXPIRATION: ${{ vars.JWT_REFRESH_TOKEN_EXPIRATION }}
+
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
@@ -113,15 +114,15 @@ jobs:
           echo "SLACK_ADMIN_CHANNEL=$SLACK_ADMIN_CHANNEL" >> .env
           echo "SLACK_LOG_CHANNEL=$SLACK_LOG_CHANNEL" >> .env
           
-          echo "KAKAOPAY_ADMIN_KEY" >> .env
-          echo "KAKAOPAY_CID" >> .env
-          echo "KAKAOPAY_APPROVAL_URL" >> .env
-          echo "KAKAOPAY_CANCEL_URL" >> .env
-          echo "KAKAOPAY_FAIL_URL" >> .env
-          
-          echo "JWT_SECRET" >> .env
-          echo "JWT_ACCESS_TOKEN_EXPIRATION" >> .env
-          echo "JWT_REFRESH_TOKEN_EXPIRATION" >> .env
+          echo "KAKAOPAY_ADMIN_KEY=$KAKAOPAY_ADMIN_KEY" >> .env
+          echo "KAKAOPAY_CID=$KAKAOPAY_CID" >> .env
+          echo "KAKAOPAY_APPROVAL_URL=$KAKAOPAY_APPROVAL_URL" >> .env
+          echo "KAKAOPAY_CANCEL_URL=$KAKAOPAY_CANCEL_URL" >> .env
+          echo "KAKAOPAY_FAIL_URL=$KAKAOPAY_FAIL_URL" >> .env
+
+          echo "JWT_SECRET=$JWT_SECRET" >> .env
+          echo "JWT_ACCESS_TOKEN_EXPIRATION=$JWT_ACCESS_TOKEN_EXPIRATION" >> .env
+          echo "JWT_REFRESH_TOKEN_EXPIRATION=$JWT_REFRESH_TOKEN_EXPIRATION" >> .env
           
           scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
           ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"

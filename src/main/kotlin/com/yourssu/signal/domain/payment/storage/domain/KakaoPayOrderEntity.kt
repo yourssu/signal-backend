@@ -15,7 +15,7 @@ class KakaoPayOrderEntity(
     val id: Long? = null,
 
     @Column(nullable = false)
-    val viewerUuid: String,
+    val uuid: String,
 
     @Column(nullable = false, unique = true)
     val tid: String,
@@ -51,7 +51,7 @@ class KakaoPayOrderEntity(
     fun toDomain(): KakaoPayOrder {
         return KakaoPayOrder(
             id = id,
-            viewerUuid = Uuid(viewerUuid),
+            uuid = Uuid(uuid),
             tid = tid,
             orderId = orderId,
             itemName = itemName,
@@ -69,7 +69,7 @@ class KakaoPayOrderEntity(
         fun from(kakaoPayOrder: KakaoPayOrder): KakaoPayOrderEntity {
             return KakaoPayOrderEntity(
                 id = kakaoPayOrder.id,
-                viewerUuid = kakaoPayOrder.viewerUuid.value,
+                uuid = kakaoPayOrder.uuid.value,
                 tid = kakaoPayOrder.tid,
                 orderId = kakaoPayOrder.orderId,
                 itemName = kakaoPayOrder.itemName,

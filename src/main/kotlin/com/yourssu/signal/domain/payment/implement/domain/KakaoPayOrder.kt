@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 class KakaoPayOrder(
     val id: Long? = null,
     val orderId: String,
-    val viewerUuid: Uuid,
+    val uuid: Uuid,
     val tid: String,
     val itemName: String,
     val amount: Int,
@@ -21,9 +21,9 @@ class KakaoPayOrder(
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyMMddHHmmss")
 
-        fun generateOrderId(viewerUuid: String): String {
+        fun generateOrderId(uuid: String): String {
             val timestamp = LocalDateTime.now().format(DATE_TIME_FORMATTER)
-            return "${viewerUuid}_${timestamp}"
+            return "${uuid}_${timestamp}"
         }
 
         fun generateItemName(quantity: Int, price: Int): String {
@@ -53,8 +53,8 @@ class KakaoPayOrder(
         }
     }
     
-    fun validateOwner(requestViewerUuid: Uuid) {
-        if (viewerUuid != requestViewerUuid) {
+    fun validateOwner(requestUser: Uuid) {
+        if (uuid != requestUser) {
             throw OrderOwnerMismatchException()
         }
     }

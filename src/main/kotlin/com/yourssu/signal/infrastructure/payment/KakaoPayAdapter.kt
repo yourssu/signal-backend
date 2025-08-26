@@ -23,7 +23,7 @@ class KakaoPayAdapter(
         val kakaoPayRequest = KakaoPayReadyRequest(
             cid = kakaoPayProperties.cid,
             partnerOrderId = request.orderId,
-            partnerUserId = request.viewerUuid,
+            partnerUserId = request.uuid,
             itemName = request.itemName,
             quantity = request.quantity,
             totalAmount = request.price,
@@ -45,7 +45,7 @@ class KakaoPayAdapter(
             cid = kakaoPayProperties.cid,
             tid = request.tid,
             partnerOrderId = request.orderId,
-            partnerUserId = request.viewerUuid,
+            partnerUserId = request.uuid,
             pgToken = request.pgToken
         )
         try {

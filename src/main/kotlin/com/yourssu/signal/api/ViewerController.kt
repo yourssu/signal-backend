@@ -8,6 +8,7 @@ import com.yourssu.signal.api.dto.NotificationDepositRequest
 import com.yourssu.signal.api.dto.TicketIssuedRequest
 import com.yourssu.signal.api.dto.ViewersFoundRequest
 import com.yourssu.signal.domain.viewer.business.ViewerService
+import com.yourssu.signal.domain.viewer.business.dto.TicketPackagesResponses
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
@@ -95,6 +96,16 @@ class ViewerController(
     @RequireAuth
     fun notifyDeposit(@Valid @RequestBody request: NotificationDepositRequest): ResponseEntity<Response<ViewerResponse>?> {
         val response = viewerService.issueTicketByDepositName(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "티켓 패키지 조회",
+        description = "사용 가능한 모든 티켓 패키지의 가격과 수량 정보를 조회합니다."
+    )
+    @GetMapping("/packages")
+    fun getTicketPackages(): ResponseEntity<Response<TicketPackagesResponses>> {
+        val response = viewerService.getTicketPackages()
         return ResponseEntity.ok(Response(result = response))
     }
 }

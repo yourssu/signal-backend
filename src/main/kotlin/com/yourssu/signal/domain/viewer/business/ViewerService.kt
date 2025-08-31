@@ -5,7 +5,9 @@ import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
 import com.yourssu.signal.domain.viewer.business.command.*
-import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
+import com.yourssu.signal.domain.viewer.business.command.ProcessDepositSmsCommand
+import com.yourssu.signal.domain.viewer.business.dto.TicketPackagesResponses
+import com.yourssu.signal.domain.viewer.business.dto.TicketPackageResponse
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
@@ -24,6 +26,7 @@ class ViewerService(
     private val purchasedProfileReader: PurchasedProfileReader,
     private val adminAccessChecker: AdminAccessChecker,
     private val depositManager: DepositManager,
+    private val ticketPricePolicy: TicketPricePolicy,
 ) {
     fun issueVerificationCode(uuid: String): VerificationResponse {
         val code = verificationWriter.issueVerificationCode(uuid = Uuid(uuid))
@@ -80,5 +83,10 @@ class ViewerService(
             Notification.notifyDeposit(command.message, command.verificationCode)
             throw TicketIssuedFailedException("${command.message} is not a valid deposit name")
         }
+    }
+
+    fun getTicketPackages(): TicketPackagesResponses {
+        val ticketPackages = ticketPricePolicy.getTicketPackages()
+        return TicketPackagesResponses.from(ticketPackages)
     }
 }

@@ -1,0 +1,5 @@
+### Get ticket packages
+GET {{host}}/api/viewers/packages
+Content-Type: application/json
+
+###

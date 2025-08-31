@@ -1,6 +1,6 @@
 package com.yourssu.signal.api.dto
 
-import com.yourssu.signal.domain.viewer.business.dto.ProcessDepositSmsCommand
+import com.yourssu.signal.domain.viewer.business.command.ProcessDepositSmsCommand
 import jakarta.validation.constraints.NotBlank
 
 class BankDepositSmsRequest(

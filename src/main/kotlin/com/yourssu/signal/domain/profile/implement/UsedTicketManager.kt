@@ -33,7 +33,6 @@ class UsedTicketManager(
 
     private fun savePurchasedProfile(purchasedProfile: PurchasedProfile) {
         purchasedProfileRepository.save(purchasedProfile)
-//        purchasedProfileRepository.updateCacheIds()
     }
 
     private fun exists(purchasedProfile: PurchasedProfile): Boolean {

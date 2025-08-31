@@ -4,6 +4,6 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "pgToken": "SIMULATED_PG_TOKEN_12345",
-  "orderId": ""
+  "pgToken": "fd50ce6ad7dacdaf9f3f",
+  "orderId": "1145ae95-5b54-48b3-9fc2-156201ffd71e_250901010928"
 }

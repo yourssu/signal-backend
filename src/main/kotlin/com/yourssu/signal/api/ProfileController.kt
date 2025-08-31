@@ -11,6 +11,7 @@ import com.yourssu.signal.domain.profile.business.ProfileService
 import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
+import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.api.dto.RandomProfileRequest
 import io.swagger.v3.oas.annotations.Operation
@@ -128,6 +129,16 @@ class ProfileController(
     @RequireAuth
     fun consumeTicket(@Valid @RequestBody request: TicketConsumedRequest, @Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Response<ProfileContactResponse>> {
         val response = profileService.consumeTicket(request.toCommand(uuid))
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "프로필 랭킹 조회",
+        description = "특정 프로필의 구매 랭킹을 조회합니다. UUID, 순위, 전체 프로필 개수, 구매 횟수를 포함한 상세 정보를 반환합니다."
+    )
+    @GetMapping("/ranking")
+    fun getProfileRanking(@RequestParam uuid: String): ResponseEntity<Response<ProfileRankingResponse>> {
+        val response = profileService.getProfileRanking(uuid)
         return ResponseEntity.ok(Response(result = response))
     }
 }

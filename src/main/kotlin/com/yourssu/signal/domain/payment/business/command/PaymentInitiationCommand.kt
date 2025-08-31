@@ -4,8 +4,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 
 data class PaymentInitiationCommand(
     val uuid: String,
-    val quantity: Int,
-    val price: Int
+    val packageId: String,
 ) {
     fun toUuid(): Uuid {
         return Uuid(uuid)

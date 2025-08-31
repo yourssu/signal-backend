@@ -6,7 +6,6 @@ import com.yourssu.signal.domain.payment.business.dto.PaymentCompletionResponse
 import com.yourssu.signal.domain.payment.business.dto.PaymentInitiationResponse
 import com.yourssu.signal.domain.payment.implement.KakaoPayOrderReader
 import com.yourssu.signal.domain.payment.implement.PaymentManager
-import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.domain.viewer.implement.ViewerWriter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,15 +13,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class PaymentService(
     private val paymentManager: PaymentManager,
-    private val viewerReader: ViewerReader,
     private val viewerWriter: ViewerWriter,
     private val kakaoPayOrderReader: KakaoPayOrderReader,
 ) {
     fun initiate(command: PaymentInitiationCommand): PaymentInitiationResponse {
         val result = paymentManager.initiate(
             uuid = command.toUuid(),
-            requestQuantity = command.quantity,
-            price = command.price
+            packageId = command.packageId
         )
         return PaymentInitiationResponse.from(result)
     }

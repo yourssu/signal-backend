@@ -19,20 +19,20 @@ class PaymentManager(
     @Transactional
     fun initiate(
         uuid: Uuid,
-        requestQuantity: Int,
-        price: Int
+        packageId: String,
     ): PaymentInitiation {
+        val ticketPrice = ticketPricePolicy.matchTicketPriceByPackageId(packageId, uuid)
         ticketPricePolicy.validateTicketQuantity(
-            requestQuantity = requestQuantity,
-            price = price,
+            requestQuantity = ticketPrice.quantity,
+            price = ticketPrice.price,
             uuid = uuid
         )
         val request = OrderReadyRequest(
             uuid = uuid.value,
             orderId = KakaoPayOrder.generateOrderId(uuid.value),
-            itemName = KakaoPayOrder.generateItemName(requestQuantity, price),
-            quantity = requestQuantity,
-            price = price
+            itemName = KakaoPayOrder.generateItemName(ticketPrice.quantity, ticketPrice.price),
+            quantity = ticketPrice.quantity,
+            price = ticketPrice.price
         )
         val response = kakaoPayOutputPort.ready(request)
         val order = kakaoPayOrderWriter.create(response.toOrder(request))

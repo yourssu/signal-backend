@@ -103,7 +103,7 @@ class ViewerController(
         summary = "티켓 패키지 조회",
         description = "사용 가능한 모든 티켓 패키지의 가격과 수량 정보를 조회합니다."
     )
-    @GetMapping("/packages")
+    @GetMapping("/ticket-packages")
     fun getTicketPackages(): ResponseEntity<Response<TicketPackagesResponses>> {
         val response = viewerService.getTicketPackages()
         return ResponseEntity.ok(Response(result = response))

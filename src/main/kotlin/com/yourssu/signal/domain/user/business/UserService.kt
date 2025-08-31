@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.user.business
 
-import com.yourssu.signal.domain.auth.implement.UserReader
+import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.user.business.dto.UserInfoResponse
 import org.springframework.stereotype.Service

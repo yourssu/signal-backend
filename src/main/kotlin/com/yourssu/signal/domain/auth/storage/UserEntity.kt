@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.auth.storage
 
-import com.yourssu.signal.domain.auth.implement.User
+import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.common.storage.BaseEntity
 import jakarta.persistence.Column

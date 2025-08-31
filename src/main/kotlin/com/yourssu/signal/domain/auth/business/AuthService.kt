@@ -6,8 +6,8 @@ import com.yourssu.signal.config.security.exception.InvalidJwtTokenException
 import com.yourssu.signal.config.security.exception.JwtUtils
 import com.yourssu.signal.api.dto.DevTokenRequest
 import com.yourssu.signal.domain.auth.business.dto.TokenResponse
-import com.yourssu.signal.domain.auth.implement.UserReader
-import com.yourssu.signal.domain.auth.implement.UserWriter
+import com.yourssu.signal.domain.user.implement.UserReader
+import com.yourssu.signal.domain.user.implement.UserWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.viewer.implement.exception.AdminPermissionDeniedException
 import org.springframework.stereotype.Service

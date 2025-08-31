@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.auth.implement
+package com.yourssu.signal.domain.user.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
 

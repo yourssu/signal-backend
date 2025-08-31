@@ -8,14 +8,17 @@ data class TicketPackage(
     companion object {
         private const val NAME_VALUE_DELIMITER = "@"
 
+        private const val PACKAGE_ID_INDEX = 0
+        private const val TICKET_PRICE_INDEX = 1
+
         fun from(registeredTicketPackage: String, unregisteredTicketPackage: String): TicketPackage {
             val registeredParts = registeredTicketPackage.split(NAME_VALUE_DELIMITER)
             val unregisteredParts = unregisteredTicketPackage.split(NAME_VALUE_DELIMITER)
-            val id = registeredParts[0]
+            val id = registeredParts[PACKAGE_ID_INDEX]
             return TicketPackage(
                 id = id,
-                registeredTicketPrice = TicketPrice.from(registeredParts[1]),
-                unregisteredTicketPrice = TicketPrice.from(unregisteredParts[1])
+                registeredTicketPrice = TicketPrice.from(registeredParts[TICKET_PRICE_INDEX]),
+                unregisteredTicketPrice = TicketPrice.from(unregisteredParts[TICKET_PRICE_INDEX])
             )
         }
     }

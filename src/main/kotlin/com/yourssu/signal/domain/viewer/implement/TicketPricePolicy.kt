@@ -6,7 +6,6 @@ import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import com.yourssu.signal.domain.viewer.implement.domain.TicketPackages
 import com.yourssu.signal.domain.viewer.implement.exception.InvalidTicketQuantityException
-import com.yourssu.signal.infrastructure.Notification
 import org.springframework.stereotype.Component
 
 const val NO_MATCH_TICKET_AMOUNT = 0

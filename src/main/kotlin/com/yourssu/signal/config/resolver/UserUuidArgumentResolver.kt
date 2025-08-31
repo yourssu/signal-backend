@@ -1,6 +1,6 @@
 package com.yourssu.signal.config.resolver
 
-import com.yourssu.signal.domain.auth.implement.User
+import com.yourssu.signal.domain.user.implement.User
 import org.springframework.core.MethodParameter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component

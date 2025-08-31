@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.profile.business
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
-import com.yourssu.signal.domain.auth.implement.UserReader
+import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
 import com.yourssu.signal.domain.common.implement.Uuid

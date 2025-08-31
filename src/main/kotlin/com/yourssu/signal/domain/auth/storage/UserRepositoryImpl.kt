@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.auth.storage
 
-import com.yourssu.signal.domain.auth.implement.User
-import com.yourssu.signal.domain.auth.implement.UserRepository
+import com.yourssu.signal.domain.user.implement.User
+import com.yourssu.signal.domain.user.implement.UserRepository
 import com.yourssu.signal.domain.auth.storage.exception.NotFoundUserException
 import com.yourssu.signal.domain.common.implement.Uuid
 import org.springframework.data.jpa.repository.JpaRepository

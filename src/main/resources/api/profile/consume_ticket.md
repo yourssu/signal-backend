@@ -1,4 +1,4 @@
-# consumeTicket (POST /api/profiles/ticket)
+# consumeTicket (POST /api/profiles/contact)
 - If the viewer bought a profile, then tickets don't be consumed
 
 ## Authentication

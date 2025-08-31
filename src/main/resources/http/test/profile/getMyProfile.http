@@ -1,0 +1,3 @@
+### getMyProfile
+GET {{host}}/api/profiles/me
+Authorization: Bearer {{accessToken}}

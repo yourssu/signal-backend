@@ -1,0 +1,3 @@
+### getTicketInfo
+GET {{host}}/api/payments/tickets
+Authorization: Bearer {{accessToken}}

@@ -1,0 +1,2 @@
+### getProfileRanking
+GET {{host}}/api/profiles/ranking?uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63

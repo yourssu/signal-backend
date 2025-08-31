@@ -1,0 +1,2 @@
+### countByGender
+GET {{host}}/api/profiles/genders/MALE/count

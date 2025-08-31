@@ -1,6 +1,3 @@
-@uuid=edf2d717-12ac-4e74-b1ce-bad3221b3f60
-
-
 @gender=MALE
 #@gender=FEMALE
 
@@ -8,6 +5,7 @@
 ###
 POST {{host}}/api/profiles
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "gender": "{{gender}}",
@@ -21,27 +19,6 @@ Content-Type: application/json
 }
 
 ###
-
-
-// Create a new profile with Uuid - 201 Created
-###
-POST {{host}}/api/profiles
-Content-Type: application/json
-
-{
-  "gender": "{{gender}}",
-  "department": "학과",
-  "birthYear": 2000,
-  "animal": "DOG",
-  "contact": "@leo",
-  "mbti": "ISTJ",
-  "nickname": "leopold",
-  "uuid": "{{uuid}}",
-  "introSentences" : ["나는 딸기를 좋아해", "나는 포도도 좋아해", "제일 좋아하는 음식은 치킨이야"]
-}
-
-###
-
 
 // Count All Profiles
 ###

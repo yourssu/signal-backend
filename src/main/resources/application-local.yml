@@ -21,32 +21,32 @@ spring:
 domain:
   permission:
     admin:
-      access-key: "DonaEmilyEatSteakLeopold"
-      contact-secret-key : "ThisIsASecretKeyForContact"
+      access-key: DonaEmilyEatSteakLeopold
+      contact-secret-key: ThisIsASecretKeyForContact
   policy:
     whitelist: false
     contact-limit: 4
     contact-limit-warning: 2
     contact-price: 1
-    ticket-price-policy: 2n20.4n40.6n60.8n80.10n100
-    ticket-price-registered-policy: 1n10.3n30.5n50.7n70.9n90
+    ticket-price-policy: single@1000n1.small@3000n4.best@5000n8
+    ticket-price-registered-policy: single@700n1.small@2100n4.best@3500n8
 
 infra:
   openai:
-    url: "https://api.openai.com/v1/responses"
-    api-key: "api-key-value"
-    model: "gpt-4o-mini"
-    prompt: "prompt for a developer"
+    url: https://api.openai.com/v1/responses
+    api-key: api-key-value
+    model: gpt-4o-mini
+    prompt: prompt for a developer
     user-input: 100
   kakaopay:
-    admin-key: "DEV4FF69BE65A3296232BCF721254981D9C38784"
-    cid: "TC0ONETIME"
-    "approval_url": "https://signal.dev.yourssu.com/purchase/success"
-    "cancel_url": "https://signal.dev.yourssu.com/purchase/cancel"
-    "fail_url": "https://signal.dev.yourssu.com/purchase/fail"
+    admin-key: DEV4FF69BE65A3296232BCF721254981D9C38784
+    cid: TC0ONETIME
+    approval_url: https://signal.dev.yourssu.com/purchase/success
+    cancel_url: https://signal.dev.yourssu.com/purchase/cancel
+    fail_url: https://signal.dev.yourssu.com/purchase/fail
 
 jwt:
-  secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"
+  secret: ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits
   access-token-expiration: 1800000  # 30 minutes
   refresh-token-expiration: 2592000000  # 30 days
 

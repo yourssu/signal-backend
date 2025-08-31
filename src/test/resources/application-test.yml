@@ -28,8 +28,8 @@ domain:
     contact-limit: 4
     contact-limit-warning: 2
     contact-price: 1
-    ticket-price-policy: 2n20.4n40.6n60.8n80.10n100
-    ticket-price-registered-policy: 1n10.3n30.5n50.7n70.9n90
+    ticket-price-policy: single@1000n1.small@3000n4.best@5000n8
+    ticket-price-registered-policy: single@700n1.small@2100n4.best@3500n8
 
 infra:
   openai:

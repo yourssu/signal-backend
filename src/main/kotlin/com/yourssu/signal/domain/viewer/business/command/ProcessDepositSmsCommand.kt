@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.viewer.business.dto
+package com.yourssu.signal.domain.viewer.business.command
 
 class ProcessDepositSmsCommand(
     val secretKey: String,

@@ -103,7 +103,7 @@ class ProfileService(
     fun getProfileRanking(uuid: String): ProfileRankingResponse {
         val profile = profileReader.getByUuid(Uuid(uuid))
         val ranking = purchasedProfileReader.getProfileRanking(profile.id!!)
-        val totalProfiles = profileReader.findIdsByGender(profile.gender).size
+        val totalProfiles = profileReader.count(profile.gender)
         return ProfileRankingResponse.of(profileRanking = ranking, profile = profile, totalProfiles = totalProfiles)
     }
 }

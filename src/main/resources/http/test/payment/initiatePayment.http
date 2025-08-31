@@ -1,9 +1,12 @@
+ @host = https://api.dev.signal.yourssu.com
+// @host = api.dev.signal.yourssu.com
+
 ### Initiate KakaoPay payment
 POST {{host}}/api/viewers/payment/kakaopay/initiate
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "quantity": 3,
-  "price": 1500
+  "quantity": 20,
+  "price": 2
 }

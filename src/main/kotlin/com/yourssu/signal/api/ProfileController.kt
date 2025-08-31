@@ -12,7 +12,7 @@ import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
-import com.yourssu.signal.domain.viewer.application.dto.RandomProfileRequest
+import com.yourssu.signal.api.dto.RandomProfileRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement

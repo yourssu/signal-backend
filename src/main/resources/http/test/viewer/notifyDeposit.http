@@ -1,0 +1,8 @@
+### notifyDeposit
+POST {{host}}/api/viewers/deposit
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "depositName": "홍길동"
+}

@@ -1,0 +1,2 @@
+### countAllProfiles
+GET {{host}}/api/profiles/count

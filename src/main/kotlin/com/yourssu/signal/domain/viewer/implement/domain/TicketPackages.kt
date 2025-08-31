@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.viewer.implement.domain
 
 import com.yourssu.signal.domain.viewer.implement.NO_MATCH_TICKET_AMOUNT
+import com.yourssu.signal.domain.viewer.implement.domain.exception.TicketPackageNotFoundException
 
 class TicketPackages(
     private val packageMap: Map<String, TicketPackage>
@@ -35,5 +36,9 @@ class TicketPackages(
 
     fun getPackageList(): List<TicketPackage> {
         return packageMap.values.toList()
+    }
+
+    fun getByPackageId(packageId: String): TicketPackage {
+        return packageMap[packageId] ?: throw TicketPackageNotFoundException()
     }
 }

@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import com.yourssu.signal.domain.viewer.implement.domain.TicketPackages
+import com.yourssu.signal.domain.viewer.implement.domain.TicketPrice
 import com.yourssu.signal.domain.viewer.implement.exception.InvalidTicketQuantityException
 import org.springframework.stereotype.Component
 
@@ -56,5 +57,13 @@ class TicketPricePolicy(
 
     fun getTicketPackages(): TicketPackages {
         return ticketPackages
+    }
+
+    fun matchTicketPriceByPackageId(packageId: String, uuid: Uuid): TicketPrice {
+        val ticketPackage = ticketPackages.getByPackageId(packageId)
+        if (isFirstPurchasedTicket(uuid)) {
+            return ticketPackage.registeredTicketPrice
+        }
+        return ticketPackage.unregisteredTicketPrice
     }
 }

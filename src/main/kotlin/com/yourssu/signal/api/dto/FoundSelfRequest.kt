@@ -1,4 +1,4 @@
-package com.yourssu.signal.domain.viewer.application.dto
+package com.yourssu.signal.api.dto
 
 import com.yourssu.signal.domain.viewer.business.command.ViewerFoundCommand
 import jakarta.validation.constraints.NotBlank

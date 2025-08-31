@@ -1,12 +1,12 @@
-package com.yourssu.signal.domain.viewer.application
+package com.yourssu.signal.api
 
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
-import com.yourssu.signal.domain.viewer.application.dto.BankDepositSmsRequest
-import com.yourssu.signal.domain.viewer.application.dto.NotificationDepositRequest
-import com.yourssu.signal.domain.viewer.application.dto.TicketIssuedRequest
-import com.yourssu.signal.domain.viewer.application.dto.ViewersFoundRequest
+import com.yourssu.signal.api.dto.BankDepositSmsRequest
+import com.yourssu.signal.api.dto.NotificationDepositRequest
+import com.yourssu.signal.api.dto.TicketIssuedRequest
+import com.yourssu.signal.api.dto.ViewersFoundRequest
 import com.yourssu.signal.domain.viewer.business.ViewerService
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
@@ -18,7 +18,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "Viewer", description = "Viewer management APIs")
 @RestController

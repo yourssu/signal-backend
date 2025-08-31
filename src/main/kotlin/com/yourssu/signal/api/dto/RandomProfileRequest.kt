@@ -1,7 +1,6 @@
-package com.yourssu.signal.domain.viewer.application.dto
+package com.yourssu.signal.api.dto
 
 import com.yourssu.signal.domain.profile.business.command.RandomProfileFoundCommand
-import com.yourssu.signal.domain.profile.implement.domain.Gender
 import jakarta.validation.constraints.NotBlank
 
 data class RandomProfileRequest(

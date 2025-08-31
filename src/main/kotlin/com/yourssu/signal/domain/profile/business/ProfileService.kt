@@ -8,10 +8,12 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
+import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.profile.implement.ProfilePriorityManager
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.profile.implement.ProfileWriter
+import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.profile.implement.UsedTicketManager
 import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator
@@ -28,6 +30,7 @@ class ProfileService(
     private val viewerReader: ViewerReader,
     private val usedTicketManager: UsedTicketManager,
     private val profilePriorityManager: ProfilePriorityManager,
+    private val purchasedProfileReader: PurchasedProfileReader,
     private val policy: PolicyConfigurationProperties,
     private val adminAccessChecker: AdminAccessChecker,
     private val blacklistWriter: BlacklistWriter,
@@ -95,5 +98,12 @@ class ProfileService(
         val targetProfile = profileReader.getById(command.profileId)
         usedTicketManager.validatePurchasedProfile(viewer, targetProfile)
         return ProfileContactResponse.from(targetProfile)
+    }
+
+    fun getProfileRanking(uuid: String): ProfileRankingResponse {
+        val profile = profileReader.getByUuid(Uuid(uuid))
+        val ranking = purchasedProfileReader.getProfileRanking(profile.id!!)
+        val totalProfiles = profileReader.findIdsByGender(profile.gender).size
+        return ProfileRankingResponse.of(profileRanking = ranking, profile = profile, totalProfiles = totalProfiles)
     }
 }

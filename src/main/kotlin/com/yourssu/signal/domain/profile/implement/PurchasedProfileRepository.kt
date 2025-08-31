@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.profile.implement
 
+import com.yourssu.signal.domain.profile.implement.domain.ProfileRanking
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
 
 interface PurchasedProfileRepository {
@@ -7,4 +8,5 @@ interface PurchasedProfileRepository {
     fun exists(purchasedProfile: PurchasedProfile): Boolean
     fun findByViewerId(viewerId: Long): List<PurchasedProfile>
     fun findProfileIdsOrderByPurchasedAsc(): List<Long>
+    fun findProfileCountGroupByProfileId(): Map<Long, ProfileRanking>
 }

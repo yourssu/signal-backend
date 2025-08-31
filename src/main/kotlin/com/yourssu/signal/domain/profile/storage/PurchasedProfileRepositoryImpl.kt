@@ -1,11 +1,12 @@
 package com.yourssu.signal.domain.profile.storage
 
-import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileRepository
+import com.yourssu.signal.domain.profile.implement.domain.ProfileRanking
 import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
 import com.yourssu.signal.domain.profile.storage.domain.PurchasedProfileEntity
 import com.yourssu.signal.domain.profile.storage.domain.QPurchasedProfileEntity.purchasedProfileEntity
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
@@ -38,6 +39,36 @@ class PurchasedProfileRepositoryImpl(
             .groupBy(purchasedProfileEntity.profileId)
             .orderBy(purchasedProfileEntity.profileId.count().asc())
             .fetch()
+    }
+
+    @Cacheable("profileRankingCache")
+    override fun findProfileCountGroupByProfileId(): Map<Long, ProfileRanking> {
+        val results = jpaQueryFactory
+            .select(
+                purchasedProfileEntity.profileId,
+                purchasedProfileEntity.profileId.count().castToNum(Int::class.java)
+            )
+            .from(purchasedProfileEntity)
+            .groupBy(purchasedProfileEntity.profileId)
+            .orderBy(purchasedProfileEntity.profileId.count().desc())
+            .fetch()
+
+        val countToRankMap = results
+            .map { it.get(1, Int::class.java)!! }
+            .withIndex()
+            .groupBy { it.value }
+            .mapValues { it.value.minOf { indexedValue -> indexedValue.index } + 1 }
+
+        return results.associate { tuple ->
+            val profileId = tuple.get(0, Long::class.java)!!
+            val count = tuple.get(1, Int::class.java)!!
+            val rank = countToRankMap[count]!!
+            profileId to ProfileRanking(
+                profileId = profileId,
+                rank = rank,
+                purchaseCount = count
+            )
+        }
     }
 }
 

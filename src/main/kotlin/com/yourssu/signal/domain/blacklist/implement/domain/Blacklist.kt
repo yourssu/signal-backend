@@ -5,11 +5,4 @@ class Blacklist(
     val profileId: Long,
     val createdByAdmin: Boolean,
 ) {
-    fun updateByAdmin(): Blacklist {
-        return Blacklist(
-            id = this.id,
-            profileId = this.profileId,
-            createdByAdmin = true,
-        )
-    }
 }

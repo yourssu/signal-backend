@@ -1,5 +1,5 @@
 ### Add my profile to blacklist
-POST {{host}}/api/profiles/blacklists/me
+POST {{host}}/api/blacklists/me
 Authorization: Bearer {{accessToken}}
 
 > {%

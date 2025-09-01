@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "Admin", description = "Admin APIs")
+@Tag(name = "BlackList", description = "BlackList APIs")
 @RestController
-@RequestMapping("/api/profiles/blacklists")
+@RequestMapping("/api/blacklists")
 class BlacklistController(
     private val blacklistService: BlacklistService,
 ) {

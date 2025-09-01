@@ -1,5 +1,5 @@
 ### Remove my profile from blacklist
-DELETE {{host}}/api/profiles/blacklists/me
+DELETE {{host}}/api/blacklists/me
 Authorization: Bearer {{accessToken}}
 
 > {%

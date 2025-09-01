@@ -18,6 +18,7 @@ class BlacklistWriter(
     @Transactional
     fun updateToAdminBlacklist(profileId: Long) {
         blacklistRepository.updateToAdminBlacklist(profileId)
+        blacklistRepository.updateCache()
     }
 
     @Transactional

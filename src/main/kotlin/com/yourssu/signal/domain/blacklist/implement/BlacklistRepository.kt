@@ -9,4 +9,6 @@ interface BlacklistRepository {
     fun deleteByProfileId(profileId: Long)
     fun findAll(): Set<Long>
     fun updateCache(): Set<Long>
+    fun isAddedByAdmin(profileId: Long): Boolean
+    fun updateToAdminBlacklist(profileId: Long)
 }

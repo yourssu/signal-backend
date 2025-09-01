@@ -1,0 +1,13 @@
+### Remove my profile from blacklist
+DELETE {{host}}/api/profiles/blacklists/me
+Authorization: Bearer {{accessToken}}
+
+> {%
+    client.test("Remove my profile from blacklist", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+%}
+
+### Expected Response:
+# 204 No Content
+# (Empty response body)

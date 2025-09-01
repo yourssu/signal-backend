@@ -1,7 +1,7 @@
 @adminSecretKey = DonaEmilyEatSteakLeopold
 
 ### Add profile to blacklist (Admin)
-POST {{host}}/api/profiles/blacklists
+POST {{host}}/api/blacklists
 Content-Type: application/json
 
 {

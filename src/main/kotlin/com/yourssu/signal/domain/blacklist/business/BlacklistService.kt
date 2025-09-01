@@ -47,6 +47,7 @@ class BlacklistService(
         return BlacklistExistsResponse(isBlacklisted = isBlacklisted)
     }
 
+    @Transactional
     fun addMyBlacklist(uuid: String): BlacklistResponse {
         val profile = profileReader.getByUuid(Uuid(uuid))
         if (blacklistReader.existsByProfileId(profile.id!!)) {

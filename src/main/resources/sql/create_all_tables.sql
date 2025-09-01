@@ -96,6 +96,7 @@ CREATE TABLE purchased_profile (
 CREATE TABLE blacklist (
     id BIGINT NOT NULL AUTO_INCREMENT,
     profile_id BIGINT NOT NULL,
+    created_by_admin BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (id),
     UNIQUE KEY uk_blacklist_profile_id (profile_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -9,6 +9,7 @@ class BlacklistAddedCommand(
     fun toDomain(): Blacklist {
         return Blacklist(
             profileId = profileId,
+            createdByAdmin = true,
         )
     }
 }

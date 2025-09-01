@@ -1,0 +1,13 @@
+### Get my blacklist status
+GET {{host}}/api/profiles/blacklists
+Authorization: Bearer {{accessToken}}
+
+
+### Expected Response:
+# 200 OK
+# {
+#   "timestamp": "2025-04-27T12:16:55.043588+09:00",
+#   "result": {
+#     "isBlacklisted": false
+#   }
+# }

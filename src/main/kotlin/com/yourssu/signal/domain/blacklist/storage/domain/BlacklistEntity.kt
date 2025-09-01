@@ -17,11 +17,15 @@ class BlacklistEntity(
 
     @Column(name = "profile_id", nullable = false, unique = true)
     val profileId: Long,
+
+    @Column(name =  "created_by_admin", nullable = false)
+    val createdByAdmin: Boolean,
 ) {
     companion object {
         fun from(blacklist: Blacklist): BlacklistEntity {
             return BlacklistEntity(
                 profileId = blacklist.profileId,
+                createdByAdmin = blacklist.createdByAdmin,
             )
         }
     }
@@ -30,6 +34,7 @@ class BlacklistEntity(
         return Blacklist(
             id = id,
             profileId = profileId,
+            createdByAdmin = createdByAdmin,
         )
     }
 }

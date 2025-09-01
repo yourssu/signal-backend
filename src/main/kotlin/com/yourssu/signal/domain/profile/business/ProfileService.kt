@@ -44,7 +44,7 @@ class ProfileService(
         val createdProfile = profileWriter.createProfile(profile)
         Notification.notifyCreatedProfile(createdProfile.copy(profile.introSentences))
         if (policy.whitelist) {
-            blacklistWriter.save(Blacklist(profileId = createdProfile.id!!))
+            blacklistWriter.save(Blacklist(profileId = createdProfile.id!!, createdByAdmin = true))
         }
         return MyProfileResponse.from(createdProfile)
     }

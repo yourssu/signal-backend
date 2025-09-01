@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.blacklist.storage
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.blacklist.implement.BlacklistRepository
 import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.exception.BlacklistAlreadyExistsException
 import com.yourssu.signal.domain.blacklist.storage.domain.BlacklistEntity
 import com.yourssu.signal.domain.blacklist.storage.domain.QBlacklistEntity.blacklistEntity
 import com.yourssu.signal.domain.blacklist.storage.exception.BlacklistNotFoundException
@@ -53,6 +54,21 @@ class BlacklistRepositoryImpl(
         return blacklistJpaRepository.findAll()
             .map { it.profileId }
             .toSet()
+    }
+
+    override fun isAddedByAdmin(profileId: Long): Boolean {
+        return jpaQueryFactory.selectFrom(blacklistEntity)
+            .where(blacklistEntity.profileId.eq(profileId))
+            .fetchOne()
+            ?.createdByAdmin
+            ?: false
+    }
+
+    override fun updateToAdminBlacklist(profileId: Long) {
+        jpaQueryFactory.update(blacklistEntity)
+            .where(blacklistEntity.profileId.eq(profileId))
+            .set(blacklistEntity.createdByAdmin, true)
+            .execute()
     }
 }
 

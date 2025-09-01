@@ -18,4 +18,8 @@ class BlacklistReader(
     fun getAllBlacklistIds(): Set<Long> {
         return blacklistRepository.findAll()
     }
+
+    fun isAddedByAdmin(profileId: Long): Boolean {
+        return blacklistRepository.isAddedByAdmin(profileId)
+    }
 }

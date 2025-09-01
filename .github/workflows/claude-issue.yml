@@ -2,7 +2,7 @@ name: Claude Assistant- Issue Review
 
 on:
   issues:
-    types: [labeled]
+    types: [labeled]  # 라벨 달았을때
 
 permissions:
   issues: write
@@ -20,12 +20,12 @@ jobs:
           fetch-depth: 0  # 전체 히스토리 클론 (0으로 설정)
 
       - name: Run Claude Code Action
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           label_trigger: "claude-review"
-          custom_instructions: |
+          claude_args: |
             당신은 한국어 코드 리뷰어입니다. 반드시 한국어로만 응답해야 합니다.
             이슈와 관련하여 다음 항목을 구조적으로 간략하게 정리해 주세요. 
             

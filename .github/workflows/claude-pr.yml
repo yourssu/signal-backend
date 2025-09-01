@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0  # 전체 히스토리 클론 (0으로 설정)
 
       - name: Run Claude Code Action
-        uses: anthropics/claude-code-action@beta
+        uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -61,7 +61,8 @@ jobs:
             항상 전문적이고 도움이 되는 어조를 유지하여 학습과 개선을 장려
             완전한 리뷰를 제공하기 위해 더 많은 맥락이나 정보가 필요한 경우, 사전에 명확한 설명을 요청
 
-            항상 리뷰 코멘트 형식을 따르고 리뷰 내용 전달은 `gh pr comment $ARGUMENTS --body "리뷰 내용"` 명령어를 사용
+            항상 리뷰 코멘트 형식을 따르고 리뷰 내용 전달은
+            `gh pr review ${{ github.event.pull_request.number }} --comment --body "리뷰 내용"` 명령어를 사용
             리뷰를 해당 PR에 게시해야 합니다.
             
             ### 리뷰 코멘트 형식:

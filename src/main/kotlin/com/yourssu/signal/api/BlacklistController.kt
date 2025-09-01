@@ -58,4 +58,25 @@ class BlacklistController(
         val response = blacklistService.checkMyBlacklistStatus(uuid)
         return ResponseEntity.ok(Response(result = response))
     }
+
+    @Operation(
+        summary = "나의 프로필 블랙리스트 등록",
+        description = "현재 로그인한 사용자의 프로필을 블랙리스트에 등록합니다."
+    )
+    @PostMapping("/me")
+    fun addMyBlacklist(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Response<BlacklistResponse>> {
+        val response = blacklistService.addMyBlacklist(uuid)
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(Response(result = response))
+    }
+
+    @Operation(
+        summary = "나의 프로필 블랙리스트 삭제",
+        description = "현재 로그인한 사용자의 프로필을 블랙리스트에서 제거합니다."
+    )
+    @DeleteMapping("/me")
+    fun removeMyBlacklist(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Void> {
+        blacklistService.removeMyBlacklist(uuid)
+        return ResponseEntity.noContent().build()
+    }
 }

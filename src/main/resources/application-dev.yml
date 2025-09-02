@@ -45,6 +45,11 @@ infra:
     approval-url: ${KAKAOPAY_APPROVAL_URL}
     cancel-url: ${KAKAOPAY_CANCEL_URL}
     fail-url: ${KAKAOPAY_FAIL_URL}
+  google:
+    oauth:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI}
 
 jwt:
   secret: ${JWT_SECRET}

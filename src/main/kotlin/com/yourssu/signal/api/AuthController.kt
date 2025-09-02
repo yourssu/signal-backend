@@ -1,11 +1,14 @@
 package com.yourssu.signal.api
 
 import com.yourssu.signal.api.dto.DevTokenRequest
+import com.yourssu.signal.api.dto.GoogleOAuthRequest
 import com.yourssu.signal.api.dto.RefreshTokenRequest
+import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.domain.auth.business.dto.TokenResponse
 import com.yourssu.signal.domain.auth.business.AuthService
 import com.yourssu.signal.domain.common.business.dto.Response
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.context.annotation.Profile
@@ -52,6 +55,19 @@ class AuthController(
         @Valid @RequestBody request: DevTokenRequest
     ): ResponseEntity<Response<TokenResponse>> {
         val response = authService.generateDevToken(request)
+        return ResponseEntity.ok(Response(result = response))
+    }
+    
+    @Operation(
+        summary = "구글 OAuth 로그인",
+        description = "구글 액세스 토큰과 사용자 UUID를 사용하여 로그인합니다. 구글 토큰을 검증한 후 해당 이메일과 UUID가 일치하면 JWT를 발급합니다. 이메일이 이미 다른 계정에 등록되어 있으면 다른 계정의 토큰을 반환합니다."
+    )
+    @PostMapping("/google")
+    fun loginWithGoogle(
+        @Parameter(hidden = true) @UserUuid uuid: String,
+        @Valid @RequestBody request: GoogleOAuthRequest
+    ): ResponseEntity<Response<TokenResponse>> {
+        val response = authService.loginWithGoogle(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }
 }

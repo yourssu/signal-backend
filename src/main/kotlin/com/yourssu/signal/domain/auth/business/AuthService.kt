@@ -7,7 +7,7 @@ import com.yourssu.signal.config.security.exception.InvalidJwtTokenException
 import com.yourssu.signal.config.security.exception.JwtUtils
 import com.yourssu.signal.domain.auth.business.command.GoogleOAuthCommand
 import com.yourssu.signal.domain.auth.business.dto.TokenResponse
-import com.yourssu.signal.domain.auth.business.exception.InvalidGoogleAccessTokenException
+import com.yourssu.signal.domain.auth.business.exception.InvalidGoogleCodeException
 import com.yourssu.signal.domain.auth.implement.EmailUserReader
 import com.yourssu.signal.domain.auth.implement.EmailUserWriter
 import com.yourssu.signal.domain.auth.implement.OAuthOutputPort
@@ -59,16 +59,17 @@ class AuthService(
 
     @Transactional
     fun loginWithGoogle(command: GoogleOAuthCommand): TokenResponse {
+        val idToken = oAuthOutputPort.exchangeCodeForIdToken(command.code)
+            ?: throw InvalidGoogleCodeException()
+        val identifier = jwtUtils.getSubWithoutVerifying(idToken)
         val user = userReader.getByUuid(command.toUuid())
-        val email = oAuthOutputPort.verifyOAuthAccessToken(command.accessToken)
-            ?: throw InvalidGoogleAccessTokenException()
-        val isExistsUser = emailUserReader.existsByEmailAndUuid(email, user.uuid)
+        val isExistsUser = emailUserReader.existsByEmailAndUuid(identifier, user.uuid)
         if (isExistsUser) {
             return generateTokenResponse(user)
         }
-        val uuid = emailUserReader.findUuidByEmail(email)
+        val uuid = emailUserReader.findUuidByEmail(identifier)
         if (uuid == null) {
-            emailUserWriter.save(command.toDomain())
+            emailUserWriter.save(command.toDomain(identifier))
             return generateTokenResponse(user)
         }
         val previousUser = userReader.getByUuid(uuid)

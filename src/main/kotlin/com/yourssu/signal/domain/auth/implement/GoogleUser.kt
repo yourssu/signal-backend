@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.auth.implement
 
-class EmailUser(
+class GoogleUser(
     val id: Long? = null,
     val uuid: String,
-    val email: String,
+    val identifier: String,
 )

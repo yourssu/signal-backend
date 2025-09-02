@@ -44,6 +44,11 @@ infra:
     "approval_url": "https://yourssu.signal.com/payment/success"
     "cancel_url": "https://yourssu.signal.com/payment/cancel"
     "fail_url": "https://yourssu.signal.com/payment/fail"
+  google:
+    oauth:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID:your-google-client-id}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:your-google-client-secret}
+      redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI:http://localhost:8080/auth/callback}
 
 jwt:
   secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"

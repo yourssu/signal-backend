@@ -1,5 +1,6 @@
 package com.yourssu.signal.config.security.exception
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.yourssu.signal.config.properties.JwtProperties
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
@@ -10,7 +11,8 @@ import javax.crypto.SecretKey
 
 @Component
 class JwtUtils(
-    private val jwtProperties: JwtProperties
+    private val jwtProperties: JwtProperties,
+    private val objectMapper: ObjectMapper,
 ) {
     private val secretKey: SecretKey = Keys.hmacShaKeyFor(jwtProperties.secret.toByteArray())
 
@@ -53,5 +55,16 @@ class JwtUtils(
             .build()
             .parseSignedClaims(token)
             .payload
+    }
+
+    fun getSubWithoutVerifying(token: String): String {
+        try {
+            val payload = token.split('.')[1]
+            val decodedPayload = String(Base64.getUrlDecoder().decode(payload))
+            val claims = objectMapper.readTree(decodedPayload)
+            return claims.get("sub").asText()
+        } catch (_: Exception) {
+            throw InvalidJwtTokenException()
+        }
     }
 }

@@ -1,0 +1,24 @@
+@code=4%2F0AVMBsJhFIVupLVS23hZfvfL0qv6pbqHEM8DRa_f0cxNqbaXm5DoNHpFvMoZ5ge-h1r0ZSw
+
+@googleClientId=423363455635-hvngr97c536f8ulcr4q514oqj5jiu1uv.apps.googleusercontent.com
+@googleClientSecret=secret
+
+### Google OAuth Login - Success Case
+POST {{host}}/api/auth/google
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "code": "{{code}}"
+}
+
+### Exchange code for tokens
+POST https://oauth2.googleapis.com/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{googleClientId}}&
+client_secret={{googleClientSecret}}&
+code={{code}}&
+grant_type=authorization_code&
+redirect_uri=https://signal.dev.yourssu.com/auth/google
+

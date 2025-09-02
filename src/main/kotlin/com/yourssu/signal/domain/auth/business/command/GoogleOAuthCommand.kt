@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.auth.business.command
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.auth.implement.EmailUser
+import com.yourssu.signal.domain.auth.implement.GoogleUser
 
 data class GoogleOAuthCommand(
     val code: String,
@@ -11,10 +11,10 @@ data class GoogleOAuthCommand(
         return Uuid(uuid)
     }
     
-    fun toDomain(email: String): EmailUser {
-        return EmailUser(
+    fun toDomain(identifier: String): GoogleUser {
+        return GoogleUser(
             uuid = uuid,
-            email =  email,
+            identifier =  identifier,
         )
     }
 }

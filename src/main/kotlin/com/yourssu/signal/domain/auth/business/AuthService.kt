@@ -8,8 +8,8 @@ import com.yourssu.signal.config.security.exception.JwtUtils
 import com.yourssu.signal.domain.auth.business.command.GoogleOAuthCommand
 import com.yourssu.signal.domain.auth.business.dto.TokenResponse
 import com.yourssu.signal.domain.auth.business.exception.InvalidGoogleCodeException
-import com.yourssu.signal.domain.auth.implement.EmailUserReader
-import com.yourssu.signal.domain.auth.implement.EmailUserWriter
+import com.yourssu.signal.domain.auth.implement.GoogleUserReader
+import com.yourssu.signal.domain.auth.implement.GoogleUserWriter
 import com.yourssu.signal.domain.auth.implement.OAuthOutputPort
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.user.implement.User
@@ -26,8 +26,8 @@ class AuthService(
     private val userWriter: UserWriter,
     private val userReader: UserReader,
     private val adminProperties: AdminConfigurationProperties,
-    private val emailUserReader: EmailUserReader,
-    private val emailUserWriter: EmailUserWriter,
+    private val googleUserReader: GoogleUserReader,
+    private val googleUserWriter: GoogleUserWriter,
     private val oAuthOutputPort: OAuthOutputPort,
 ) {
     @Transactional
@@ -63,13 +63,13 @@ class AuthService(
             ?: throw InvalidGoogleCodeException()
         val identifier = jwtUtils.getSubWithoutVerifying(idToken)
         val user = userReader.getByUuid(command.toUuid())
-        val isExistsUser = emailUserReader.existsByEmailAndUuid(identifier, user.uuid)
+        val isExistsUser = googleUserReader.existsByIdentifierAndUuid(identifier, user.uuid)
         if (isExistsUser) {
             return generateTokenResponse(user)
         }
-        val uuid = emailUserReader.findUuidByEmail(identifier)
+        val uuid = googleUserReader.findUuidByIdentifier(identifier)
         if (uuid == null) {
-            emailUserWriter.save(command.toDomain(identifier))
+            googleUserWriter.save(command.toDomain(identifier))
             return generateTokenResponse(user)
         }
         val previousUser = userReader.getByUuid(uuid)

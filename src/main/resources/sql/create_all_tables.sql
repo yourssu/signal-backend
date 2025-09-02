@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS kakaopay_order;
 DROP TABLE IF EXISTS profile;
 DROP TABLE IF EXISTS viewer;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS google_user;
 
 -- ==========================================
 -- Create Tables
@@ -136,6 +137,19 @@ CREATE TABLE kakaopay_order (
     INDEX idx_kakaopay_order_uuid (uuid),
     INDEX idx_kakaopay_order_order_id (order_id),
     INDEX idx_kakaopay_order_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. Google User table
+CREATE TABLE google_user (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    uuid VARCHAR(36) NOT NULL,
+    identifier VARCHAR(255) NOT NULL,
+    created_time DATETIME(6) NOT NULL,
+    updated_time DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_google_user_identifier (identifier),
+    INDEX idx_google_user_uuid (uuid),
+    INDEX idx_google_user_identifier (identifier)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================

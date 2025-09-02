@@ -4,6 +4,7 @@ import com.yourssu.signal.api.dto.DevTokenRequest
 import com.yourssu.signal.api.dto.GoogleOAuthRequest
 import com.yourssu.signal.api.dto.RefreshTokenRequest
 import com.yourssu.signal.config.resolver.UserUuid
+import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.auth.business.dto.TokenResponse
 import com.yourssu.signal.domain.auth.business.AuthService
 import com.yourssu.signal.domain.common.business.dto.Response
@@ -63,6 +64,7 @@ class AuthController(
         description = "authorization code 검증 후 해당 이메일과 UUID가 일치하면 JWT를 발급합니다. 구글 계정이 이미 다른 유저에 등록되어 있으면 연결된 유저의 토큰을 반환합니다."
     )
     @PostMapping("/google")
+    @RequireAuth
     fun loginWithGoogle(
         @Parameter(hidden = true) @UserUuid uuid: String,
         @Valid @RequestBody request: GoogleOAuthRequest

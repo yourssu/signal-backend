@@ -128,8 +128,8 @@ jobs:
           echo "JWT_REFRESH_TOKEN_EXPIRATION=$JWT_REFRESH_TOKEN_EXPIRATION" >> .env
           
           echo "GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID" >> .env
-          echo "GOOGLE_OAUTH_CLIENT_SECRET=GOOGLE_OAUTH_CLIENT_SECRET" >> .env
-          echo "GOOGLE_OAUTH_REDIRECT_URI=GOOGLE_OAUTH_REDIRECT_URI" >> .env
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET" >> .env
+          echo "GOOGLE_OAUTH_REDIRECT_URI=$GOOGLE_OAUTH_REDIRECT_URI" >> .env
           
           scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
           ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"

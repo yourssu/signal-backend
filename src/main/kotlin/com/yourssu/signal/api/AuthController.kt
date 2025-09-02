@@ -59,8 +59,8 @@ class AuthController(
     }
     
     @Operation(
-        summary = "구글 OAuth 로그인",
-        description = "구글 액세스 토큰과 사용자 UUID를 사용하여 로그인합니다. 구글 토큰을 검증한 후 해당 이메일과 UUID가 일치하면 JWT를 발급합니다. 이메일이 이미 다른 계정에 등록되어 있으면 다른 계정의 토큰을 반환합니다."
+        summary = "구글 로그인",
+        description = "authorization code 검증 후 해당 이메일과 UUID가 일치하면 JWT를 발급합니다. 구글 계정이 이미 다른 유저에 등록되어 있으면 연결된 유저의 토큰을 반환합니다."
     )
     @PostMapping("/google")
     fun loginWithGoogle(

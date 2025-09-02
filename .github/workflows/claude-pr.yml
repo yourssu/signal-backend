@@ -22,15 +22,13 @@ jobs:
           fetch-depth: 0  # 전체 히스토리 클론 (0으로 설정)
 
       - name: Run Claude Code Action
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@beta
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_instructions: |
             당신은 코드 전문가이며 PR 분석 전문 리뷰어입니다.
             코드 변경 사항에 대해 철저하고 건설적이며 실행 가능한 피드백을 제공하는 것이 여러분의 역할입니다.
-            git branch checkout은 허용하지 않습니다.
-            gh pr 명령어를 사용하여 PR의 변경 사항을 분석하고, 코드 품질, 보안, 성능 등을 종합적으로 평가합니다.
 
             1. **코드 품질 분석**
             - 잠재적 버그, 예외 사례 또는 논리 오류를 식별
@@ -60,10 +58,6 @@ jobs:
             전체 코드베이스를 검토하라는 명시적인 요청을 받지 않는 한, 최근 수정된 코드에 집중
             항상 전문적이고 도움이 되는 어조를 유지하여 학습과 개선을 장려
             완전한 리뷰를 제공하기 위해 더 많은 맥락이나 정보가 필요한 경우, 사전에 명확한 설명을 요청
-
-            항상 리뷰 코멘트 형식을 따르고 리뷰 내용 전달은
-            `gh pr review ${{ github.event.pull_request.number }} --comment --body "리뷰 내용"` 명령어를 사용
-            리뷰를 해당 PR에 게시해야 합니다.
             
             ### 리뷰 코멘트 형식:
             ```markdown

@@ -1,14 +1,20 @@
 package com.yourssu.signal.domain.auth.business
 
+import com.yourssu.signal.api.dto.DevTokenRequest
 import com.yourssu.signal.config.properties.AdminConfigurationProperties
 import com.yourssu.signal.config.properties.JwtProperties
 import com.yourssu.signal.config.security.exception.InvalidJwtTokenException
 import com.yourssu.signal.config.security.exception.JwtUtils
-import com.yourssu.signal.api.dto.DevTokenRequest
+import com.yourssu.signal.domain.auth.business.command.GoogleOAuthCommand
 import com.yourssu.signal.domain.auth.business.dto.TokenResponse
+import com.yourssu.signal.domain.auth.business.exception.InvalidGoogleAccessTokenException
+import com.yourssu.signal.domain.auth.implement.EmailUserReader
+import com.yourssu.signal.domain.auth.implement.EmailUserWriter
+import com.yourssu.signal.domain.auth.implement.OAuthOutputPort
+import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.user.implement.UserWriter
-import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.viewer.implement.exception.AdminPermissionDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,18 +26,14 @@ class AuthService(
     private val userWriter: UserWriter,
     private val userReader: UserReader,
     private val adminProperties: AdminConfigurationProperties,
+    private val emailUserReader: EmailUserReader,
+    private val emailUserWriter: EmailUserWriter,
+    private val oAuthOutputPort: OAuthOutputPort,
 ) {
     @Transactional
     fun register(): TokenResponse {
         val user = userWriter.generateUser()
-        val accessToken = jwtUtils.generateAccessToken(user.uuid.value)
-        val refreshToken = jwtUtils.generateRefreshToken(user.uuid.value)
-        return TokenResponse(
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            accessTokenExpiresIn = jwtProperties.accessTokenExpiration,
-            refreshTokenExpiresIn = jwtProperties.refreshTokenExpiration
-        )
+        return generateTokenResponse(user)
     }
 
     fun refreshToken(refreshToken: String): TokenResponse {
@@ -39,15 +41,8 @@ class AuthService(
             throw InvalidJwtTokenException()
         }
         val uuid = jwtUtils.getUserUuidFromToken(refreshToken)
-        userReader.getByUuid(Uuid(uuid))
-        val accessToken = jwtUtils.generateAccessToken(uuid)
-        val newRefreshToken = jwtUtils.generateRefreshToken(uuid)
-        return TokenResponse(
-            accessToken = accessToken,
-            refreshToken = newRefreshToken,
-            accessTokenExpiresIn = jwtProperties.accessTokenExpiration,
-            refreshTokenExpiresIn = jwtProperties.refreshTokenExpiration
-        )
+        val user = userReader.getByUuid(Uuid(uuid))
+        return generateTokenResponse(user)
     }
 
     fun generateDevToken(request: DevTokenRequest): TokenResponse {
@@ -59,10 +54,32 @@ class AuthService(
         } catch (_: Exception) {
             userWriter.generateUser(request.uuid)
         }
-        val accessToken = jwtUtils.generateAccessToken(user.uuid.value)
+        return generateTokenResponse(user)
+    }
+
+    @Transactional
+    fun loginWithGoogle(command: GoogleOAuthCommand): TokenResponse {
+        val user = userReader.getByUuid(command.toUuid())
+        val email = oAuthOutputPort.verifyOAuthAccessToken(command.accessToken)
+            ?: throw InvalidGoogleAccessTokenException()
+        val isExistsUser = emailUserReader.existsByEmailAndUuid(email, user.uuid)
+        if (isExistsUser) {
+            return generateTokenResponse(user)
+        }
+        val uuid = emailUserReader.findUuidByEmail(email)
+        if (uuid == null) {
+            emailUserWriter.save(command.toDomain())
+            return generateTokenResponse(user)
+        }
+        val previousUser = userReader.getByUuid(uuid)
+        return generateTokenResponse(previousUser)
+    }
+
+    private fun generateTokenResponse(user: User): TokenResponse {
+        val newAccessToken = jwtUtils.generateAccessToken(user.uuid.value)
         val refreshToken = jwtUtils.generateRefreshToken(user.uuid.value)
         return TokenResponse(
-            accessToken = accessToken,
+            accessToken = newAccessToken,
             refreshToken = refreshToken,
             accessTokenExpiresIn = jwtProperties.accessTokenExpiration,
             refreshTokenExpiresIn = jwtProperties.refreshTokenExpiration

@@ -45,6 +45,11 @@ infra:
     approval_url: https://signal.dev.yourssu.com/purchase/success
     cancel_url: https://signal.dev.yourssu.com/purchase/cancel
     fail_url: https://signal.dev.yourssu.com/purchase/fail
+  tosspayments:
+    secret-key: test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm
+    client-key: test_gsk_docs_OaPz8L5KdmQXkzRz3y47BMw6
+    success-url: https://signal.dev.yourssu.com/purchase/tosspayments/success
+    fail-url: https://signal.dev.yourssu.com/purchase/tosspayments/fail
   google:
     oauth:
       client-id: ${GOOGLE_OAUTH_CLIENT_ID}

@@ -40,7 +40,8 @@ class ViewerController(
     )
     @PostMapping("/verification")
     @RequireAuth
-    fun issueVerification(@Parameter(hidden = true) @UserUuid uuid: String, @RequestBody request: IssuedVerificationRequest): ResponseEntity<Response<VerificationResponse>> {
+    fun issueVerification(@Parameter(hidden = true) @UserUuid uuid: String, @RequestBody(required = false) request: IssuedVerificationRequest?): ResponseEntity<Response<VerificationResponse>> {
+        val request = request ?: IssuedVerificationRequest()
         val response = viewerService.issueVerificationCode(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }

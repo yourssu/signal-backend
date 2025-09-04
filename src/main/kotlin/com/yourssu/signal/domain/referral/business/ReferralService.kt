@@ -60,15 +60,15 @@ class ReferralService(
             return
         }
         val referralOrder = referralOrderReader.findByViewerUuid(viewer.uuid.value) ?: return
-        val referrer = viewerReader.get(Uuid(referralOrder.viewerUuid.value))
-        if (referrer.uuid == viewer.uuid) {
+        val referee = viewerReader.get(Uuid(referralOrder.viewerUuid.value))
+        if (referee.uuid == viewer.uuid) {
             return
         }
         val updatedReferrer = viewerWriter.issueTicket(
-            uuid = referrer.uuid,
+            uuid = referee.uuid,
             ticket = REFERRAL_BONUS_AMOUNT,
         )
-        createReferralBonusOrderHistory(referrer.uuid.value)
+        createReferralBonusOrderHistory(referee.uuid.value)
         Notification.notifyTicketIssued(verification, REFERRAL_BONUS_AMOUNT, updatedReferrer.ticket - updatedReferrer.usedTicket)
         referralOrderWriter.delete(referralOrder)
     }

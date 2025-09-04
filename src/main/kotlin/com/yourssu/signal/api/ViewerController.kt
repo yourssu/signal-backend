@@ -50,7 +50,7 @@ class ViewerController(
     )
     @PostMapping
     fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest): ResponseEntity<Response<ViewerResponse>> {
-        val response = viewerService.issueTicket(request.toCommand())
+        val response = viewerService.issueTicketForAdmin(request.toCommand())
         return ResponseEntity.ok(Response(result = response))
     }
 

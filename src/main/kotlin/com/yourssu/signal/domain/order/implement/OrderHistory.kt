@@ -7,7 +7,7 @@ import com.yourssu.signal.domain.order.implement.domain.OrderStatus
 class OrderHistory(
     val id: Long? = null,
     val orderId: String = Uuid.randomUUID().value,
-    val uuid: String,
+    val uuid: Uuid,
     val amount: Int,
     val quantity: Int,
     val orderType: OrderType,

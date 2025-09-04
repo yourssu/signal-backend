@@ -16,7 +16,7 @@ class ReferralService(
         val user = userReader.getByUuid(command.toUuid())
         val referral = referralWriter.save(
             Referral(
-                origin = user.uuid,
+                origin = user.uuid.value,
                 referralCode = command.referralCode()
             )
         )

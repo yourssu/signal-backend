@@ -10,4 +10,8 @@ class ReferralOrderWriter(
     fun save(referralOrder: ReferralOrder): ReferralOrder {
         return referralOrderRepository.save(referralOrder)
     }
+
+    fun delete(referralOrder: ReferralOrder) {
+        referralOrderRepository.delete(referralOrder)
+    }
 }

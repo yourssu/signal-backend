@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 
 interface ReferralOrderJpaRepository : JpaRepository<ReferralOrderEntity, Long> {
     fun findByReferralCode(referralCode: String): List<ReferralOrderEntity>
-    fun findByOrderId(orderId: Long): ReferralOrderEntity?
+    fun findByViewerUuid(viewerUuid: String): ReferralOrderEntity?
 }
 
 @Repository
@@ -25,7 +25,11 @@ class ReferralOrderRepositoryImpl(
         return jpaRepository.findByReferralCode(referralCode).map { it.toDomain() }
     }
 
-    override fun findByOrderId(orderId: Long): ReferralOrder? {
-        return jpaRepository.findByOrderId(orderId)?.toDomain()
+    override fun findByViewerUuid(viewerUuid: String): ReferralOrder? {
+        return jpaRepository.findByViewerUuid(viewerUuid)?.toDomain()
+    }
+
+    override fun delete(referralOrder: ReferralOrder) {
+        jpaRepository.delete(ReferralOrderEntity.from(referralOrder))
     }
 }

@@ -23,11 +23,11 @@ class ReferralController(
     private val referralService: ReferralService,
 ) {
     @Operation(
-        summary = "내 레퍼럴 코드 발급",
-        description = "인증된 사용자의 레퍼럴 코드를 발급합니다.",
+        summary = "내 추천인 코드 발급",
+        description = "인증된 사용자의 추천인 코드를 발급합니다. customCode를 제공하지 않으면 시스템에서 자동으로 생성된 코드를 발급합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PostMapping("/my-code")
+    @PostMapping
     @RequireAuth
     fun generateMyReferralCode(
         @Parameter(hidden = true) @UserUuid uuid: String,

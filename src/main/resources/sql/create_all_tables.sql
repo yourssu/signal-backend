@@ -191,13 +191,12 @@ CREATE TABLE referral (
 CREATE TABLE referral_order (
     id BIGINT NOT NULL AUTO_INCREMENT,
     referral_code VARCHAR(255) NOT NULL,
-    order_id BIGINT NOT NULL,
+    viewer_uuid VARCHAR(36) NOT NULL,
     created_time DATETIME(6) NOT NULL,
     updated_time DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
     INDEX idx_referral_order_referral_code (referral_code),
-    INDEX idx_referral_order_order_id (order_id),
-    UNIQUE KEY uk_referral_order_order_id (order_id)
+    INDEX idx_referral_order_viewer_uuid (viewer_uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================

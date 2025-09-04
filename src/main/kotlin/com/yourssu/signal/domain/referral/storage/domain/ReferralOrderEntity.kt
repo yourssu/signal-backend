@@ -11,18 +11,18 @@ class ReferralOrderEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true, name = "referral_code")
+    @Column(nullable = false, name = "referral_code")
     val referralCode: String,
 
-    @Column(nullable = false, name = "order_id")
-    val orderId: Long,
+    @Column(nullable = false, name = "viewer_uuid")
+    val viewerUuid: String,
 ): BaseEntity() {
     companion object {
         fun from(referralOrder: ReferralOrder): ReferralOrderEntity {
             return ReferralOrderEntity(
                 id = referralOrder.id,
                 referralCode = referralOrder.referralCode,
-                orderId = referralOrder.orderId,
+                viewerUuid = referralOrder.viewerUuid,
             )
         }
     }
@@ -31,7 +31,7 @@ class ReferralOrderEntity(
         return ReferralOrder(
             id = id,
             referralCode = referralCode,
-            orderId = orderId,
+            viewerUuid = viewerUuid,
         )
     }
 }

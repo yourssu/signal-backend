@@ -21,7 +21,7 @@ class ReferralEntity(
         fun from(referral: Referral): ReferralEntity {
             return ReferralEntity(
                 id = referral.id,
-                origin = referral.origin.value,
+                origin = referral.origin,
                 referralCode = referral.referralCode,
             )
         }
@@ -30,7 +30,7 @@ class ReferralEntity(
     fun toDomain(): Referral {
         return Referral(
             id = id,
-            origin = com.yourssu.signal.domain.common.implement.Uuid(origin),
+            origin = origin,
             referralCode = referralCode,
         )
     }

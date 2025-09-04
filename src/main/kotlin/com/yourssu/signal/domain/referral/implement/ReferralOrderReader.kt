@@ -11,7 +11,7 @@ class ReferralOrderReader(
         return referralOrderRepository.findByReferralCode(referralCode)
     }
 
-    fun findByOrderId(orderId: Long): ReferralOrder? {
-        return referralOrderRepository.findByOrderId(orderId)
+    fun findByViewerUuid(viewerUuid: String): ReferralOrder? {
+        return referralOrderRepository.findByViewerUuid(viewerUuid)
     }
 }

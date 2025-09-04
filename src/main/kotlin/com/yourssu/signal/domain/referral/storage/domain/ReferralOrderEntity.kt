@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.referral.storage.domain
 
+import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.referral.implement.domain.ReferralOrder
 import jakarta.persistence.*
@@ -14,7 +15,7 @@ class ReferralOrderEntity(
     @Column(nullable = false, name = "referral_code")
     val referralCode: String,
 
-    @Column(nullable = false, name = "viewer_uuid")
+    @Column(nullable = false, unique = true, name = "viewer_uuid")
     val viewerUuid: String,
 ): BaseEntity() {
     companion object {
@@ -22,7 +23,7 @@ class ReferralOrderEntity(
             return ReferralOrderEntity(
                 id = referralOrder.id,
                 referralCode = referralOrder.referralCode,
-                viewerUuid = referralOrder.viewerUuid,
+                viewerUuid = referralOrder.viewerUuid.value,
             )
         }
     }
@@ -31,7 +32,7 @@ class ReferralOrderEntity(
         return ReferralOrder(
             id = id,
             referralCode = referralCode,
-            viewerUuid = viewerUuid,
+            viewerUuid = Uuid(viewerUuid),
         )
     }
 }

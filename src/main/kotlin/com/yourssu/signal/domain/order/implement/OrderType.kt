@@ -4,4 +4,5 @@ enum class OrderType(
 ) {
     ADMIN_CHARGE,
     DEPOSIT_SMS,
+    REFERRAL_BONUS,
 }

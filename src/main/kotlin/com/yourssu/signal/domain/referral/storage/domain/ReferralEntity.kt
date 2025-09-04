@@ -11,7 +11,7 @@ class ReferralEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val origin: String,
 
     @Column(nullable = false, unique = true, name = "referral_code")

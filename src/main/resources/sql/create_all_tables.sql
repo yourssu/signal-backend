@@ -10,6 +10,8 @@ USE `signal_dev`;
 -- ==========================================
 -- Drop existing tables
 -- ==========================================
+DROP TABLE IF EXISTS referral_order;
+DROP TABLE IF EXISTS referral;
 DROP TABLE IF EXISTS purchased_profile;
 DROP TABLE IF EXISTS intro_sentence;
 DROP TABLE IF EXISTS blacklist;
@@ -170,6 +172,32 @@ CREATE TABLE google_user (
     UNIQUE KEY uk_google_user_identifier (identifier),
     INDEX idx_google_user_uuid (uuid),
     INDEX idx_google_user_identifier (identifier)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11. Referral table
+CREATE TABLE referral (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    origin VARCHAR(36) NOT NULL,
+    referral_code VARCHAR(255) NOT NULL,
+    created_time DATETIME(6) NOT NULL,
+    updated_time DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_referral_referral_code (referral_code),
+    INDEX idx_referral_origin (origin),
+    INDEX idx_referral_referral_code (referral_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Referral Order table
+CREATE TABLE referral_order (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    referral_code VARCHAR(255) NOT NULL,
+    order_id BIGINT NOT NULL,
+    created_time DATETIME(6) NOT NULL,
+    updated_time DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    INDEX idx_referral_order_referral_code (referral_code),
+    INDEX idx_referral_order_order_id (order_id),
+    UNIQUE KEY uk_referral_order_order_id (order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================

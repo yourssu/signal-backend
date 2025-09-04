@@ -4,6 +4,10 @@ POST {{host}}/api/viewers/verification
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
+{
+  "referralCode": "test"
+}
+
 > {%
     client.global.set("verificationCode", response.body.result.verificationCode);
 %}

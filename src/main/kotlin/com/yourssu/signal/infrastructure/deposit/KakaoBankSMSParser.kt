@@ -3,6 +3,8 @@ package com.yourssu.signal.infrastructure.deposit
 import com.yourssu.signal.infrastructure.deposit.exception.NotDepositMessageException
 
 object KakaoBankSMSParser: SMSParser {
+    override val type: String = "kakao_sms"
+    
     override fun parse(message: String): SMSMessage {
         val lines = message.split("\n")
         val depositLine = lines.find { it.contains("입금") } ?: throw NotDepositMessageException()

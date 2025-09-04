@@ -3,6 +3,8 @@ package com.yourssu.signal.infrastructure.deposit
 import com.yourssu.signal.infrastructure.deposit.exception.NotDepositMessageException
 
 object KbBankSMSParser: SMSParser {
+    override val type: String = "kb_sms"
+    
     override fun parse(message: String): SMSMessage {
         val lines = message.split("\n").map { it.trim() }
         if (lines[4] != "입금") {

@@ -21,7 +21,6 @@ data class TicketIssuedRequest(
             secretKey = secretKey,
             verificationCode = verificationCode,
             ticket = ticket,
-            orderType = OrderType.ADMIN_CHARGE,
         )
     }
 }

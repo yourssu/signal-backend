@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.order.storage.domain
 
+import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.order.implement.OrderHistory
 import com.yourssu.signal.domain.order.implement.OrderType
@@ -37,7 +38,7 @@ class OrderHistoryEntity(
         fun from(orderHistory: OrderHistory) = OrderHistoryEntity(
             id = orderHistory.id,
             orderId = orderHistory.orderId,
-            uuid = orderHistory.uuid,
+            uuid = orderHistory.uuid.value,
             amount = orderHistory.amount,
             quantity = orderHistory.quantity,
             orderType = orderHistory.orderType,
@@ -48,7 +49,7 @@ class OrderHistoryEntity(
     fun toDomain() = OrderHistory(
         id = id,
         orderId = orderId,
-        uuid = uuid,
+        uuid = Uuid(uuid),
         amount = amount,
         quantity = quantity,
         orderType = orderType,

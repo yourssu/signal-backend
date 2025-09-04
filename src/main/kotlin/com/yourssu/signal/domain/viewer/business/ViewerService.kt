@@ -39,24 +39,10 @@ class ViewerService(
         return VerificationResponse.from(code)
     }
 
-    fun issueTicket(command: TicketIssuedCommand): ViewerResponse {
-        adminAccessChecker.validateAdminAccess(command.secretKey)
-        val verification = verificationReader.findByCode(command.toVerificationCode())
-        val viewer = viewerWriter.issueTicket(
-            uuid = verification.uuid,
-            ticket = command.ticket,
-        )
-        val orderHistory = OrderHistory(
-            uuid = viewer.uuid.value,
-            amount = command.amount,
-            quantity = command.ticket,
-            orderType = command.orderType,
-            status = OrderStatus.COMPLETED,
-        )
-        orderHistoryWriter.createOrderHistory(orderHistory)
-        verificationWriter.remove(verification.uuid)
-        Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
-        return ViewerResponse.from(viewer)
+    fun issueTicketForAdmin(command: TicketIssuedCommand): ViewerResponse {
+        val response = issueTicket(command)
+        createOrderHistory(uuid = response.uuid, quantity = command.ticket, orderType = OrderType.ADMIN_CHARGE)
+        return response
     }
 
     fun issueTicket(command: ProcessDepositSmsCommand): ViewerResponse {
@@ -66,11 +52,33 @@ class ViewerService(
             secretKey = command.secretKey,
             verificationCode = depositResult.verificationCode.value,
             ticket = depositResult.ticket,
-            orderType = OrderType.DEPOSIT_SMS,
-            amount = depositResult.depositAmount,
         )
         val response = issueTicket(ticketIssuedCommand)
+        createOrderHistory(response.uuid, depositResult.depositAmount, depositResult.ticket, OrderType.DEPOSIT_SMS)
         return response
+    }
+
+    private fun issueTicket(command: TicketIssuedCommand): ViewerResponse {
+        adminAccessChecker.validateAdminAccess(command.secretKey)
+        val verification = verificationReader.findByCode(command.toVerificationCode())
+        val viewer = viewerWriter.issueTicket(
+            uuid = verification.uuid,
+            ticket = command.ticket,
+        )
+        verificationWriter.remove(verification.uuid)
+        Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
+        return ViewerResponse.from(viewer)
+    }
+
+    private fun createOrderHistory(uuid: String, amount: Int = 0, quantity: Int, orderType: OrderType) {
+        val orderHistory = OrderHistory(
+            uuid = Uuid(uuid),
+            amount = amount,
+            quantity = quantity,
+            orderType = orderType,
+            status = OrderStatus.COMPLETED,
+        )
+        orderHistoryWriter.createOrderHistory(orderHistory)
     }
 
     fun getViewer(uuid: String): ViewerDetailResponse {

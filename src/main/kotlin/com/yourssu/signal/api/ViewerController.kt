@@ -35,13 +35,15 @@ class ViewerController(
 ) {
     @Operation(
         summary = "인증번호 발급",
-        description = "인증된 사용자에 대한 인증번호를 발급합니다. UUID가 등록되지 않은 경우 새로운 인증번호가 생성되며, 이미 등록된 경우 해당 UUID에 대한 인증번호를 반환합니다.",
+        description = "인증된 사용자에 대한 인증번호를 발급합니다. UUID가 등록되지 않은 경우 새로운 인증번호가 생성되며, 이미 등록된 경우 해당 UUID에 대한 인증번호를 반환합니다. 요청 본문은 레퍼럴 코드가 있는 경우에만 포함하면 됩니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/verification")
     @RequireAuth
-    fun issueVerification(@Parameter(hidden = true) @UserUuid uuid: String, @RequestBody(required = false) request: IssuedVerificationRequest?): ResponseEntity<Response<VerificationResponse>> {
-        val request = request ?: IssuedVerificationRequest()
+    fun issueVerification(
+        @Parameter(hidden = true) @UserUuid uuid: String, 
+        @RequestBody(required = false) request: IssuedVerificationRequest = IssuedVerificationRequest()
+    ): ResponseEntity<Response<VerificationResponse>> {
         val response = viewerService.issueVerificationCode(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }

@@ -24,16 +24,15 @@ class ReferralController(
 ) {
     @Operation(
         summary = "내 추천인 코드 발급",
-        description = "인증된 사용자의 추천인 코드를 발급합니다. customCode를 제공하지 않으면 시스템에서 자동으로 생성된 코드를 발급합니다.",
+        description = "인증된 사용자의 추천인 코드를 발급합니다. RequestBody를 제공하지 않으면 시스템에서 자동으로 생성된 코드를 발급합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping
     @RequireAuth
     fun generateMyReferralCode(
         @Parameter(hidden = true) @UserUuid uuid: String,
-        @RequestBody(required = false) request: ReferralCodeRequest?
+        @RequestBody(required = false) request: ReferralCodeRequest = ReferralCodeRequest()
     ): ResponseEntity<Response<ReferralCodeResponse>> {
-        val request = request ?: ReferralCodeRequest()
         val response = referralService.generateReferralCode(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }

@@ -116,6 +116,9 @@ class ViewerService(
             return null
         }
         val referrer = viewerReader.get(Uuid(referralOrder.viewerUuid.value))
+        if (referrer.uuid == viewer.uuid) {
+            return null
+        }
         viewerWriter.issueTicket(
             uuid = referrer.uuid,
             ticket = REFERRAL_BONUS_AMOUNT,

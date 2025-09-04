@@ -46,7 +46,7 @@ class ViewerController(
 
     @Operation(
         summary = "티켓 발급",
-        description = "문자 인증을 통해 뷰어에게 티켓을 발급합니다. 인증번호는 티켓이 발급된 후 재사용할 수 없습니다. (관리자 전용)"
+        description = "어드민이 직접 뷰어에게 티켓을 발급합니다. 인증번호는 티켓이 발급된 후 재사용할 수 없습니다. (관리자 전용)"
     )
     @PostMapping
     fun issueTicket(@Valid @RequestBody request: TicketIssuedRequest): ResponseEntity<Response<ViewerResponse>> {

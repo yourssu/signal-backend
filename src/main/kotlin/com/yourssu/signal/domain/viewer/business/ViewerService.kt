@@ -1,6 +1,10 @@
 package com.yourssu.signal.domain.viewer.business
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.order.implement.OrderHistory
+import com.yourssu.signal.domain.order.implement.OrderHistoryWriter
+import com.yourssu.signal.domain.order.implement.OrderType
+import com.yourssu.signal.domain.order.implement.domain.OrderStatus
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
@@ -14,6 +18,7 @@ import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
+import org.hibernate.query.Order
 import org.springframework.stereotype.Service
 import org.yaml.snakeyaml.Yaml
 
@@ -24,6 +29,7 @@ class ViewerService(
     private val viewerWriter: ViewerWriter,
     private val viewerReader: ViewerReader,
     private val purchasedProfileReader: PurchasedProfileReader,
+    private val orderHistoryWriter: OrderHistoryWriter,
     private val adminAccessChecker: AdminAccessChecker,
     private val depositManager: DepositManager,
     private val ticketPricePolicy: TicketPricePolicy,
@@ -39,7 +45,15 @@ class ViewerService(
         val viewer = viewerWriter.issueTicket(
             uuid = verification.uuid,
             ticket = command.ticket,
-            )
+        )
+        val orderHistory = OrderHistory(
+            uuid = viewer.uuid.value,
+            amount = command.amount,
+            quantity = command.ticket,
+            orderType = command.orderType,
+            status = OrderStatus.COMPLETED,
+        )
+        orderHistoryWriter.createOrderHistory(orderHistory)
         verificationWriter.remove(verification.uuid)
         Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
         return ViewerResponse.from(viewer)
@@ -47,9 +61,16 @@ class ViewerService(
 
     fun issueTicket(command: ProcessDepositSmsCommand): ViewerResponse {
         adminAccessChecker.validateAdminAccess(command.secretKey)
-        val (code, ticket) = depositManager.processDepositSms(type = command.type, message = command.message)
-        val ticketIssuedCommand = TicketIssuedCommand(secretKey = command.secretKey, verificationCode = code.value, ticket = ticket)
-        return issueTicket(ticketIssuedCommand)
+        val depositResult = depositManager.processDepositSms(type = command.type, message = command.message)
+        val ticketIssuedCommand = TicketIssuedCommand(
+            secretKey = command.secretKey,
+            verificationCode = depositResult.verificationCode.value,
+            ticket = depositResult.ticket,
+            orderType = OrderType.DEPOSIT_SMS,
+            amount = depositResult.depositAmount,
+        )
+        val response = issueTicket(ticketIssuedCommand)
+        return response
     }
 
     fun getViewer(uuid: String): ViewerDetailResponse {

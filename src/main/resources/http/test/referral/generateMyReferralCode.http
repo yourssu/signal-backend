@@ -1,5 +1,5 @@
 ### Generate my referral code (default)
-POST {{host}}/api/referrals/my-code
+POST {{host}}/api/referrals
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 

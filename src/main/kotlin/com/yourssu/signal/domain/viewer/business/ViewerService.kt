@@ -9,18 +9,14 @@ import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
 import com.yourssu.signal.domain.viewer.business.command.*
-import com.yourssu.signal.domain.viewer.business.command.ProcessDepositSmsCommand
 import com.yourssu.signal.domain.viewer.business.dto.TicketPackagesResponses
-import com.yourssu.signal.domain.viewer.business.dto.TicketPackageResponse
 import com.yourssu.signal.domain.viewer.business.dto.VerificationResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.Notification
-import org.hibernate.query.Order
 import org.springframework.stereotype.Service
-import org.yaml.snakeyaml.Yaml
 
 @Service
 class ViewerService(

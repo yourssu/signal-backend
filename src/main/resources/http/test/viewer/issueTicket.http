@@ -1,14 +1,8 @@
-@host=localhost:9011
-@uuid=ec5ea893-8540-42c5-958a-ce69ed7f9f63
-
 // Issue a verification code for uuid - 200 OK
 ###
 POST {{host}}/api/viewers/verification
 Content-Type: application/json
-
-{
-  "uuid": "{{uuid}}"
-}
+Authorization: Bearer {{accessToken}}
 
 > {%
     client.global.set("verificationCode", response.body.result.verificationCode);

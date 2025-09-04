@@ -31,8 +31,9 @@ class ReferralController(
     @RequireAuth
     fun generateMyReferralCode(
         @Parameter(hidden = true) @UserUuid uuid: String,
-        @RequestBody request: ReferralCodeRequest
+        @RequestBody(required = false) request: ReferralCodeRequest?
     ): ResponseEntity<Response<ReferralCodeResponse>> {
+        val request = request ?: ReferralCodeRequest()
         val response = referralService.generateReferralCode(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }

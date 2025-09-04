@@ -33,7 +33,7 @@ class ReferralService(
     private val orderHistoryWriter: OrderHistoryWriter,
 ) {
     companion object {
-        private const val REFERRAL_BONUS_THRESHOLD = 1
+        private const val MIN_TICKETS_FOR_REFERRAL_BONUS = 1
         private const val REFERRAL_BONUS_AMOUNT = 1
     }
 
@@ -56,7 +56,7 @@ class ReferralService(
 
     @Transactional
     fun processReferralBonus(viewer: Viewer, ticketCount: Int, verification: com.yourssu.signal.domain.verification.implement.domain.Verification) {
-        if (ticketCount <= REFERRAL_BONUS_THRESHOLD) {
+        if (ticketCount <= MIN_TICKETS_FOR_REFERRAL_BONUS) {
             return
         }
         val referralOrder = referralOrderReader.findByViewerUuid(viewer.uuid.value) ?: return

@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.viewer.implement
 
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import com.yourssu.signal.domain.viewer.implement.dto.DepositResult
 import com.yourssu.signal.domain.viewer.implement.exception.NotFoundDepositNameException
 import com.yourssu.signal.domain.viewer.implement.exception.NotFoundVerificationCode
 import com.yourssu.signal.domain.viewer.implement.exception.TicketIssuedFailedException
@@ -17,7 +18,7 @@ class DepositManager(
 ) {
     private val smsRecord = ConcurrentHashMap<String, SMSMessage>()
 
-    fun processDepositSms(type: String, message: String): Pair<VerificationCode, Int> {
+    fun processDepositSms(type: String, message: String): DepositResult {
         val messageParser = SMSParser.of(type)
         val message = messageParser.parse(message = message)
         return toCodeAndTicket(message)
@@ -31,12 +32,16 @@ class DepositManager(
         return ticket
     }
 
-    private fun toCodeAndTicket(message: SMSMessage): Pair<VerificationCode, Int> {
+    private fun toCodeAndTicket(message: SMSMessage): DepositResult {
         Notification.notifyIssueTicketByBankDepositSms(message)
         val code = toVerificationCode(message)
         val ticket = ticketPricePolicy.calculateTicketQuantity(message.depositAmount, code)
         validateAmount(ticket, message)
-        return Pair(code, ticket)
+        return DepositResult(
+            verificationCode = code,
+            ticket = ticket,
+            depositAmount = message.depositAmount
+        )
     }
 
     private fun toVerificationCode(message: SMSMessage): VerificationCode {

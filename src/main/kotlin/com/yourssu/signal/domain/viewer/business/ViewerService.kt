@@ -34,8 +34,8 @@ class ViewerService(
     private val depositManager: DepositManager,
     private val ticketPricePolicy: TicketPricePolicy,
 ) {
-    fun issueVerificationCode(uuid: String): VerificationResponse {
-        val code = verificationWriter.issueVerificationCode(uuid = Uuid(uuid))
+    fun issueVerificationCode(command: IssuedVerificationCommand): VerificationResponse {
+        val code = verificationWriter.issueVerificationCode(uuid = Uuid(command.uuid))
         return VerificationResponse.from(code)
     }
 

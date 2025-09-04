@@ -4,6 +4,7 @@ import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.api.dto.BankDepositSmsRequest
+import com.yourssu.signal.api.dto.IssuedVerificationRequest
 import com.yourssu.signal.api.dto.NotificationDepositRequest
 import com.yourssu.signal.api.dto.TicketIssuedRequest
 import com.yourssu.signal.api.dto.ViewersFoundRequest
@@ -39,8 +40,8 @@ class ViewerController(
     )
     @PostMapping("/verification")
     @RequireAuth
-    fun issueVerification(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Response<VerificationResponse>> {
-        val response = viewerService.issueVerificationCode(uuid)
+    fun issueVerification(@Parameter(hidden = true) @UserUuid uuid: String, @RequestBody request: IssuedVerificationRequest): ResponseEntity<Response<VerificationResponse>> {
+        val response = viewerService.issueVerificationCode(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }
 

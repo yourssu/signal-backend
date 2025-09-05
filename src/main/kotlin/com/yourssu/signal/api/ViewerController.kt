@@ -4,6 +4,7 @@ import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.api.dto.BankDepositSmsRequest
+import com.yourssu.signal.api.dto.BankDepositSmsMessageRequest
 import com.yourssu.signal.api.dto.IssuedVerificationRequest
 import com.yourssu.signal.api.dto.NotificationDepositRequest
 import com.yourssu.signal.api.dto.TicketIssuedRequest
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -65,6 +67,20 @@ class ViewerController(
     @PostMapping("/sms")
     fun issueTicketByBankDepositSms(@Valid @RequestBody request: BankDepositSmsRequest): ResponseEntity<Response<ViewerResponse>> {
         val response = viewerService.issueTicket(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "은행 입금 문자 티켓 발급 (경로 변수 방식)",
+        description = "은행 입금 SMS 인증을 통해 뷰어에게 티켓을 발급합니다. type과 secretKey를 경로 변수로 받습니다. (관리자 전용)"
+    )
+    @PostMapping("/sms/{type}/secretKey/{secretKey}")
+    fun issueTicketByBankDepositSmsWithPathVariable(
+        @PathVariable type: String,
+        @PathVariable secretKey: String,
+        @Valid @RequestBody request: BankDepositSmsMessageRequest
+    ): ResponseEntity<Response<ViewerResponse>> {
+        val response = viewerService.issueTicket(request.toCommand(secretKey, type))
         return ResponseEntity.ok(Response(result = response))
     }
 

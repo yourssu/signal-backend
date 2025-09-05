@@ -21,7 +21,7 @@ Authorization: Bearer {{accessToken}}
 @deposit=1000
 // Verify the uuid with the verification code (Path Variable) - 200 OK
 ###
-POST {{host}}/api/viewers/sms/kakao_sms/secretKey/{{secretKey}}
+POST {{host}}/api/viewers/sms/kakao_sms/{{secretKey}}
 Content-Type: application/json
 
 {

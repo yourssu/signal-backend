@@ -74,7 +74,7 @@ class ViewerController(
         summary = "은행 입금 문자 티켓 발급 (경로 변수 방식)",
         description = "은행 입금 SMS 인증을 통해 뷰어에게 티켓을 발급합니다. type과 secretKey를 경로 변수로 받습니다. (관리자 전용)"
     )
-    @PostMapping("/sms/{type}/secretKey/{secretKey}")
+    @PostMapping("/sms/{type}/{secretKey}")
     fun issueTicketByBankDepositSmsWithPathVariable(
         @PathVariable type: String,
         @PathVariable secretKey: String,

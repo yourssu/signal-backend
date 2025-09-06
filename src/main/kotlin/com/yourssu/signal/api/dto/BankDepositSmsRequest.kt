@@ -3,7 +3,7 @@ package com.yourssu.signal.api.dto
 import com.yourssu.signal.domain.viewer.business.command.ProcessDepositSmsCommand
 import jakarta.validation.constraints.NotBlank
 
-class BankDepositSmsRequest(
+data class BankDepositSmsRequest(
     @field:NotBlank
     val secretKey: String,
 

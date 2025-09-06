@@ -1,9 +1,9 @@
-package com.yourssu.signal.infrastructure
+package com.yourssu.signal.infrastructure.logging
 
 import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.verification.implement.domain.Verification
 import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
-import com.yourssu.signal.infrastructure.deposit.SMSMessage
+import com.yourssu.signal.infrastructure.sms.SMSMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

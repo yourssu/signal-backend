@@ -1,6 +1,7 @@
 package com.yourssu.signal.infrastructure.deposit
 
-import com.yourssu.signal.infrastructure.deposit.exception.NotDepositMessageException
+import com.yourssu.signal.infrastructure.sms.KbBankSMSParser
+import com.yourssu.signal.infrastructure.sms.exception.NotDepositMessageException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

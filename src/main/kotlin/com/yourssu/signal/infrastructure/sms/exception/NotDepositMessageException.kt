@@ -1,4 +1,4 @@
-package com.yourssu.signal.infrastructure.deposit.exception
+package com.yourssu.signal.infrastructure.sms.exception
 
 import com.yourssu.signal.handler.BadRequestException
 

@@ -19,7 +19,7 @@ import com.yourssu.signal.domain.profile.implement.domain.Gender
 import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
-import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.logging.Notification
 import org.springframework.stereotype.Service
 
 @Service

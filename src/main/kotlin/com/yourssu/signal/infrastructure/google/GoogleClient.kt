@@ -1,12 +1,13 @@
-package com.yourssu.signal.infra.google
+package com.yourssu.signal.infrastructure.google
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.yourssu.signal.domain.auth.implement.OAuthOutputPort
 import com.yourssu.signal.config.properties.GoogleOAuthConfigurationProperties
-import okhttp3.*
+import com.yourssu.signal.domain.auth.implement.OAuthOutputPort
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.springframework.stereotype.Component
 import java.io.IOException
-import java.net.URLDecoder
 
 @Component
 class GoogleClient(

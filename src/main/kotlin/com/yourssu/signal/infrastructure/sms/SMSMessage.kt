@@ -1,4 +1,4 @@
-package com.yourssu.signal.infrastructure.deposit
+package com.yourssu.signal.infrastructure.sms
 
 data class SMSMessage(
     val depositAmount: Int,

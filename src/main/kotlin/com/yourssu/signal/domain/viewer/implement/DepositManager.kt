@@ -5,9 +5,9 @@ import com.yourssu.signal.domain.viewer.implement.dto.DepositResult
 import com.yourssu.signal.domain.viewer.implement.exception.NotFoundDepositNameException
 import com.yourssu.signal.domain.viewer.implement.exception.NotFoundVerificationCode
 import com.yourssu.signal.domain.viewer.implement.exception.TicketIssuedFailedException
-import com.yourssu.signal.infrastructure.Notification
-import com.yourssu.signal.infrastructure.deposit.SMSMessage
-import com.yourssu.signal.infrastructure.deposit.SMSParser
+import com.yourssu.signal.infrastructure.logging.Notification
+import com.yourssu.signal.infrastructure.sms.SMSMessage
+import com.yourssu.signal.infrastructure.sms.SMSParser
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
 

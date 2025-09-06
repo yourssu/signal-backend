@@ -1,8 +1,13 @@
-package com.yourssu.signal.domain.auth.storage.domain
+package com.yourssu.signal.domain.auth.storage
 
-import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.auth.implement.GoogleUser
-import jakarta.persistence.*
+import com.yourssu.signal.domain.common.storage.BaseEntity
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 
 @Entity
 @Table(name = "google_user")

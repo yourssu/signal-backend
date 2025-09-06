@@ -1,10 +1,11 @@
-package com.yourssu.signal.infrastructure
+package com.yourssu.signal.infrastructure.openai
 
 import com.yourssu.signal.config.properties.OpenAIConfigurationProperties
-import com.yourssu.signal.infrastructure.dto.ContentRequest
-import com.yourssu.signal.infrastructure.dto.NicknameSuggestedRequest
-import com.yourssu.signal.infrastructure.dto.NicknameSuggestedResponse
-import com.yourssu.signal.infrastructure.exception.FailedOpenAIModel
+import com.yourssu.signal.infrastructure.openai.ChatModel
+import com.yourssu.signal.infrastructure.openai.dto.ContentRequest
+import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedRequest
+import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedResponse
+import com.yourssu.signal.infrastructure.openai.exception.FailedOpenAIModelException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -12,7 +13,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
@@ -72,7 +72,7 @@ class OpenAIModel(
         val error = root["error"]
         if (error != null && error !is JsonNull) {
             val errorMessage = error.jsonObject["message"]!!.jsonPrimitive.content
-            throw FailedOpenAIModel()
+            throw FailedOpenAIModelException()
         }
     }
 

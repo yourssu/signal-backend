@@ -1,6 +1,6 @@
-package com.yourssu.signal.infrastructure.deposit
+package com.yourssu.signal.infrastructure.sms
 
-import com.yourssu.signal.infrastructure.deposit.exception.NotDepositMessageException
+import com.yourssu.signal.infrastructure.sms.exception.NotDepositMessageException
 
 object KakaoBankSMSParser: SMSParser {
     override val type: String = "kakao_sms"

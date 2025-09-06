@@ -5,7 +5,7 @@ import com.yourssu.signal.domain.profile.implement.domain.exception.ContactLimit
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLengthViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.NicknameLengthViolatedException
-import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.logging.Notification
 import java.time.LocalDate
 
 private const val MAXIMUM_NICKNAME_LENGTH = 15

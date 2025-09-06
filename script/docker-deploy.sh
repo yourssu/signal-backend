@@ -5,7 +5,8 @@ source .env
 
 # Variables
 CONTAINER_NAME="${PROJECT_NAME}-container"
-IMAGE_NAME="$ECR_REGISTRY/yourssu/${PROJECT_NAME}:latest"
+IMAGE_TAG="${IMAGE_TAG:-latest}"
+IMAGE_NAME="$ECR_REGISTRY/yourssu/${PROJECT_NAME}:${IMAGE_TAG}"
 
 echo "Starting deployment process..."
 echo "Container name: $CONTAINER_NAME"

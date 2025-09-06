@@ -141,4 +141,4 @@ jobs:
           
           # Execute the deployment script
           ssh -i yourssu.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \
-            PROJECT_NAME=$PROJECT_NAME ./docker-deploy.sh"
+            PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=${{ github.event.inputs.image_tag || 'latest' }} ./docker-deploy.sh"

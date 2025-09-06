@@ -108,7 +108,7 @@ class LogHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    path = "/app/logs/"
+    path = "logs/"
     event_handler = LogHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)

@@ -4,7 +4,7 @@ import com.yourssu.signal.domain.blacklist.business.command.BlacklistAddedComman
 import jakarta.validation.constraints.NotBlank
 import org.springframework.format.annotation.NumberFormat
 
-class BlacklistAddedRequest(
+data class BlacklistAddedRequest(
     @NumberFormat
     val profileId: Long,
 

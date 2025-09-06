@@ -3,7 +3,7 @@ package com.yourssu.signal.api.dto
 import com.yourssu.signal.domain.blacklist.business.command.BlacklistDeletedCommand
 import jakarta.validation.constraints.NotBlank
 
-class BlacklistDeletedRequest(
+data class BlacklistDeletedRequest(
     @NotBlank
     val secretKey: String
 ) {

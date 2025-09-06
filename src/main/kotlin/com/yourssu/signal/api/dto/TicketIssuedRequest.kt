@@ -1,6 +1,5 @@
 package com.yourssu.signal.api.dto
 
-import com.yourssu.signal.domain.order.implement.OrderType
 import com.yourssu.signal.domain.viewer.business.command.TicketIssuedCommand
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

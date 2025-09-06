@@ -1,6 +1,6 @@
 package com.yourssu.signal.api
 
-import com.yourssu.signal.api.dto.dto.PaymentApprovalRequest
+import com.yourssu.signal.api.dto.PaymentApprovalRequest
 import com.yourssu.signal.api.dto.PaymentInitiationRequest
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth

@@ -19,9 +19,18 @@ jobs:
           role-session-name: GitHubActions-PermissionTest
           aws-region: us-east-1
 
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
       - name: Test ECR Public Permissions
+        env:
+          ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
         run: |
           echo "=== ECR Public 권한 테스트 ==="
+          echo "ECR_REGISTRY: $ECR_REGISTRY"
           
           # 1. GetAuthorizationToken 테스트
           echo "1. GetAuthorizationToken 테스트:"
@@ -43,21 +52,17 @@ jobs:
           echo -e "\n3. 현재 IAM 정보:"
           aws sts get-caller-identity
           
-          # 4. ECR Public 로그인 테스트
-          echo -e "\n4. ECR Public 로그인 테스트:"
-          ECR_REGISTRY="${{ vars.ECR_PUBLIC_REGISTRY_ID }}"
-          if aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/$ECR_REGISTRY; then
-            echo "✅ ECR Public 로그인 성공"
-          else
-            echo "❌ ECR Public 로그인 실패"
-          fi
+          # 4. ECR Public 로그인 테스트 (이미 로그인됨)
+          echo -e "\n4. ECR Public 로그인 상태:"
+          echo "✅ ECR Public 로그인 완료 (단계에서 수행됨)"
 
       - name: Test Repository Access
+        env:
+          ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
         run: |
           echo "=== Repository 접근 테스트 ==="
           
           # Registry URL 구성
-          ECR_REGISTRY="public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}"
           FULL_REPO_PATH="$ECR_REGISTRY/yourssu/signal"
           
           echo "Registry: $ECR_REGISTRY"

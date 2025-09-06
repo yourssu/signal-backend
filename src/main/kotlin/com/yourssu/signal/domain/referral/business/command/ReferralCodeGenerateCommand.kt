@@ -2,7 +2,7 @@ package com.yourssu.signal.domain.referral.business.command
 
 import com.yourssu.signal.domain.common.implement.Uuid
 
-data class ReferralCodeGenerateCommand(
+class ReferralCodeGenerateCommand(
     val uuid: String,
     val customCode: String? = null
 ) {

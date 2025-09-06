@@ -3,7 +3,7 @@ package com.yourssu.signal.domain.auth.business.command
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.auth.implement.GoogleUser
 
-data class GoogleOAuthCommand(
+class GoogleOAuthCommand(
     val code: String,
     val uuid: String,
 ) {

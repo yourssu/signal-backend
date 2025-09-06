@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.util.ContentCachingRequestWrapper
@@ -13,7 +12,6 @@ import java.nio.charset.StandardCharsets
 
 private val log = KotlinLogging.logger {}
 
-//@Profile("!prod")
 @Component
 class LoggingFilter : OncePerRequestFilter() {
     override fun doFilterInternal(

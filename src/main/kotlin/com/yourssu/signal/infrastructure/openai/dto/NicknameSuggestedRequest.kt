@@ -1,4 +1,4 @@
-package com.yourssu.signal.infrastructure.dto
+package com.yourssu.signal.infrastructure.openai.dto
 
 import kotlinx.serialization.Serializable
 

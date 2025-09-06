@@ -16,7 +16,7 @@ import com.yourssu.signal.domain.viewer.business.dto.ViewerDetailResponse
 import com.yourssu.signal.domain.viewer.business.dto.ViewerResponse
 import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedException
 import com.yourssu.signal.domain.viewer.implement.*
-import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.logging.Notification
 import org.springframework.stereotype.Service
 
 @Service

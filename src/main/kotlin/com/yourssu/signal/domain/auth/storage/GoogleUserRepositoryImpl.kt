@@ -2,7 +2,7 @@ package com.yourssu.signal.domain.auth.storage
 
 import com.yourssu.signal.domain.auth.implement.GoogleUser
 import com.yourssu.signal.domain.auth.implement.GoogleUserRepository
-import com.yourssu.signal.domain.auth.storage.domain.GoogleUserEntity
+import com.yourssu.signal.domain.auth.storage.GoogleUserEntity
 import com.yourssu.signal.domain.common.implement.Uuid
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Component

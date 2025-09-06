@@ -1,6 +1,6 @@
-package com.yourssu.signal.infrastructure.deposit
+package com.yourssu.signal.infrastructure.sms
 
-import com.yourssu.signal.infrastructure.deposit.exception.InvalidBankException
+import com.yourssu.signal.infrastructure.sms.exception.InvalidBankException
 
 interface SMSParser {
     val type: String

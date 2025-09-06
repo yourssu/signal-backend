@@ -17,7 +17,7 @@ import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.domain.viewer.implement.ViewerWriter
 import com.yourssu.signal.domain.viewer.implement.domain.Viewer
-import com.yourssu.signal.infrastructure.Notification
+import com.yourssu.signal.infrastructure.logging.Notification
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 

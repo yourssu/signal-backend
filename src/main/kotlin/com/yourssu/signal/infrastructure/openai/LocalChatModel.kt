@@ -1,6 +1,6 @@
-package com.yourssu.signal.infrastructure
+package com.yourssu.signal.infrastructure.openai
 
-import com.yourssu.signal.infrastructure.dto.NicknameSuggestedResponse
+import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedResponse
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 

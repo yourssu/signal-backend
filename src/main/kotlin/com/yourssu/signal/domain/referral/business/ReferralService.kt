@@ -71,7 +71,6 @@ class ReferralService(
         )
         createReferralBonusOrderHistory(referee.uuid.value)
         Notification.notifyTicketIssued(verification, REFERRAL_BONUS_AMOUNT, updatedReferrer.ticket - updatedReferrer.usedTicket)
-        referralOrderWriter.delete(referralOrder)
     }
 
     private fun createReferralBonusOrderHistory(uuid: String) {

@@ -11,10 +11,6 @@ echo "Starting deployment process..."
 echo "Container name: $CONTAINER_NAME"
 echo "Image name: $IMAGE_NAME"
 
-# Login to ECR
-echo "Logging in to ECR..."
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
-
 # Pull the latest image
 echo "Pulling the latest image..."
 docker pull $IMAGE_NAME

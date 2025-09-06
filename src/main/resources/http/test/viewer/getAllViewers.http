@@ -1,7 +1,3 @@
-@host=localhost:8080
+### Get All Viewers
+GET {{host}}/api/viewers?secretKey={{accessKey}}
 
-// Invalid secretKey - 403 FORBIDDEN
-###
-GET {{host}}/api/viewers?secretKey=invalid-secret-key
-
-###

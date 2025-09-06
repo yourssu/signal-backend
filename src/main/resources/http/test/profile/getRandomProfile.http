@@ -2,8 +2,6 @@
 GET {{host}}/api/profiles/random?gender=FEMALE
 Authorization: Bearer {{accessToken}}
 
-###
-
 ### Get random profile with exclusions
 GET {{host}}/api/profiles/random?gender=MALE&excludeProfiles=1,2,3
 Authorization: Bearer {{accessToken}}

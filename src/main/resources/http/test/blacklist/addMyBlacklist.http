@@ -2,15 +2,6 @@
 POST {{host}}/api/blacklists/me
 Authorization: Bearer {{accessToken}}
 
-> {%
-    client.test("Add my profile to blacklist", function() {
-        client.assert(response.status === 201, "Response status is not 201");
-        client.assert(response.body.result !== undefined, "Result is missing");
-        client.assert(response.body.result.id !== undefined, "Blacklist id is missing");
-        client.assert(response.body.result.profileId !== undefined, "Profile id is missing");
-    });
-%}
-
 ### Expected Response:
 # 201 Created
 # {

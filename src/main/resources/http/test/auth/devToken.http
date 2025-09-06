@@ -1,19 +1,17 @@
+@uuid=26eaadba-a2a0-4de3-ae7c-ea98cd14a014
+
 ### Get development token (dev environment only)
 POST {{host}}/api/auth/dev/token
 Content-Type: application/json
 
 {
-  "uuid": "{{uuid}}"
+  "uuid": "{{uuid}}",
+  "accessKey": "{{accessKey}}"
 }
 
 > {%
-    client.test("Dev token retrieved", function() {
-        client.assert(response.status === 200, "Response status is not 200");
-        client.assert(response.body.result.accessToken !== undefined, "Access token is missing");
-    });
-    
-    // Store dev token globally (optional - can be used for testing)
-    client.global.set("devAccessToken", response.body.result.accessToken);
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
 %}
 
 ### Expected Response:

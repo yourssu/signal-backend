@@ -10,10 +10,6 @@ Content-Type: application/json
   "uuid": "{{uuid}}"
 }
 
-> {%
-    client.global.set("verificationCode", response.body.result.verificationCode);
-%}
-
 ###
 
 @secretKey=DonaEmilyEatSteakLeopold

@@ -1,0 +1,34 @@
+
+@amount = 1000
+@verificationCode = 5016
+### Issue ticket by KakaoBank deposit SMS
+POST {{host}}/api/viewers/sms
+Content-Type: application/json
+
+{
+  "secretKey": "{{accessKey}}",
+  "message": "[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\/14 11:30\n입금 {{amount}}\n{{verificationCode}}\n잔액 6원",
+  "type": "kakao_sms"
+}
+
+### Issue ticket by KBBank deposit SMS
+POST {{host}}/api/viewers/sms
+Content-Type: application/json
+
+{
+  "secretKey": "{{accessKey}}",
+  "message": "[Web발신]\n[KB]09\/06 15:09\n218301**044\n{{verificationCode}}\n입금\n{{amount}}\n잔액4",
+  "type": "kb_sms"
+}
+
+### Expected Response:
+# 200 OK
+# {
+#   "timestamp": "2025-09-06T12:00:00.000000+09:00",
+#   "result": {
+#     "id": 1,
+#     "uuid": "some-uuid",
+#     "ticketCount": 5,
+#     "usedTicketCount": 0
+#   }
+# }

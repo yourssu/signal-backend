@@ -8,10 +8,6 @@ Authorization: Bearer {{accessToken}}
   "referralCode": "test"
 }
 
-> {%
-    client.global.set("verificationCode", response.body.result.verificationCode);
-%}
-
 ###
 // If the uuid is not registered, then a new verification code will be created.
 // Otherwise the uuid is registered, then return the verification code for the uuid.
@@ -25,7 +21,7 @@ POST {{host}}/api/viewers/sms/kakao_sms/{{secretKey}}
 Content-Type: application/json
 
 {
-  "message":"[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\\/14 11:30\n입금 {{deposit}}원\n{{verificationCode}}\n잔액 6원"
+  "message":"[Web발신]\n[카카오뱅크]\n남*현(3873)\n05\/14 11:30\n입금 {{deposit}}원\n{{verificationCode}}\n잔액 6원"
 }
 
 ###

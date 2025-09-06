@@ -1,11 +1,6 @@
-### Get my profile
-GET {{host}}/api/profiles/me
-Authorization: Bearer {{accessToken}}
-
-###
-
+@profileId = 1
 ### Get purchased profile by ID
-GET {{host}}/api/profiles/1
+GET {{host}}/api/profiles/{{profileId}}
 Authorization: Bearer {{accessToken}}
 
 ### Expected Response:

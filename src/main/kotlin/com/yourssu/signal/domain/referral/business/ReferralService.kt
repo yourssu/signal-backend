@@ -70,13 +70,13 @@ class ReferralService(
             uuid = referrer.uuid,
             ticket = REFERRAL_BONUS_AMOUNT,
         )
-        createReferralBonusOrderHistory(referrer.uuid.value)
+        createReferralBonusOrderHistory(referrer.uuid)
         Notification.notifyTicketIssued(verification, REFERRAL_BONUS_AMOUNT, updatedReferrer.ticket - updatedReferrer.usedTicket)
     }
 
-    private fun createReferralBonusOrderHistory(uuid: String) {
+    private fun createReferralBonusOrderHistory(uuid: Uuid) {
         val orderHistory = OrderHistory(
-            uuid = Uuid(uuid),
+            uuid = uuid,
             amount = 0,
             quantity = REFERRAL_BONUS_AMOUNT,
             orderType = OrderType.REFERRAL_BONUS,

@@ -12,4 +12,5 @@ class OrderHistory(
     val quantity: Int,
     val orderType: OrderType,
     val status: OrderStatus,
+    val referralCode: String? = null,
 )

@@ -1,8 +1,7 @@
 package com.yourssu.signal.domain.referral.storage
 
 import com.yourssu.signal.domain.referral.implement.ReferralOrderRepository
-import com.yourssu.signal.domain.referral.implement.domain.ReferralOrder
-import com.yourssu.signal.domain.referral.storage.domain.ReferralOrderEntity
+import com.yourssu.signal.domain.referral.implement.ReferralOrder
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

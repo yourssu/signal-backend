@@ -1,8 +1,7 @@
 package com.yourssu.signal.domain.verification.implement
 
+import VerificationCode
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.verification.implement.domain.Verification
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

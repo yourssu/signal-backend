@@ -2,11 +2,10 @@ package com.yourssu.signal.domain.payment.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.payment.implement.KakaoPayOrderRepository
-import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
-import com.yourssu.signal.domain.payment.storage.domain.KakaoPayOrderEntity
-import com.yourssu.signal.domain.payment.storage.domain.QKakaoPayOrderEntity.*
+import com.yourssu.signal.domain.payment.implement.KakaoPayOrder
+import com.yourssu.signal.domain.payment.storage.QKakaoPayOrderEntity.kakaoPayOrderEntity
 import com.yourssu.signal.domain.payment.storage.exception.NotFoundKakaoPayOrderException
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+import com.yourssu.signal.domain.viewer.implement.Viewer
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

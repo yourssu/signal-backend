@@ -2,10 +2,9 @@ package com.yourssu.signal.domain.viewer.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+import com.yourssu.signal.domain.viewer.implement.Viewer
 import com.yourssu.signal.domain.viewer.implement.ViewerRepository
-import com.yourssu.signal.domain.viewer.storage.domain.QViewerEntity.viewerEntity
-import com.yourssu.signal.domain.viewer.storage.domain.ViewerEntity
+import com.yourssu.signal.domain.viewer.storage.QViewerEntity.viewerEntity
 import com.yourssu.signal.domain.viewer.storage.exception.ViewerNotFoundException
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

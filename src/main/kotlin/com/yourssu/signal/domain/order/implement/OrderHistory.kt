@@ -2,7 +2,7 @@ package com.yourssu.signal.domain.order.implement
 
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.order.implement.domain.OrderStatus
+import com.yourssu.signal.domain.order.implement.OrderStatus
 
 class OrderHistory(
     val id: Long? = null,

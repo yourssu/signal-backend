@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.payment.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
 import com.yourssu.signal.domain.payment.implement.dto.KakaoPayApprovalResponse
 import com.yourssu.signal.domain.payment.implement.dto.OrderApprovalRequest
 import com.yourssu.signal.domain.payment.implement.dto.OrderReadyRequest

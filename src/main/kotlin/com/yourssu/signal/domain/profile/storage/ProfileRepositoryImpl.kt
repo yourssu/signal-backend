@@ -4,10 +4,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.config.security.DataCipher
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileRepository
-import com.yourssu.signal.domain.profile.implement.domain.Gender
-import com.yourssu.signal.domain.profile.implement.domain.Profile
-import com.yourssu.signal.domain.profile.storage.domain.ProfileEntity
-import com.yourssu.signal.domain.profile.storage.domain.QProfileEntity.profileEntity
+import com.yourssu.signal.domain.profile.implement.Gender
+import com.yourssu.signal.domain.profile.implement.Profile
+import com.yourssu.signal.domain.profile.storage.QProfileEntity.profileEntity
 import com.yourssu.signal.domain.profile.storage.execption.ProfileNotFoundException
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable

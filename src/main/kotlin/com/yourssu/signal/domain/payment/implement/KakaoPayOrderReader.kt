@@ -1,6 +1,5 @@
 package com.yourssu.signal.domain.payment.implement
 
-import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
 import org.springframework.stereotype.Component
 
 @Component

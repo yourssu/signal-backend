@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.viewer.business.dto
 
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+import com.yourssu.signal.domain.viewer.implement.Viewer
 
 data class ViewerResponse(
     val id: Long,

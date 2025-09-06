@@ -1,7 +1,5 @@
 package com.yourssu.signal.domain.profile.implement
 
-import com.yourssu.signal.domain.profile.implement.domain.ProfileRanking
-import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
 import com.yourssu.signal.domain.profile.implement.exception.ProfileRankingNotFoundException
 import org.springframework.stereotype.Component
 

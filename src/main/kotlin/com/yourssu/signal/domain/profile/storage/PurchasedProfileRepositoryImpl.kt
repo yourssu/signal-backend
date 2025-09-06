@@ -2,10 +2,9 @@ package com.yourssu.signal.domain.profile.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileRepository
-import com.yourssu.signal.domain.profile.implement.domain.ProfileRanking
-import com.yourssu.signal.domain.profile.implement.domain.PurchasedProfile
-import com.yourssu.signal.domain.profile.storage.domain.PurchasedProfileEntity
-import com.yourssu.signal.domain.profile.storage.domain.QPurchasedProfileEntity.purchasedProfileEntity
+import com.yourssu.signal.domain.profile.implement.ProfileRanking
+import com.yourssu.signal.domain.profile.implement.PurchasedProfile
+import com.yourssu.signal.domain.profile.storage.QPurchasedProfileEntity.purchasedProfileEntity
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

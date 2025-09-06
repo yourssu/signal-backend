@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.payment.implement.dto
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
+import com.yourssu.signal.domain.payment.implement.KakaoPayOrder
 
 data class KakaoPayReadyResponse(
     val tid: String,

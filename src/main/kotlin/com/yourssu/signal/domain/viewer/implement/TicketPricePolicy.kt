@@ -1,11 +1,9 @@
 package com.yourssu.signal.domain.viewer.implement
 
+import VerificationCode
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileReader
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
-import com.yourssu.signal.domain.viewer.implement.domain.TicketPackages
-import com.yourssu.signal.domain.viewer.implement.domain.TicketPrice
 import com.yourssu.signal.domain.viewer.implement.exception.InvalidTicketQuantityException
 import org.springframework.stereotype.Component
 

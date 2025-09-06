@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.verification.implement
 
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import VerificationCode
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Component
 import java.util.*

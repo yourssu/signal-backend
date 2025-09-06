@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.profile.business.dto
 
-import com.yourssu.signal.domain.profile.implement.domain.Profile
-import com.yourssu.signal.domain.profile.implement.domain.ProfileRanking
+import com.yourssu.signal.domain.profile.implement.Profile
+import com.yourssu.signal.domain.profile.implement.ProfileRanking
 
 data class ProfileRankingResponse(
     val rank: Int,

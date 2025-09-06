@@ -1,7 +1,5 @@
 package com.yourssu.signal.domain.payment.implement
 
-import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
-import com.yourssu.signal.domain.payment.implement.domain.OrderStatus
 import com.yourssu.signal.domain.payment.implement.exception.InvalidPaymentStatusException
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime

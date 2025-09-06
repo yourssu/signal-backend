@@ -1,8 +1,8 @@
 package com.yourssu.signal.infrastructure.logging
 
-import com.yourssu.signal.domain.profile.implement.domain.Profile
-import com.yourssu.signal.domain.verification.implement.domain.Verification
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import VerificationCode
+import com.yourssu.signal.domain.profile.implement.Profile
+import com.yourssu.signal.domain.verification.implement.Verification
 import com.yourssu.signal.infrastructure.sms.SMSMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 

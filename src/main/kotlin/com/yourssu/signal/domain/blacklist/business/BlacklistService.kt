@@ -6,7 +6,7 @@ import com.yourssu.signal.domain.blacklist.business.dto.BlacklistExistsResponse
 import com.yourssu.signal.domain.blacklist.business.dto.BlacklistResponse
 import com.yourssu.signal.domain.blacklist.implement.BlacklistReader
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
-import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import com.yourssu.signal.domain.blacklist.implement.exception.AdminBlacklistCannotBeRemovedException
 import com.yourssu.signal.domain.blacklist.implement.exception.BlacklistAlreadyExistsException
 import com.yourssu.signal.domain.common.implement.Uuid

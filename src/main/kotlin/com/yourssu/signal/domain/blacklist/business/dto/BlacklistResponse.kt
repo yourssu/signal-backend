@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.blacklist.business.dto
 
-import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.Blacklist
 
 class BlacklistResponse(
     val id: Long? = null,

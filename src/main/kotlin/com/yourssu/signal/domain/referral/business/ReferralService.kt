@@ -3,7 +3,7 @@ package com.yourssu.signal.domain.referral.business
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.order.implement.OrderHistoryWriter
 import com.yourssu.signal.domain.order.implement.OrderType
-import com.yourssu.signal.domain.order.implement.domain.OrderStatus
+import com.yourssu.signal.domain.order.implement.OrderStatus
 import com.yourssu.signal.domain.order.implement.OrderHistory
 import com.yourssu.signal.domain.referral.business.command.ReferralCodeGenerateCommand
 import com.yourssu.signal.domain.referral.business.dto.ReferralCodeResponse
@@ -11,12 +11,13 @@ import com.yourssu.signal.domain.referral.implement.ReferralOrderReader
 import com.yourssu.signal.domain.referral.implement.ReferralOrderWriter
 import com.yourssu.signal.domain.referral.implement.ReferralReader
 import com.yourssu.signal.domain.referral.implement.ReferralWriter
-import com.yourssu.signal.domain.referral.implement.domain.Referral
-import com.yourssu.signal.domain.referral.implement.domain.ReferralOrder
+import com.yourssu.signal.domain.referral.implement.Referral
+import com.yourssu.signal.domain.referral.implement.ReferralOrder
 import com.yourssu.signal.domain.user.implement.UserReader
+import com.yourssu.signal.domain.verification.implement.Verification
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.domain.viewer.implement.ViewerWriter
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+import com.yourssu.signal.domain.viewer.implement.Viewer
 import com.yourssu.signal.infrastructure.logging.Notification
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
@@ -55,7 +56,7 @@ class ReferralService(
     }
 
     @Transactional
-    fun processReferralBonus(viewer: Viewer, ticketCount: Int, verification: com.yourssu.signal.domain.verification.implement.domain.Verification) {
+    fun processReferralBonus(viewer: Viewer, ticketCount: Int, verification: Verification) {
         if (ticketCount <= MIN_TICKETS_FOR_REFERRAL_BONUS) {
             return
         }

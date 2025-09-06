@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.profile.business.dto
 
-import com.yourssu.signal.domain.profile.implement.domain.Profile
+import com.yourssu.signal.domain.profile.implement.Profile
 
 class MyProfileResponse(
     val profileId: Long,

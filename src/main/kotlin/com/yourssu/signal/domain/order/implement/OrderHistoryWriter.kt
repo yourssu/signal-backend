@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.order.implement
 
-import com.yourssu.signal.domain.order.implement.domain.OrderStatus
+import com.yourssu.signal.domain.order.implement.OrderStatus
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

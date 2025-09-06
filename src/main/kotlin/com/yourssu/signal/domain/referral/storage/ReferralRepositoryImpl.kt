@@ -2,8 +2,7 @@ package com.yourssu.signal.domain.referral.storage
 
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.referral.implement.ReferralRepository
-import com.yourssu.signal.domain.referral.implement.domain.Referral
-import com.yourssu.signal.domain.referral.storage.domain.ReferralEntity
+import com.yourssu.signal.domain.referral.implement.Referral
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

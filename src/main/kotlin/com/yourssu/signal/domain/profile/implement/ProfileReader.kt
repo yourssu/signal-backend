@@ -1,8 +1,6 @@
 package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.profile.implement.domain.Gender
-import com.yourssu.signal.domain.profile.implement.domain.Profile
 import org.springframework.stereotype.Component
 
 @Component

@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.viewer.implement
 
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import VerificationCode
 import com.yourssu.signal.domain.viewer.implement.dto.DepositResult
 import com.yourssu.signal.domain.viewer.implement.exception.NotFoundDepositNameException
 import com.yourssu.signal.domain.viewer.implement.exception.NotFoundVerificationCode

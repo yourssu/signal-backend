@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.order.implement
 
-import com.yourssu.signal.domain.order.implement.domain.OrderStatus
+import com.yourssu.signal.domain.order.implement.OrderStatus
 
 interface OrderHistoryRepository {
     fun save(orderHistory: OrderHistory): OrderHistory

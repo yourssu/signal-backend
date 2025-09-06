@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.viewer.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
 import org.springframework.stereotype.Component
 
 @Component

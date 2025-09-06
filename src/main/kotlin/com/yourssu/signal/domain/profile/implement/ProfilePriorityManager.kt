@@ -1,8 +1,6 @@
 package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.domain.blacklist.implement.BlacklistReader
-import com.yourssu.signal.domain.profile.implement.domain.Gender
-import com.yourssu.signal.domain.profile.implement.domain.Profile
 import com.yourssu.signal.domain.profile.implement.exception.RandomProfileNotFoundException
 import com.yourssu.signal.utils.GaussianDistributionUtils.calculateProbabilities
 import com.yourssu.signal.utils.GaussianDistributionUtils.selectIndexByProbabilityDistribution

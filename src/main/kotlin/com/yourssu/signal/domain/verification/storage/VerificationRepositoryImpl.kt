@@ -1,12 +1,11 @@
 package com.yourssu.signal.domain.verification.storage
 
+import VerificationCode
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.verification.implement.VerificationRepository
-import com.yourssu.signal.domain.verification.implement.domain.Verification
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
-import com.yourssu.signal.domain.verification.storage.domain.QVerificationEntity.verificationEntity
-import com.yourssu.signal.domain.verification.storage.domain.VerificationEntity
+import com.yourssu.signal.domain.verification.implement.Verification
+import com.yourssu.signal.domain.verification.storage.QVerificationEntity.verificationEntity
 import com.yourssu.signal.domain.verification.storage.exception.VerificationCodeNotFoundException
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

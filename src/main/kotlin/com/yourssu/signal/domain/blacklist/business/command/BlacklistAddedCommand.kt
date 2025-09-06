@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.blacklist.business.command
 
-import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.Blacklist
 
 class BlacklistAddedCommand(
     val profileId: Long,

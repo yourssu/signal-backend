@@ -1,6 +1,5 @@
 package com.yourssu.signal.domain.referral.implement
 
-import com.yourssu.signal.domain.referral.implement.domain.ReferralOrder
 import org.springframework.stereotype.Component
 
 @Component

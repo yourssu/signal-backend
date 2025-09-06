@@ -3,8 +3,7 @@ package com.yourssu.signal.domain.profile.storage
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.IntroSentenceRepository
-import com.yourssu.signal.domain.profile.storage.domain.IntroSentenceEntity
-import com.yourssu.signal.domain.profile.storage.domain.QIntroSentenceEntity.introSentenceEntity
+import com.yourssu.signal.domain.profile.storage.QIntroSentenceEntity.introSentenceEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

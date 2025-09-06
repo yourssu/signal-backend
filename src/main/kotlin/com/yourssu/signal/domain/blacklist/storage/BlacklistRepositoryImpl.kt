@@ -1,11 +1,9 @@
 package com.yourssu.signal.domain.blacklist.storage
 
 import com.querydsl.jpa.impl.JPAQueryFactory
+import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import com.yourssu.signal.domain.blacklist.implement.BlacklistRepository
-import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
-import com.yourssu.signal.domain.blacklist.implement.exception.BlacklistAlreadyExistsException
-import com.yourssu.signal.domain.blacklist.storage.domain.BlacklistEntity
-import com.yourssu.signal.domain.blacklist.storage.domain.QBlacklistEntity.blacklistEntity
+import com.yourssu.signal.domain.blacklist.storage.QBlacklistEntity.blacklistEntity
 import com.yourssu.signal.domain.blacklist.storage.exception.BlacklistNotFoundException
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable

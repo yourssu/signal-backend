@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.payment.implement
 
-import com.yourssu.signal.domain.payment.implement.domain.KakaoPayOrder
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+import com.yourssu.signal.domain.viewer.implement.Viewer
 
 interface KakaoPayOrderRepository {
     fun save(order: KakaoPayOrder): KakaoPayOrder

@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.viewer.business.command
 
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import VerificationCode
 
 class TicketIssuedCommand(
     val secretKey: String,

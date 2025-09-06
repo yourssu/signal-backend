@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.viewer.business.dto
 
-import com.yourssu.signal.domain.viewer.implement.domain.TicketPackage
-import com.yourssu.signal.domain.viewer.implement.domain.TicketPackages
+import com.yourssu.signal.domain.viewer.implement.TicketPackage
+import com.yourssu.signal.domain.viewer.implement.TicketPackages
 
 data class TicketPackagesResponses(
     val packages: List<TicketPackageResponse>,

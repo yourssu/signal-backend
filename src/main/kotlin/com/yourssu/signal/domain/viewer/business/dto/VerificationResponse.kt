@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.viewer.business.dto
 
-import com.yourssu.signal.domain.verification.implement.domain.VerificationCode
+import VerificationCode
 
 data class VerificationResponse(
    val verificationCode: Int,

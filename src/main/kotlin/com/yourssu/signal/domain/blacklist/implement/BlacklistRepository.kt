@@ -1,6 +1,6 @@
 package com.yourssu.signal.domain.blacklist.implement
 
-import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.Blacklist
 
 interface BlacklistRepository {
     fun save(blacklist: Blacklist): Blacklist

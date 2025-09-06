@@ -1,7 +1,7 @@
 package com.yourssu.signal.domain.viewer.business.dto
 
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
-import com.yourssu.signal.domain.viewer.implement.domain.Viewer
+import com.yourssu.signal.domain.viewer.implement.Viewer
 import java.time.format.DateTimeFormatter
 
 data class ViewerDetailResponse(

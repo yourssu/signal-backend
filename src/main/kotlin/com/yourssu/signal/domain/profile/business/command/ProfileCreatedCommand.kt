@@ -1,8 +1,8 @@
 package com.yourssu.signal.domain.profile.business.command
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.profile.implement.domain.Gender
-import com.yourssu.signal.domain.profile.implement.domain.Profile
+import com.yourssu.signal.domain.profile.implement.Gender
+import com.yourssu.signal.domain.profile.implement.Profile
 
 class ProfileCreatedCommand(
     val uuid: String,

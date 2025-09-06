@@ -3,7 +3,7 @@ package com.yourssu.signal.domain.profile.business
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
-import com.yourssu.signal.domain.blacklist.implement.domain.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
@@ -15,8 +15,8 @@ import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.profile.implement.ProfileWriter
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.profile.implement.UsedTicketManager
-import com.yourssu.signal.domain.profile.implement.domain.Gender
-import com.yourssu.signal.domain.profile.implement.domain.ProfileValidator
+import com.yourssu.signal.domain.profile.implement.Gender
+import com.yourssu.signal.domain.profile.implement.ProfileValidator
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.infrastructure.logging.Notification

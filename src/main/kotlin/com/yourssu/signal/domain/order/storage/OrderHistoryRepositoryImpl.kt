@@ -3,11 +3,10 @@ package com.yourssu.signal.domain.order.storage
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.order.implement.OrderHistoryRepository
 import com.yourssu.signal.domain.order.implement.OrderHistory
-import com.yourssu.signal.domain.order.implement.domain.OrderStatus
+import com.yourssu.signal.domain.order.implement.OrderStatus
 import com.yourssu.signal.domain.order.implement.exception.OrderHistoryNotFoundException
 import com.yourssu.signal.domain.order.implement.exception.OrderHistoryUpdateFailedException
-import com.yourssu.signal.domain.order.storage.domain.OrderHistoryEntity
-import com.yourssu.signal.domain.order.storage.domain.QOrderHistoryEntity.orderHistoryEntity
+import com.yourssu.signal.domain.order.storage.QOrderHistoryEntity.orderHistoryEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional

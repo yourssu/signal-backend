@@ -4,7 +4,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.order.implement.OrderHistory
 import com.yourssu.signal.domain.order.implement.OrderHistoryWriter
 import com.yourssu.signal.domain.order.implement.OrderType
-import com.yourssu.signal.domain.order.implement.domain.OrderStatus
+import com.yourssu.signal.domain.order.implement.OrderStatus
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.referral.business.ReferralService

@@ -109,7 +109,7 @@ class ViewerService(
 
     private fun validateUnMatchedDeposit(command: NotificationDepositCommand) {
         if (!depositManager.existsByMessage(command.message)) {
-            Notification.notifyDeposit(command.message, command.verificationCode)
+            Notification.notifyPayDeposit(command.message, command.verificationCode)
             throw TicketIssuedFailedException("${command.message} is not a valid deposit name")
         }
     }

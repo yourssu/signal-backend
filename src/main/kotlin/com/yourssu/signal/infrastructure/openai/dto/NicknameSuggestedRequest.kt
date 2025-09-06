@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class NicknameSuggestedRequest(
     val model: String,
-    val input: List<ContentRequest>,
+    val messages: List<ContentRequest>,
 ) {
     companion object {
-        fun from(model: String, input: List<ContentRequest>): NicknameSuggestedRequest {
+        fun from(model: String, messages: List<ContentRequest>): NicknameSuggestedRequest {
             return NicknameSuggestedRequest(
                 model = model,
-                input = input,
+                messages = messages,
             )
         }
     }

@@ -3,22 +3,25 @@ from datetime import datetime
 
 
 class SignalHandler:
+    # 공통 로그 접두사
+    NOTIFICATION_PREFIX = 'INFO com.yourssu.signal.infrastructure.logging.Notification -'
+    
+    # 시그널 관련 로그 패턴 상수
+    CREATE_PROFILE_PREFIX = f'{NOTIFICATION_PREFIX} CreateProfile'
+    FAILED_PROFILE_CONTACT_PREFIX = f'{NOTIFICATION_PREFIX} FailedProfileContactExceedsLimit'
+    CONTACT_EXCEEDS_WARNING_PREFIX = f'{NOTIFICATION_PREFIX} ContactExceedsLimitWarning'
+    ISSUE_TICKET_PREFIX = f'{NOTIFICATION_PREFIX} Issued ticket'
+    RETRY_ISSUE_TICKET_PREFIX = f'{NOTIFICATION_PREFIX} RetryIssuedTicket'
+    CONSUME_TICKET_PREFIX = f'{NOTIFICATION_PREFIX} Consumed ticket'
+    ISSUE_TICKET_BY_BANK_DEPOSIT_PREFIX = f'{NOTIFICATION_PREFIX} IssueTicketByBankDepositSms'
+    FAILED_BY_BANK_DEPOSIT_PREFIX = f'{NOTIFICATION_PREFIX} IssueFailedTicketByDepositAmount'
+    FAILED_BY_UNMATCHED_VERIFICATION_PREFIX = f'{NOTIFICATION_PREFIX} IssueFailedTicketByUnMatchedVerification'
+    PAY_NOTIFICATION_PREFIX = f'{NOTIFICATION_PREFIX} PayNotification'
+    NO_FIRST_PURCHASED_TICKET_PREFIX = f'{NOTIFICATION_PREFIX} NoFirstPurchasedTicket'
+    
     def __init__(self, config, notifier):
         self.config = config
         self.notifier = notifier
-        
-        # 시그널 관련 로그 패턴
-        self.CREATE_PROFILE_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - CreateProfile'
-        self.FAILED_PROFILE_CONTACT_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - FailedProfileContactExceedsLimit'
-        self.CONTACT_EXCEEDS_WARNING_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - ContactExceedsLimitWarning'
-        self.ISSUE_TICKET_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - Issued ticket'
-        self.RETRY_ISSUE_TICKET_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - RetryIssuedTicket'
-        self.CONSUME_TICKET_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - Consumed ticket'
-        self.ISSUE_TICKET_BY_BANK_DEPOSIT_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - IssueTicketByBankDepositSms'
-        self.FAILED_BY_BANK_DEPOSIT_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - IssueFailedTicketByDepositAmount'
-        self.FAILED_BY_UNMATCHED_VERIFICATION_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - IssueFailedTicketByUnMatchedVerification'
-        self.PAY_NOTIFICATION_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - PayNotification'
-        self.NO_FIRST_PURCHASED_TICKET_PREFIX = 'INFO com.yourssu.signal.infrastructure.Notification - NoFirstPurchasedTicket'
 
         # 핸들러 매핑
         self.handlers = {

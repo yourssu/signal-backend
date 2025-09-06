@@ -1,4 +1,4 @@
-name: Dev - Build and Deploy to EC2
+name: Docker - Build, Push to ECR and Deploy (Dev)
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-push-deploy:
     runs-on: ubuntu-latest
     environment: dev
 
@@ -16,6 +16,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+          registries: ${{ vars.ECR_PUBLIC_REGISTRY_ID }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -31,21 +54,44 @@ jobs:
         run: |
           ./gradlew clean build
 
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "ECR_REGISTRY: $ECR_REGISTRY"
+          echo "ECR_REPOSITORY: yourssu/${{ vars.PROJECT_NAME }}"
+          echo "Full image path: $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:latest"
+          
+          # Create and use a new builder instance
+          docker buildx create --use --name arm-builder
+          
+          # Build ARM64 image and push with cache
+          docker buildx build \
+            --platform linux/arm64 \
+            --push \
+            --provenance=false \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            -t $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:$IMAGE_TAG \
+            -t $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:latest \
+            .
+
       - name: Deploy to EC2
         env:
           YOURSSU_PEM: ${{ secrets.YOURSSU_PEM }}
-          HOST: ${{ vars.HOST_URL }}
-
+          HOST_URL: ${{ vars.HOST_URL }}
+          
           SERVER_PORT: ${{ vars.SERVER_PORT }}
           CORS_ALLOWED_ORIGIN: ${{ vars.CORS_ALLOWED_ORIGIN }}
-
+          
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-
+          
           ADMIN_ACCESS_KEY: ${{ secrets.ADMIN_ACCESS_KEY }}
           CONTACT_SECRET_KEY: ${{ secrets.CONTACT_SECRET_KEY }}
-
+          
           WHITELIST: ${{ vars.WHITELIST }}
           CONTACT_LIMIT: ${{ vars.CONTACT_LIMIT }}
           CONTACT_LIMIT_WARNING: ${{ vars.CONTACT_LIMIT_WARNING }}
@@ -53,41 +99,42 @@ jobs:
           TICKET_COST: ${{ vars.TICKET_COST }}
           TICKET_PRICE_POLICY: ${{ vars.TICKET_PRICE_POLICY }}
           TICKET_PRICE_REGISTERED_POLICY: ${{ vars.TICKET_PRICE_REGISTERED_POLICY }}
-
+          
           OPENAI_URL: ${{ vars.OPENAI_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
           OPENAI_PROMPT: ${{ vars.OPENAI_PROMPT }}
           USER_INPUT_LIMIT: ${{ vars.USER_INPUT_LIMIT }}
-
+          
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
           SLACK_ADMIN_CHANNEL: ${{ vars.SLACK_ADMIN_CHANNEL }}
           SLACK_LOG_CHANNEL: ${{ vars.SLACK_LOG_CHANNEL }}
-
+          
           KAKAOPAY_ADMIN_KEY: ${{ secrets.KAKAOPAY_ADMIN_KEY }}
           KAKAOPAY_CID: ${{ vars.KAKAOPAY_CID }}
           KAKAOPAY_APPROVAL_URL: ${{ vars.KAKAOPAY_APPROVAL_URL }}
           KAKAOPAY_CANCEL_URL: ${{ vars.KAKAOPAY_CANCEL_URL }}
           KAKAOPAY_FAIL_URL: ${{ vars.KAKAOPAY_FAIL_URL }}
-
+          
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_ACCESS_TOKEN_EXPIRATION: ${{ vars.JWT_ACCESS_TOKEN_EXPIRATION }}
           JWT_REFRESH_TOKEN_EXPIRATION: ${{ vars.JWT_REFRESH_TOKEN_EXPIRATION }}
-
+          
           GOOGLE_OAUTH_CLIENT_ID: ${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_REDIRECT_URI: ${{ vars.GOOGLE_OAUTH_REDIRECT_URI }}
-
+          
+          ECR_REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+          ssh-keyscan -H $HOST_URL >> ~/.ssh/known_hosts
           echo "$YOURSSU_PEM" > yourssu.pem
           chmod 600 yourssu.pem
-          mv build/libs/signal-0.0.1-SNAPSHOT.jar yourssu-signal-application.jar
-          scp -i yourssu.pem yourssu-signal-application.jar ubuntu@$HOST:/home/ubuntu/signal-api
           
+          # Create environment file
           echo "SERVER_PORT=$SERVER_PORT" >> .env
           echo "CORS_ALLOWED_ORIGIN=$CORS_ALLOWED_ORIGIN" >> .env
           
@@ -101,6 +148,7 @@ jobs:
           echo "WHITELIST=$WHITELIST" >> .env
           echo "CONTACT_LIMIT=$CONTACT_LIMIT" >> .env
           echo "CONTACT_LIMIT_WARNING=$CONTACT_LIMIT_WARNING" >> .env
+          echo "CONTACT_PRICE=$CONTACT_PRICE" >> .env
           echo "TICKET_COST=$TICKET_COST" >> .env
           echo "TICKET_PRICE_POLICY=$TICKET_PRICE_POLICY" >> .env
           echo "TICKET_PRICE_REGISTERED_POLICY=$TICKET_PRICE_REGISTERED_POLICY" >> .env
@@ -111,6 +159,7 @@ jobs:
           echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
           echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
           
+          echo "PROJECT_NAME=$PROJECT_NAME" >> .env
           echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
@@ -122,7 +171,7 @@ jobs:
           echo "KAKAOPAY_APPROVAL_URL=$KAKAOPAY_APPROVAL_URL" >> .env
           echo "KAKAOPAY_CANCEL_URL=$KAKAOPAY_CANCEL_URL" >> .env
           echo "KAKAOPAY_FAIL_URL=$KAKAOPAY_FAIL_URL" >> .env
-
+          
           echo "JWT_SECRET=$JWT_SECRET" >> .env
           echo "JWT_ACCESS_TOKEN_EXPIRATION=$JWT_ACCESS_TOKEN_EXPIRATION" >> .env
           echo "JWT_REFRESH_TOKEN_EXPIRATION=$JWT_REFRESH_TOKEN_EXPIRATION" >> .env
@@ -131,6 +180,18 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET" >> .env
           echo "GOOGLE_OAUTH_REDIRECT_URI=$GOOGLE_OAUTH_REDIRECT_URI" >> .env
           
-          scp -i yourssu.pem .env ubuntu@$HOST:/home/ubuntu/signal-api
-          ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/run.sh"
-          ssh -i yourssu.pem ubuntu@$HOST "chmod 600 /home/ubuntu/signal-api/.env && /home/ubuntu/signal-api/observer_run.sh"
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> .env
+          
+          # Create deployment directory structure
+          ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p /home/ubuntu/$PROJECT_NAME-api/logs"
+          
+          # Deploy environment file and docker script to host machine
+          scp -i yourssu.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -i yourssu.pem script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          
+          # Make the script executable
+          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"
+          
+          # Execute the deployment script
+          ssh -i yourssu.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \
+            PROJECT_NAME=$PROJECT_NAME ./docker-deploy.sh"

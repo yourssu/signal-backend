@@ -150,6 +150,7 @@ CREATE TABLE order_history (
     amount INT NOT NULL,
     quantity INT NOT NULL,
     order_type VARCHAR(50) NOT NULL,
+    referral_code VARCHAR(255) DEFAULT NULL,
     status VARCHAR(50) NOT NULL,
     created_time DATETIME(6) NOT NULL,
     updated_time DATETIME(6) NOT NULL,

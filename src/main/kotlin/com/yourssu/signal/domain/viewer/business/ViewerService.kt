@@ -8,6 +8,8 @@ import com.yourssu.signal.domain.order.implement.OrderStatus
 import com.yourssu.signal.domain.profile.business.dto.PurchasedProfileResponse
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
 import com.yourssu.signal.domain.referral.business.ReferralService
+import com.yourssu.signal.domain.referral.implement.ReferralOrderReader
+import com.yourssu.signal.domain.referral.implement.ReferralReader
 import com.yourssu.signal.domain.verification.implement.VerificationWriter
 import com.yourssu.signal.domain.viewer.business.command.*
 import com.yourssu.signal.domain.viewer.business.dto.TicketPackagesResponses
@@ -28,6 +30,7 @@ class ViewerService(
     private val purchasedProfileReader: PurchasedProfileReader,
     private val orderHistoryWriter: OrderHistoryWriter,
     private val referralService: ReferralService,
+    private val referralOrderReader: ReferralOrderReader,
     private val adminAccessChecker: AdminAccessChecker,
     private val depositManager: DepositManager,
     private val ticketPricePolicy: TicketPricePolicy,
@@ -40,7 +43,13 @@ class ViewerService(
 
     fun issueTicketForAdmin(command: TicketIssuedCommand): ViewerResponse {
         val response = issueTicket(command)
-        createOrderHistory(uuid = response.uuid, quantity = command.ticket, orderType = OrderType.ADMIN_CHARGE)
+        val referralCode = referralOrderReader.findByViewerUuid(response.uuid)
+        createOrderHistory(
+            uuid = response.uuid,
+            quantity = command.ticket,
+            referralCode = referralCode?.referralCode,
+            orderType = OrderType.ADMIN_CHARGE
+        )
         return response
     }
 
@@ -53,7 +62,14 @@ class ViewerService(
             ticket = depositResult.ticket,
         )
         val response = issueTicket(ticketIssuedCommand)
-        createOrderHistory(response.uuid, depositResult.depositAmount, depositResult.ticket, OrderType.DEPOSIT_SMS)
+        val referralCode = referralOrderReader.findByViewerUuid(response.uuid)
+        createOrderHistory(
+            uuid = response.uuid,
+            amount = depositResult.depositAmount,
+            quantity = depositResult.ticket,
+            referralCode = referralCode?.referralCode,
+            orderType = OrderType.DEPOSIT_SMS
+        )
         return response
     }
 
@@ -70,12 +86,19 @@ class ViewerService(
         return ViewerResponse.from(viewer)
     }
 
-    private fun createOrderHistory(uuid: String, amount: Int = 0, quantity: Int, orderType: OrderType) {
+    private fun createOrderHistory(
+        uuid: String,
+        amount: Int = 0,
+        quantity: Int,
+        referralCode: String? = null,
+        orderType: OrderType
+    ) {
         val orderHistory = OrderHistory(
             uuid = Uuid(uuid),
             amount = amount,
             quantity = quantity,
             orderType = orderType,
+            referralCode = referralCode,
             status = OrderStatus.COMPLETED,
         )
         orderHistoryWriter.createOrderHistory(orderHistory)

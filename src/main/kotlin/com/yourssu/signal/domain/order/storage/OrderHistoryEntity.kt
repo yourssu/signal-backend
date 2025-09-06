@@ -33,6 +33,9 @@ class OrderHistoryEntity(
     @Column(nullable = false)
     val quantity: Int,
 
+    @Column(nullable = true)
+    val referralCode: String? = null,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "order_type")
     var orderType: OrderType,
@@ -48,6 +51,7 @@ class OrderHistoryEntity(
             uuid = orderHistory.uuid.value,
             amount = orderHistory.amount,
             quantity = orderHistory.quantity,
+            referralCode = orderHistory.referralCode,
             orderType = orderHistory.orderType,
             status = orderHistory.status,
         )
@@ -59,6 +63,7 @@ class OrderHistoryEntity(
         uuid = Uuid(uuid),
         amount = amount,
         quantity = quantity,
+        referralCode = referralCode,
         orderType = orderType,
         status = status,
     )

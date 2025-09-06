@@ -13,7 +13,7 @@ class ReferralOrderEntity(
     val id: Long? = null,
 
     @Column(nullable = false, name = "referral_code")
-    val referralCode: String,
+    var referralCode: String,
 
     @Column(nullable = false, unique = true, name = "viewer_uuid")
     val viewerUuid: String,

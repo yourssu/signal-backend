@@ -18,11 +18,10 @@ class ReferralOrderRepositoryImpl(
     override fun save(referralOrder: ReferralOrder): ReferralOrder {
         val entity = jpaRepository.findByViewerUuid(referralOrder.viewerUuid.value)
         if (entity == null) {
-            val entity = ReferralOrderEntity.from(referralOrder)
-            return jpaRepository.save(entity).toDomain()
+            return jpaRepository.save(ReferralOrderEntity.from(referralOrder)).toDomain()
         }
         entity.referralCode = referralOrder.referralCode
-        return jpaRepository.save(entity).toDomain()
+        return entity.toDomain()
     }
 
     override fun findByReferralCode(referralCode: String): List<ReferralOrder> {

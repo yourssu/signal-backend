@@ -1,6 +1,5 @@
 package com.yourssu.signal.infrastructure.logging
 
-import VerificationCode
 import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.verification.implement.Verification
 import com.yourssu.signal.infrastructure.sms.SMSMessage
@@ -51,11 +50,7 @@ object Notification {
         logger.info { "IssueFailedTicketByUnMatchedVerification&${message.name} ${message.depositAmount}" }
     }
 
-    fun notifyNoFirstPurchasedTicket(price: Int, code: VerificationCode) {
-        logger.info { "NoFirstPurchasedTicket&${code.value} $price" }
-    }
-
-    fun notifyDeposit(message: String, verificationCode: Int) {
+    fun notifyPayDeposit(message: String, verificationCode: Int) {
         logger.info { "PayNotification&${validateMessage(message)} $verificationCode" }
     }
 

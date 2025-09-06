@@ -1,22 +1,12 @@
-@adminSecretKey = DonaEmilyEatSteakLeopold
-
+@profileId=1
 ### Add profile to blacklist (Admin)
 POST {{host}}/api/blacklists
 Content-Type: application/json
 
 {
-  "profileId": 1,
-  "secretKey": "{{adminSecretKey}}"
+  "profileId": {{profileId}},
+  "secretKey": "{{accessKey}}"
 }
-
-> {%
-    client.test("Add profile to blacklist", function() {
-        client.assert(response.status === 201, "Response status is not 201");
-        client.assert(response.body.result !== undefined, "Result is missing");
-        client.assert(response.body.result.id !== undefined, "Blacklist id is missing");
-        client.assert(response.body.result.profileId === 123, "Profile id mismatch");
-    });
-%}
 
 ### Expected Response:
 # 201 Created

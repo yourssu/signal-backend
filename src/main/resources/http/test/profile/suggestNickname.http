@@ -1,12 +1,11 @@
-@host=localhost:8080
-
 // Suggest a nickname - 200 OK
 ###
 POST {{host}}/api/profiles/nickname
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
-  "description": [
+  "introSentences": [
     "나는 딸기를 좋아해",
     "나는 포도도 좋아해",
     "제일 좋아하는 음식은 치킨이야"
@@ -18,5 +17,6 @@ Content-Type: application/json
 ###
 POST {{host}}/api/profiles/nickname
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 ###

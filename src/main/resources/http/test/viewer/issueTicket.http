@@ -8,10 +8,6 @@ Authorization: Bearer {{accessToken}}
   "referralCode": "test"
 }
 
-> {%
-    client.global.set("verificationCode", response.body.result.verificationCode);
-%}
-
 ###
 // If the uuid is not registered, then a new verification code will be created.
 // Otherwise the uuid is registered, then return the verification code for the uuid.
@@ -53,10 +49,6 @@ Content-Type: application/json
 {
   "uuid": "{{uuid}}"
 }
-
-> {%
-    client.global.set("verificationCode", response.body.result.verificationCode);
-%}
 
 ###
 

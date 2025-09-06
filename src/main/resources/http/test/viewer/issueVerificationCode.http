@@ -2,3 +2,12 @@
 POST {{host}}/api/viewers/verification
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
+
+### Issue verification code
+POST {{host}}/api/viewers/verification
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "referralCode": "test2"
+}

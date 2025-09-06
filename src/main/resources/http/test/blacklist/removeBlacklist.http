@@ -1,0 +1,6 @@
+### Remove profile from blacklist (Admin)
+DELETE {{host}}/api/blacklists/1?secretKey={{accessKey}}
+Authorization: Bearer {{accessToken}}
+
+### Expected Response:
+# 204 No Content

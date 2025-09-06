@@ -2,4 +2,3 @@
 GET {{host}}/api/viewers/ticket-packages
 Content-Type: application/json
 
-###

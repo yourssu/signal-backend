@@ -22,3 +22,9 @@ code={{code}}&
 grant_type=authorization_code&
 redirect_uri=https://signal.dev.yourssu.com/auth/google
 
+> {%
+    client.global.set("accessToken", response.body.result.accessToken);
+    client.global.set("refreshToken", response.body.result.refreshToken);
+%}
+###
+

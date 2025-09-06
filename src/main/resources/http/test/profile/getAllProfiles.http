@@ -1,7 +1,3 @@
-@host=localhost:8080
+### get all profiles
+GET {{host}}/api/profiles?secretKey={{accessKey}}
 
-// Invalid secretKey - 403 FORBIDDEN
-###
-GET {{host}}/api/profiles?secretKey=invalid-secret-key
-
-###

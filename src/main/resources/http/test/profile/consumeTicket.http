@@ -1,10 +1,11 @@
+@profileId = 1
 ### Consume ticket to view contact information
 POST {{host}}/api/profiles/contact
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "profileId": 1
+  "profileId": {{profileId}}
 }
 
 ### Expected Response:

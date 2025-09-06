@@ -1,2 +1,4 @@
+@gender=MALE
+#@gender=FEMALE
 ### countByGender
-GET {{host}}/api/profiles/genders/MALE/count
+GET {{host}}/api/profiles/genders/{{gender}}/count

@@ -4,5 +4,6 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "depositName": "홍길동"
+  "message": "홍길동 1000",
+  "verificationCode": 123456
 }

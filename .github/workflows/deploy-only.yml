@@ -12,7 +12,7 @@ on:
           - dev
           - prod
       image_tag:
-        description: 'Image tag to deploy (default: latest)'
+        description: 'Image tag to deploy'
         required: false
         default: 'latest'
 

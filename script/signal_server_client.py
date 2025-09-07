@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 class ServerClient:
     def __init__(self):
         load_dotenv(override=True)
-        server_port = os.getenv('SERVER_PORT', '9011')
+        server_port = os.getenv('SERVER_PORT', '9012')
         self.base_url = f"http://localhost:{server_port}"
         self.secret_key = os.getenv('ADMIN_ACCESS_KEY', '')
         

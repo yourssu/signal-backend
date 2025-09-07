@@ -1,10 +1,12 @@
 package com.yourssu.signal.api.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.yourssu.signal.domain.profile.business.command.ProfileCreatedCommand
 import com.yourssu.signal.domain.profile.support.ContactFormat
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.springframework.beans.factory.annotation.Value
 
 data class ProfileCreatedRequest(
     @field:NotBlank
@@ -31,7 +33,7 @@ data class ProfileCreatedRequest(
     @field:Size(min = 0, max = 3)
     val introSentences: List<String>,
 
-    val school: String = "숭실대",
+    val school: String? = null,
 ) {
     fun toCommand(uuid: String): ProfileCreatedCommand {
         return ProfileCreatedCommand(
@@ -44,7 +46,7 @@ data class ProfileCreatedRequest(
             mbti = mbti,
             nickname = nickname,
             introSentences = introSentences,
-            school = school,
+            school = school ?: "숭실대",
         )
     }
 

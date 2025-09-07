@@ -64,7 +64,7 @@ class ProfileController(
         description = "인증된 사용자의 프로필에서 닉네임과 소개 문장을 수정합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PutMapping("/me")
+    @PatchMapping("/me")
     @RequireAuth
     fun updateMyProfile(
         @Valid @RequestBody request: ProfileUpdateRequest,

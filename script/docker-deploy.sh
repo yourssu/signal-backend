@@ -12,9 +12,20 @@ echo "Starting deployment process..."
 echo "Container name: $CONTAINER_NAME"
 echo "Image name: $IMAGE_NAME"
 
-# Pull the latest image
-echo "Pulling the latest image..."
-docker pull $IMAGE_NAME
+# Pull the latest image for current platform
+echo "Pulling the latest image for current platform..."
+PLATFORM=$(uname -m)
+if [ "$PLATFORM" = "x86_64" ]; then
+    DOCKER_PLATFORM="linux/amd64"
+elif [ "$PLATFORM" = "aarch64" ]; then
+    DOCKER_PLATFORM="linux/arm64"
+else
+    echo "Unsupported platform: $PLATFORM"
+    exit 1
+fi
+
+echo "Detected platform: $PLATFORM, using Docker platform: $DOCKER_PLATFORM"
+docker pull --platform $DOCKER_PLATFORM $IMAGE_NAME
 
 # Check if container is running
 if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then

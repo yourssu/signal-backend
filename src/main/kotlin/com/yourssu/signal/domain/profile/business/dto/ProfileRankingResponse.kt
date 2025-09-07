@@ -13,7 +13,8 @@ data class ProfileRankingResponse(
     val animal: String,
     val mbti: String,
     val nickname: String,
-    val introSentences: List<String>
+    val introSentences: List<String>,
+    val school: String
 ) {
     companion object {
         fun of(profileRanking: ProfileRanking, profile: Profile, totalProfiles: Int): ProfileRankingResponse {
@@ -27,7 +28,8 @@ data class ProfileRankingResponse(
                 animal = profile.animal,
                 mbti = profile.mbti,
                 nickname = profile.nickname,
-                introSentences = profile.introSentences
+                introSentences = profile.introSentences,
+                school = profile.school
             )
         }
     }

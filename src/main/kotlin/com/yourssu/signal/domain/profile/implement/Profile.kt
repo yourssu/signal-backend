@@ -16,27 +16,12 @@ class Profile(
     val mbti: String,
     val nickname: String,
     val introSentences: List<String>,
+    val school: String,
 ) {
     init {
         validateNickname(nickname)
         validateIntroSentences(introSentences)
         validateBirthYear(birthYear)
-    }
-
-    companion object {
-        fun ofNewProfile(gender: Gender, department: String, birthYear: Int, animal: String, contact: String, mbti: String, nickname: String, introSentences: List<String>): Profile {
-            return Profile(
-                uuid = Uuid.randomUUID(),
-                gender = gender,
-                department = department,
-                birthYear = birthYear,
-                animal = animal,
-                contact = contact,
-                mbti = mbti,
-                nickname = nickname,
-                introSentences = introSentences,
-            )
-        }
     }
 
     fun copy(introSentences: List<String> = this.introSentences, contact: String = this.contact, nickname: String = this.nickname): Profile {
@@ -50,7 +35,8 @@ class Profile(
             contact = contact,
             mbti = mbti,
             nickname = nickname,
-            introSentences = introSentences
+            introSentences = introSentences,
+            school = school
         )
     }
 }

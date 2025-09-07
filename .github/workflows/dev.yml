@@ -96,9 +96,9 @@ jobs:
           # Create and use a new builder instance
           docker buildx create --use --name arm-builder
           
-          # Build ARM64 image and push with enhanced cache
+          # Build multi-platform image (ARM64 + AMD64) and push with enhanced cache
           docker buildx build \
-            --platform linux/arm64 \
+            --platform linux/arm64,linux/amd64 \
             --push \
             --provenance=false \
             --cache-from type=gha \

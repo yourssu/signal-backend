@@ -57,9 +57,32 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # Additional Gradle caches for better performance
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            .gradle/
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Clean Build with Gradle (with Testing)
         run: |
-          ./gradlew clean build
+          # 캐시 활용을 위한 빌드 옵션 추가
+          ./gradlew clean build --build-cache --parallel --daemon
+
+      # Docker 베이스 이미지 캐시
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('script/requirements.txt', 'Dockerfile') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ hashFiles('script/requirements.txt', 'Dockerfile') }}-
+            ${{ runner.os }}-buildx-
 
       - name: Build, tag, and push image to Amazon ECR
         env:
@@ -73,16 +96,22 @@ jobs:
           # Create and use a new builder instance
           docker buildx create --use --name arm-builder
           
-          # Build ARM64 image and push with cache
+          # Build ARM64 image and push with enhanced cache
           docker buildx build \
             --platform linux/arm64 \
             --push \
             --provenance=false \
             --cache-from type=gha \
+            --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=gha,mode=max \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             -t $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:$IMAGE_TAG \
             -t $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:latest \
             .
+          
+          # 캐시 교체
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Deploy to EC2
         env:
@@ -111,6 +140,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
           OPENAI_PROMPT: ${{ vars.OPENAI_PROMPT }}
+          OPENAI_POLICY_PROMPT: ${{ vars.OPENAI_POLICY_PROMPT }}
           USER_INPUT_LIMIT: ${{ vars.USER_INPUT_LIMIT }}
           
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
@@ -165,6 +195,7 @@ jobs:
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
           echo "OPENAI_MODEL=$OPENAI_MODEL" >> .env
           echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
+          echo "OPENAI_POLICY_PROMPT=\"$OPENAI_POLICY_PROMPT\"" >> .env
           echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
           
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env

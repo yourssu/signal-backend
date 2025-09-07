@@ -25,6 +25,12 @@ class IntroSentenceRepositoryImpl(
             .fetch()
             .toList()
     }
+
+    override fun deleteByUuid(uuid: Uuid) {
+        jpaQueryFactory.delete(introSentenceEntity)
+            .where(introSentenceEntity.uuid.eq(uuid.value))
+            .execute()
+    }
 }
 
 interface IntroSentenceJpaRepository : JpaRepository<IntroSentenceEntity, Long> {

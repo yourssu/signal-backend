@@ -17,4 +17,12 @@ class ProfileWriter(
         }
         return savedProfile
     }
+
+    @Transactional
+    fun updateProfile(profile: Profile): Profile {
+        val savedProfile = profileRepository.save(profile)
+        introSentenceRepository.deleteByUuid(savedProfile.uuid)
+        introSentenceRepository.saveAll(introSentences = profile.introSentences, uuid = savedProfile.uuid)
+        return savedProfile
+    }
 }

@@ -1,5 +1,7 @@
 import pytz
 from datetime import datetime
+from openai_client import openai_client
+from signal_server_client import server_client
 
 
 class SignalHandler:
@@ -49,7 +51,7 @@ class SignalHandler:
             f.write(content)
 
     def create_profile_message(self, line):
-        """프로필 등록 완료 메시지"""
+        """프로필 등록 완료 메시지 및 정책 위반 검사"""
         id, department, contact, nickname, introSentences = line[line.find('&') + 1:].split('&')
         message = f"""🩷 *프로필 등록 완료* 🩷
     -  💖 *식별 번호*: {id}
@@ -58,8 +60,57 @@ class SignalHandler:
     -  👤 *닉네임*: {nickname}
     -  📝 *자기소개*: {introSentences}
     """
-        self._append_or_create_file("/app/logs/createProfiles.txt", message)
+
         self.notifier.send_admin_notification(message)
+        
+        try:
+            profile_data = {
+                'id': id,
+                'department': department,
+                'contact': contact,
+                'nickname': nickname,
+                'introSentences': introSentences
+            }
+            violation_result = openai_client.check_policy_violation(profile_data)
+            
+            if violation_result.get('violation', False):
+                reason = violation_result.get('reason', 'Policy violation detected by AI')
+                blacklist_result = server_client.add_to_blacklist(id, reason)
+                
+                violation_message = f"""🚨 *정책 위반 프로필 감지* 🚨
+    -  💖 *프로필 ID*: {id}
+    -  🚨 *위반 사유*: {reason}
+    -  ⚡ *블랙리스트 처리*: {'성공' if blacklist_result.get('success', False) else '실패'}
+    
+    원본 프로필:
+    -  🏢 *학과*: {department}
+    -  📞 *연락처*: https://www.instagram.com/{contact.replace('@', '')}
+    -  👤 *닉네임*: {nickname}
+    -  📝 *자기소개*: {introSentences}
+    """
+                self.notifier.send_admin_notification(violation_message)
+            else:
+                reason = violation_result.get('reason', '')
+                if reason and 'Policy check failed' in reason:
+                    failure_message = f"""❌ *정책 검사 실패* ❌
+    -  💖 *프로필 ID*: {id}
+    -  🚨 *실패 사유*: {reason}
+    -  ⚠️ *조치*: 수동 확인 필요
+    """
+                    self.notifier.send_admin_notification(failure_message)
+                else:
+                    pass_message = f"""✅ *정책 검사 통과* ✅
+    -  💖 *프로필 ID*: {id}
+    -  🎉 *결과*: 정책 위반 없음
+    """
+                    self.notifier.send_admin_notification(pass_message)
+                
+        except Exception as e:
+            error_message = f"""❌ *정책 검사 시스템 오류* ❌
+    -  💖 *프로필 ID*: {id}
+    -  🚨 *오류 내용*: {str(e)}
+    """
+            self.notifier.send_admin_notification(error_message)
 
     def create_failed_profile_contact_message(self, line):
         """프로필 등록 실패 메시지"""

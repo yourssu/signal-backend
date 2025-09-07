@@ -51,6 +51,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
           OPENAI_PROMPT: ${{ vars.OPENAI_PROMPT }}
+          OPENAI_POLICY_PROMPT: ${{ vars.OPENAI_POLICY_PROMPT }}
           USER_INPUT_LIMIT: ${{ vars.USER_INPUT_LIMIT }}
           
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
@@ -104,6 +105,7 @@ jobs:
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
           echo "OPENAI_MODEL=$OPENAI_MODEL" >> .env
           echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
+          echo "OPENAI_POLICY_PROMPT=\"$OPENAI_POLICY_PROMPT\"" >> .env
           echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
           
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env

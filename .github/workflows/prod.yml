@@ -169,7 +169,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST_URL >> ~/.ssh/known_hosts
-          echo "$HOME_PEM" > home.pem
+          printf "%s\n" "$HOME_PEM" > home.pem
           chmod 600 home.pem
           
           # Create environment file

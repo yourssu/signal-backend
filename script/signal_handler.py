@@ -81,12 +81,6 @@ class SignalHandler:
     -  💖 *프로필 ID*: {id}
     -  🚨 *위반 사유*: {reason}
     -  ⚡ *블랙리스트 처리*: {'성공' if blacklist_result.get('success', False) else '실패'}
-    
-    원본 프로필:
-    -  🏢 *학과*: {department}
-    -  📞 *연락처*: https://www.instagram.com/{contact.replace('@', '')}
-    -  👤 *닉네임*: {nickname}
-    -  📝 *자기소개*: {introSentences}
     """
                 self.notifier.send_admin_notification(violation_message)
             else:

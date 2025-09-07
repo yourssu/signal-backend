@@ -115,7 +115,7 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          YOURSSU_PEM: ${{ secrets.YOURSSU_PEM }}
+          YOURSSU_PEM: ${{ secrets.HOME_PEM }}
           HOST_URL: ${{ vars.HOST_URL }}
 
           SERVER_PORT: ${{ vars.SERVER_PORT }}

@@ -9,25 +9,10 @@ from typing import Dict, Any, Optional
 
 class OpenAIClient:
     def __init__(self):
-        self.api_key = os.getenv('OPENAI_API_KEY', '')
-        self.base_url = os.getenv('OPENAI_URL', 'https://api.openai.com/v1/responses')
-        self.model = os.getenv('OPENAI_MODEL', 'gpt-5')
-        self.policy_prompt = os.getenv('OPENAI_POLICY_PROMPT', 
-            """다음 프로필 정보가 부적절한 내용을 포함하는지 검사해주세요.
-            부적절한 내용의 기준:
-            1. 성적인 내용이나 암시
-            2. 폭력적이거나 위협적인 내용
-            3. 혐오 발언이나 차별적 표현
-            4. 불법적인 활동 관련 내용
-            5. 개인정보 노출 (주민등록번호, 계좌번호 등)
-            
-            응답은 반드시 다음 형식으로만 답변하세요:
-            VIOLATION: true/false
-            REASON: (위반시에만) 위반 사유를 간단히 설명
-            """)
-        
-        if not self.api_key:
-            raise ValueError("OPENAI_API_KEY environment variable is required")
+        self.api_key = os.getenv('OPENAI_API_KEY')
+        self.base_url = 'https://api.openai.com/v1/responses'
+        self.model = os.getenv('OPENAI_MODEL')
+        self.policy_prompt = os.getenv('OPENAI_POLICY_PROMPT')
     
     def check_policy_violation(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
         """

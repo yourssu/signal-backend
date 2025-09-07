@@ -2,6 +2,7 @@ package com.yourssu.signal.api
 
 import com.yourssu.signal.api.dto.ProfileCreatedRequest
 import com.yourssu.signal.api.dto.ProfilesFoundRequest
+import com.yourssu.signal.api.dto.ProfileUpdateRequest
 import com.yourssu.signal.api.dto.TicketConsumedRequest
 import com.yourssu.signal.config.resolver.UserUuid
 import com.yourssu.signal.config.security.annotation.RequireAuth
@@ -55,6 +56,21 @@ class ProfileController(
     @RequireAuth
     fun getMyProfile(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Response<MyProfileResponse>> {
         val response = profileService.getProfile(uuid)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "나의 프로필 수정",
+        description = "인증된 사용자의 프로필에서 닉네임과 소개 문장을 수정합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PutMapping("/me")
+    @RequireAuth
+    fun updateMyProfile(
+        @Valid @RequestBody request: ProfileUpdateRequest,
+        @Parameter(hidden = true) @UserUuid uuid: String
+    ): ResponseEntity<Response<MyProfileResponse>> {
+        val response = profileService.updateProfile(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }
 

@@ -54,6 +54,16 @@ class ProfileService(
         return MyProfileResponse.from(profile)
     }
 
+    fun updateProfile(command: ProfileUpdateCommand): MyProfileResponse {
+        val profile = profileReader.getByUuid(Uuid(command.uuid))
+        val updatedProfile = profile.copy(
+            nickname = command.nickname,
+            introSentences = command.introSentences
+        )
+        val savedProfile = profileWriter.updateProfile(updatedProfile)
+        return MyProfileResponse.from(savedProfile)
+    }
+
     fun getRandomProfile(command: RandomProfileFoundCommand): ProfileResponse {
         val gender = command.toGender()
         val uuid = command.toUuid()

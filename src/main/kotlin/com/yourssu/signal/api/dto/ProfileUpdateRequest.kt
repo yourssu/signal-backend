@@ -9,7 +9,8 @@ data class ProfileUpdateRequest(
     val nickname: String,
 
     @field:Size(min = 0, max = 3)
-    val introSentences: List<String>,
+    @field:Valid
+    val introSentences: List<@Size(max = 20) String>
 ) {
     fun toCommand(uuid: String): ProfileUpdateCommand {
         return ProfileUpdateCommand(

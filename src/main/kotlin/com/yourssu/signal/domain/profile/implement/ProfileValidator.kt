@@ -13,8 +13,6 @@ private const val MAXIMUM_INTRO_SENTENCES_SIZE = 3
 private const val MAXIMUM_INTRO_SENTENCE_LENGTH = 20
 
 private const val MINIMUM_BIRTH_YEAR = 1900
-private const val MINIMUM_AGE = 20
-
 private const val UNLIMITED_CONTACT_POLICY = 0
 
 object ProfileValidator {

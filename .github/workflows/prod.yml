@@ -172,6 +172,14 @@ jobs:
           printf "%s\n" "$HOME_PEM" > home.pem
           chmod 600 home.pem
           
+          # 디버깅 정보
+          echo "=== SSH 디버깅 정보 ==="
+          echo "HOST_URL: $HOST_URL"
+          echo "HOME_PEM 첫 줄: $(head -1 home.pem)"
+          ls -la home.pem
+          ssh-keygen -l -f home.pem
+          echo "========================"
+          
           # Create environment file
           echo "SERVER_PORT=$SERVER_PORT" >> .env
           echo "CORS_ALLOWED_ORIGIN=$CORS_ALLOWED_ORIGIN" >> .env
@@ -223,15 +231,15 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> .env
           
           # Create deployment directory structure
-          ssh -i home.pem ubuntu@$HOST_URL "mkdir -p /home/ubuntu/$PROJECT_NAME-api/logs"
+          ssh -v -i home.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@$HOST_URL "mkdir -p /home/ubuntu/$PROJECT_NAME-api/logs"
           
           # Deploy environment file and docker script to host machine
-          scp -i home.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
-          scp -i home.pem script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -v -i home.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -v -i home.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
           
           # Make the script executable
-          ssh -i home.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"
+          ssh -v -i home.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"
           
           # Execute the deployment script with specific image tag
-          ssh -i home.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \
+          ssh -v -i home.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \
             PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$IMAGE_TAG ./docker-deploy.sh"

@@ -26,9 +26,9 @@ class DepositManager(
 
     fun retryDepositSms(message: String, verificationCode: VerificationCode): Int {
         val smsMessage = smsRecord[message] ?: throw NotFoundDepositNameException()
-        smsRecord.remove(message)
         val ticket = ticketPricePolicy.calculateTicketQuantity(smsMessage.depositAmount, verificationCode)
         validateAmount(ticket, smsMessage)
+        smsRecord.remove(message)
         return ticket
     }
 

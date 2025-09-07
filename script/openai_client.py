@@ -2,10 +2,12 @@ import os
 import json
 import requests
 from typing import Dict, Any, Optional
+from dotenv import load_dotenv
 
 
 class OpenAIClient:
     def __init__(self):
+        load_dotenv(override=True)
         self.api_key = os.getenv('OPENAI_API_KEY')
         self.base_url = os.getenv('OPENAI_URL', 'https://api.openai.com/v1/responses')
         self.model = os.getenv('OPENAI_MODEL', 'gpt-5-mini')

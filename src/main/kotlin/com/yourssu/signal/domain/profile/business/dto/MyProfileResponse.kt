@@ -13,6 +13,7 @@ class MyProfileResponse(
     val mbti: String,
     val nickname: String,
     val introSentences: List<String>,
+    val school: String,
 ) {
     companion object {
         fun from(profile: Profile): MyProfileResponse {
@@ -27,6 +28,7 @@ class MyProfileResponse(
                 mbti = profile.mbti,
                 nickname = profile.nickname,
                 introSentences = profile.introSentences,
+                school = profile.school,
             )
         }
     }

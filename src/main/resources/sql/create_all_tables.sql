@@ -49,13 +49,15 @@ CREATE TABLE profile (
     contact VARCHAR(255) NOT NULL,
     mbti VARCHAR(4) NOT NULL,
     nickname VARCHAR(100) NOT NULL,
+    school VARCHAR(20) NOT NULL,
     created_time DATETIME(6) NOT NULL,
     updated_time DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_profile_uuid (uuid),
     INDEX idx_profile_uuid (uuid),
     INDEX idx_profile_gender (gender),
-    INDEX idx_profile_department (department)
+    INDEX idx_profile_department (department),
+    INDEX idx_profile_school (school)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 3. Intro Sentence table

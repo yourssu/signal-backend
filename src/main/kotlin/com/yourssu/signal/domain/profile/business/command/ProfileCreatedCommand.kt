@@ -13,7 +13,8 @@ class ProfileCreatedCommand(
     val contact: String,
     val mbti: String,
     val nickname: String,
-    val introSentences: List<String>
+    val introSentences: List<String>,
+    val school: String
 ) {
     fun toUuid(): Uuid {
         return Uuid(uuid)
@@ -30,6 +31,7 @@ class ProfileCreatedCommand(
             mbti = mbti,
             nickname = nickname,
             introSentences = introSentences,
+            school = school,
         )
     }
 }

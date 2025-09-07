@@ -38,6 +38,9 @@ class ProfileEntity(
 
     @Column(nullable = false)
     val nickname: String,
+
+    @Column(nullable = false)
+    val school: String,
 ): BaseEntity() {
     companion object {
         fun from(profile: Profile, encryptedContact: String): ProfileEntity {
@@ -51,6 +54,7 @@ class ProfileEntity(
                 contact = encryptedContact,
                 mbti = profile.mbti,
                 nickname = profile.nickname,
+                school = profile.school,
             )
         }
     }
@@ -67,6 +71,7 @@ class ProfileEntity(
             mbti = mbti,
             nickname = nickname,
             introSentences = introSentences,
+            school = school,
         )
     }
 }

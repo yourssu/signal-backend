@@ -30,6 +30,8 @@ data class ProfileCreatedRequest(
 
     @field:Size(min = 0, max = 3)
     val introSentences: List<String>,
+
+    val school: String = "숭실대",
 ) {
     fun toCommand(uuid: String): ProfileCreatedCommand {
         return ProfileCreatedCommand(
@@ -42,6 +44,7 @@ data class ProfileCreatedRequest(
             mbti = mbti,
             nickname = nickname,
             introSentences = introSentences,
+            school = school,
         )
     }
 

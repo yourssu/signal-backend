@@ -50,7 +50,7 @@ class ReferralService(
     }
 
     fun createReferralOrder(referralCode: String?, uuid: Uuid) {
-        if (!referralCode.isNullOrBlank() && referralReader.findByReferralCode(referralCode) != null) {
+        if (!referralCode.isNullOrBlank() && referralReader.findByReferralCode(referralCode) == null) {
             referralOrderWriter.save(ReferralOrder(referralCode = referralCode, viewerUuid = uuid))
         }
     }
@@ -62,6 +62,9 @@ class ReferralService(
         }
         val referralOrder = referralOrderReader.findByViewerUuid(viewer.uuid.value) ?: return
         val referral = referralReader.findByReferralCode(referralOrder.referralCode) ?: return
+        if (!viewerReader.existsByUuid(Uuid(referral.origin))) {
+            return
+        }
         val referrer = viewerReader.get(Uuid(referral.origin))
         if (referrer.uuid == viewer.uuid) {
             return
@@ -71,7 +74,11 @@ class ReferralService(
             ticket = REFERRAL_BONUS_AMOUNT,
         )
         createReferralBonusOrderHistory(referrer.uuid)
-        Notification.notifyTicketIssued(verification, REFERRAL_BONUS_AMOUNT, updatedReferrer.ticket - updatedReferrer.usedTicket)
+        Notification.notifyTicketIssued(
+            verification,
+            REFERRAL_BONUS_AMOUNT,
+            updatedReferrer.ticket - updatedReferrer.usedTicket
+        )
     }
 
     private fun createReferralBonusOrderHistory(uuid: Uuid) {

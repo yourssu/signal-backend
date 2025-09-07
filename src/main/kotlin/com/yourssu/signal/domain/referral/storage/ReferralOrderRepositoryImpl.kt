@@ -21,7 +21,7 @@ class ReferralOrderRepositoryImpl(
             return jpaRepository.save(ReferralOrderEntity.from(referralOrder)).toDomain()
         }
         entity.referralCode = referralOrder.referralCode
-        return entity.toDomain()
+        return jpaRepository.save(entity).toDomain()
     }
 
     override fun findByReferralCode(referralCode: String): List<ReferralOrder> {

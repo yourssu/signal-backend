@@ -12,7 +12,7 @@ Authorization: Bearer {{accessToken}}
 // If the uuid is not registered, then a new verification code will be created.
 // Otherwise the uuid is registered, then return the verification code for the uuid.
 
-
+@verificationCode=7052
 @secretKey=DonaEmilyEatSteakLeopold
 // Verify the uuid with the verification code - 200 OK
 ###

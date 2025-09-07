@@ -75,7 +75,7 @@ class SignalHandler:
             
             if violation_result.get('violation', False):
                 reason = violation_result.get('reason', 'Policy violation detected by AI')
-                blacklist_result = server_client.add_to_blacklist(id, reason)
+                blacklist_result = server_client.add_to_blacklist(id)
                 
                 violation_message = f"""🚨 *정책 위반 프로필 감지* 🚨
     -  💖 *프로필 ID*: {id}

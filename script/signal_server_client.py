@@ -1,17 +1,19 @@
 import os
 import json
 import requests
+from dotenv import load_dotenv
 from typing import Dict, Any, Optional
 
 
 class ServerClient:
     def __init__(self):
+        load_dotenv(override=True)
         server_port = os.getenv('SERVER_PORT', '9011')
         self.base_url = f"http://localhost:{server_port}"
-        self.secret_key = os.getenv('ADMIN_SECRET_KEY', '')
+        self.secret_key = os.getenv('ADMIN_ACCESS_KEY', '')
         
         if not self.secret_key:
-            raise ValueError("ADMIN_SECRET_KEY environment variable is required")
+            raise ValueError("ADMIN_ACCESS_KEY environment variable is required")
     
     def add_to_blacklist(self, profile_id: str) -> Dict[str, Any]:
         try:

@@ -115,7 +115,7 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          YOURSSU_PEM: ${{ secrets.YOURSSU_PEM }}
+          HOME_PEM: ${{ secrets.HOME_PEM }}
           HOST_URL: ${{ vars.HOST_URL }}
           
           SERVER_PORT: ${{ vars.SERVER_PORT }}
@@ -169,8 +169,8 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST_URL >> ~/.ssh/known_hosts
-          echo "$YOURSSU_PEM" > yourssu.pem
-          chmod 600 yourssu.pem
+          echo "$HOME_PEM" > home.pem
+          chmod 600 home.pem
           
           # Create environment file
           echo "SERVER_PORT=$SERVER_PORT" >> .env
@@ -223,15 +223,15 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> .env
           
           # Create deployment directory structure
-          ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p /home/ubuntu/$PROJECT_NAME-api/logs"
+          ssh -i home.pem ubuntu@$HOST_URL "mkdir -p /home/ubuntu/$PROJECT_NAME-api/logs"
           
           # Deploy environment file and docker script to host machine
-          scp -i yourssu.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
-          scp -i yourssu.pem script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -i home.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -i home.pem script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
           
           # Make the script executable
-          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"
+          ssh -i home.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"
           
           # Execute the deployment script with specific image tag
-          ssh -i yourssu.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \
+          ssh -i home.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \
             PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$IMAGE_TAG ./docker-deploy.sh"

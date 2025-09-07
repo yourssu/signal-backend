@@ -1,27 +1,40 @@
-# Runtime stage only - JAR is built externally
-FROM openjdk:21-jdk-slim
+# Multi-stage build for better caching
+FROM openjdk:21-jdk-slim as base
 
 # Set timezone to KST
 ENV TZ=Asia/Seoul
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-WORKDIR /app
-
-# Install Python and required packages for observer script
+# Install system packages (this layer will be cached)
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
     tzdata \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Python dependencies stage
+FROM base as python-deps
+
+WORKDIR /app
 
 # Copy requirements file first for better Docker layer caching
 COPY script/requirements.txt /tmp/requirements.txt
 
 # Create Python virtual environment and install dependencies
+# This layer will be cached unless requirements.txt changes
 RUN python3 -m venv /app/venv && \
     /app/venv/bin/pip install --upgrade pip --no-cache-dir && \
     /app/venv/bin/pip install -r /tmp/requirements.txt --no-cache-dir
+
+# Final runtime stage
+FROM base as runtime
+
+WORKDIR /app
+
+# Copy Python virtual environment from previous stage
+COPY --from=python-deps /app/venv /app/venv
 
 # Copy pre-built JAR (built in GitHub Actions)
 COPY build/libs/*-SNAPSHOT.jar app.jar

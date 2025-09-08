@@ -10,6 +10,7 @@ import com.yourssu.signal.domain.blacklist.business.dto.BlacklistResponse
 import com.yourssu.signal.domain.common.business.dto.Response
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -52,7 +53,8 @@ class BlacklistController(
 
     @Operation(
         summary = "나의 블랙리스트 상태 확인",
-        description = "현재 로그인한 사용자의 프로필이 블랙리스트에 등록되어 있는지 여부를 확인합니다."
+        description = "현재 로그인한 사용자의 프로필이 블랙리스트에 등록되어 있는지 여부를 확인합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
     @GetMapping
     @RequireAuth
@@ -63,7 +65,8 @@ class BlacklistController(
 
     @Operation(
         summary = "나의 프로필 블랙리스트 등록",
-        description = "현재 로그인한 사용자의 프로필을 블랙리스트에 등록합니다."
+        description = "현재 로그인한 사용자의 프로필을 블랙리스트에 등록합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PostMapping("/me")
     @RequireAuth
@@ -75,7 +78,8 @@ class BlacklistController(
 
     @Operation(
         summary = "나의 프로필 블랙리스트 삭제",
-        description = "현재 로그인한 사용자의 프로필을 블랙리스트에서 제거합니다."
+        description = "현재 로그인한 사용자의 프로필을 블랙리스트에서 제거합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
     @DeleteMapping("/me")
     @RequireAuth

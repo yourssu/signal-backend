@@ -3,6 +3,7 @@ package com.yourssu.signal.api
 import com.yourssu.signal.api.dto.BlacklistAddedRequest
 import com.yourssu.signal.api.dto.BlacklistDeletedRequest
 import com.yourssu.signal.config.resolver.UserUuid
+import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.blacklist.business.BlacklistService
 import com.yourssu.signal.domain.blacklist.business.dto.BlacklistExistsResponse
 import com.yourssu.signal.domain.blacklist.business.dto.BlacklistResponse
@@ -54,6 +55,7 @@ class BlacklistController(
         description = "현재 로그인한 사용자의 프로필이 블랙리스트에 등록되어 있는지 여부를 확인합니다."
     )
     @GetMapping
+    @RequireAuth
     fun checkMyBlacklistStatus(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Response<BlacklistExistsResponse>> {
         val response = blacklistService.checkMyBlacklistStatus(uuid)
         return ResponseEntity.ok(Response(result = response))
@@ -64,6 +66,7 @@ class BlacklistController(
         description = "현재 로그인한 사용자의 프로필을 블랙리스트에 등록합니다."
     )
     @PostMapping("/me")
+    @RequireAuth
     fun addMyBlacklist(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Response<BlacklistResponse>> {
         val response = blacklistService.addMyBlacklist(uuid)
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -75,6 +78,7 @@ class BlacklistController(
         description = "현재 로그인한 사용자의 프로필을 블랙리스트에서 제거합니다."
     )
     @DeleteMapping("/me")
+    @RequireAuth
     fun removeMyBlacklist(@Parameter(hidden = true) @UserUuid uuid: String): ResponseEntity<Void> {
         blacklistService.removeMyBlacklist(uuid)
         return ResponseEntity.noContent().build()

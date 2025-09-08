@@ -22,7 +22,7 @@ class WebConfig(
                 registry.addMapping("/**")
                     .allowedOrigins(corsProperties.allowedOrigin?:"*")
                     .allowedHeaders("*")
-                    .allowedMethods(GET.name(), POST.name(), PUT.name(), DELETE.name(), OPTIONS.name())
+                    .allowedMethods(GET.name(), POST.name(), PUT.name(), DELETE.name(), OPTIONS.name(), PATCH.name())
                     .allowCredentials(false)
             }
 

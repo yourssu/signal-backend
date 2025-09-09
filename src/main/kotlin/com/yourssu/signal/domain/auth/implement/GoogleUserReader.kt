@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 class GoogleUserReader(
     private val googleUserRepository: GoogleUserRepository,
 ) {
-    fun existsByIdentifierAndUuid(identifier: String, uuid: Uuid): Boolean {
-        return googleUserRepository.existsBy(identifier, uuid)
-    }
-
     fun findUuidByIdentifier(identifier: String): Uuid? {
         return googleUserRepository.findUuidByIdentifier(identifier)
+    }
+
+    fun existsByUuid(uuid: Uuid): Boolean {
+        return googleUserRepository.existsBy(uuid)
     }
 }

@@ -20,13 +20,14 @@ class GoogleUserRepositoryImpl(
         return jpaRepository.findByIdentifier(identifier)
             ?.let { Uuid(it.uuid) }
     }
-    
-    override fun existsBy(identifier: String, uuid: Uuid): Boolean {
-        return jpaRepository.existsByIdentifierAndUuid(identifier, uuid.value)
+
+    override fun existsBy(uuid: Uuid): Boolean {
+        return jpaRepository.existsByUuid(uuid.value)
     }
 }
 
 interface JpaGoogleUserRepository: JpaRepository<GoogleUserEntity, Long> {
     fun findByIdentifier(identifier: String): GoogleUserEntity?
     fun existsByIdentifierAndUuid(identifier: String, uuid: String): Boolean
+    fun existsByUuid(uuid: String): Boolean
 }

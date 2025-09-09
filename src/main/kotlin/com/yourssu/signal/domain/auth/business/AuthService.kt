@@ -70,7 +70,8 @@ class AuthService(
         val user = userReader.getByUuid(command.toUuid())
         val uuid = googleUserReader.findUuidByIdentifier(identifier)
         val isExistsUser = googleUserReader.existsByUuid(user.uuid)
-        if ((uuid == null && isExistsUser) || alreadyLinkedUser(uuid, user)) {
+        val isCurrentUserAlreadyLinked = uuid == null && isExistsUser
+        if (isCurrentUserAlreadyLinked || isGoogleAccountLinkedToOtherUser(uuid, user)) {
             throw GoogleAccountAlreadyLinkedException()
         }
         if (uuid == null) {
@@ -81,7 +82,7 @@ class AuthService(
         return generateTokenResponse(linkedUser)
     }
 
-    private fun alreadyLinkedUser(uuid: Uuid?, user: User): Boolean {
+    private fun isGoogleAccountLinkedToOtherUser(uuid: Uuid?, user: User): Boolean {
         val linkedProfile = profileReader.existsByUuid(user.uuid)
         val linkedViewer = viewerReader.existsByUuid(user.uuid)
         return uuid != user.uuid && (linkedProfile || linkedViewer)

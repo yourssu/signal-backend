@@ -28,6 +28,5 @@ class GoogleUserRepositoryImpl(
 
 interface JpaGoogleUserRepository: JpaRepository<GoogleUserEntity, Long> {
     fun findByIdentifier(identifier: String): GoogleUserEntity?
-    fun existsByIdentifierAndUuid(identifier: String, uuid: String): Boolean
     fun existsByUuid(uuid: String): Boolean
 }

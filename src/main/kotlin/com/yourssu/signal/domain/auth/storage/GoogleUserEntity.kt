@@ -16,7 +16,7 @@ class GoogleUserEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     val uuid: String,
 
     @Column(nullable = false, unique = true)

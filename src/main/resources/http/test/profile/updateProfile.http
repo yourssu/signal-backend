@@ -1,5 +1,5 @@
 ### Update profile - Success case
-PUT {{host}}/api/profiles/me
+PATCH {{host}}/api/profiles/me
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -9,21 +9,23 @@ Content-Type: application/json
     "수정된 첫 번째 소개 문장입니다",
     "업데이트된 두 번째 소개입니다",
     "새로운 세 번째 소개 문장"
-  ]
+  ],
+  "contact": "@testcontact"
 }
 
 ### Update profile - Only nickname
-PUT {{host}}/api/profiles/me
+PATCH {{host}}/api/profiles/me
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
   "nickname": "새닉네임만변경",
-  "introSentences": []
+  "introSentences": [],
+  "contact": "01012345678"
 }
 
 ### Update profile - Validation error (nickname too long)
-PUT {{host}}/api/profiles/me
+PATCH {{host}}/api/profiles/me
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -31,11 +33,12 @@ Content-Type: application/json
   "nickname": "이닉네임은15자를넘어서에러가발생합니다",
   "introSentences": [
     "정상적인 소개 문장"
-  ]
+  ],
+  "contact": "01012345678"
 }
 
 ### Update profile - Validation error (too many intro sentences)
-PUT {{host}}/api/profiles/me
+PATCH {{host}}/api/profiles/me
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -46,11 +49,12 @@ Content-Type: application/json
     "두 번째 소개 문장", 
     "세 번째 소개 문장",
     "네 번째는 에러가 발생합니다"
-  ]
+  ],
+  "contact": "01012345678"
 }
 
 ### Update profile - Validation error (intro sentence too long)
-PUT {{host}}/api/profiles/me
+PATCH {{host}}/api/profiles/me
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -58,16 +62,31 @@ Content-Type: application/json
   "nickname": "정상닉네임",
   "introSentences": [
     "이 소개 문장은 20자를 넘어서 validation 에러가 발생할 것입니다"
-  ]
+  ],
+  "contact": "010-5555-6666"
+}
+
+### Update profile - Validation error (invalid contact format)
+PATCH {{host}}/api/profiles/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "nickname": "정상닉네임",
+  "introSentences": [
+    "정상 소개 문장"
+  ],
+  "contact": "잘못된연락처형식"
 }
 
 ### Update profile - Unauthorized (no token)
-PUT {{host}}/api/profiles/me
+PATCH {{host}}/api/profiles/me
 Content-Type: application/json
 
 {
   "nickname": "새닉네임",
   "introSentences": [
     "권한이 없는 요청"
-  ]
+  ],
+  "contact": "01012345678"
 }

@@ -61,7 +61,7 @@ class ProfileController(
 
     @Operation(
         summary = "나의 프로필 수정",
-        description = "인증된 사용자의 프로필에서 닉네임과 소개 문장을 수정합니다.",
+        description = "인증된 사용자의 프로필에서 닉네임과 소개 문장 및 연락처를 수정합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     @PatchMapping("/me")

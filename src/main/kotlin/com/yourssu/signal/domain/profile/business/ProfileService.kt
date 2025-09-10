@@ -60,7 +60,7 @@ class ProfileService(
             nickname = command.nickname,
             introSentences = command.introSentences
         )
-        val countContact = profileReader.countContact(profile.contact)
+        val countContact = profileReader.countContact(command.contact)
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit + 1)
         val savedProfile = profileWriter.updateProfile(updatedProfile)
         return MyProfileResponse.from(savedProfile)

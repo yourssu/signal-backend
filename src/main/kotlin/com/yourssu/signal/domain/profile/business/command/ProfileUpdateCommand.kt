@@ -4,4 +4,5 @@ data class ProfileUpdateCommand(
     val uuid: String,
     val nickname: String,
     val introSentences: List<String>,
+    val contact: String,
 )

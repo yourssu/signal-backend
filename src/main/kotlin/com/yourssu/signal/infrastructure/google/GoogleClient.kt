@@ -8,6 +8,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.springframework.stereotype.Component
 import java.io.IOException
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Component
 class GoogleClient(
@@ -17,12 +19,13 @@ class GoogleClient(
 ) : OAuthOutputPort {
     override fun exchangeCodeForIdToken(code: String): String? {
         val url = "https://oauth2.googleapis.com/token"
+        val decodedCode = URLDecoder.decode(code, StandardCharsets.UTF_8)
         val requestBody = FormBody.Builder()
-            .add("code", code.replace("%2F", "/"))
             .add("client_id", googleOAuthProperties.clientId)
             .add("client_secret", googleOAuthProperties.clientSecret)
-            .add("redirect_uri", googleOAuthProperties.redirectUri)
+            .add("code", decodedCode)
             .add("grant_type", "authorization_code")
+            .add("redirect_uri", googleOAuthProperties.redirectUri)
             .build()
 
         val request = Request.Builder()
@@ -40,7 +43,7 @@ class GoogleClient(
                     null
                 }
             }
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             null
         }
     }

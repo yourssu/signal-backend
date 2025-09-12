@@ -86,16 +86,16 @@ class GenderTest : DescribeSpec({
                 }
             }
 
-            context("MALE 상수는") {
+            context("FEMALE 상수는") {
                 // given
-                val male = Gender.MALE
+                val female = Gender.FEMALE
 
                 // when
-                val result = male.opposite()
+                val result = female.opposite()
 
                 // then
-                it("Gender.FEMALE을 반환한다") {
-                    result shouldBe Gender.FEMALE
+                it("Gender.MALE을 반환한다") {
+                    result shouldBe Gender.MALE
                 }
             }
         }

@@ -19,7 +19,7 @@ class ProfileEntity(
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    var gender: Gender,
+    val gender: Gender,
 
     @Column(nullable = false)
     val department: String,
@@ -31,13 +31,13 @@ class ProfileEntity(
     val animal: String,
 
     @Column(nullable = false)
-    val contact: String,
+    var contact: String,
 
     @Column(nullable = false)
     val mbti: String,
 
     @Column(nullable = false)
-    val nickname: String,
+    var nickname: String,
 
     @Column(nullable = false)
     val school: String,

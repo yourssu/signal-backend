@@ -58,7 +58,8 @@ class ProfileService(
         val profile = profileReader.getByUuid(Uuid(command.uuid))
         val updatedProfile = profile.copy(
             nickname = command.nickname,
-            introSentences = command.introSentences
+            introSentences = command.introSentences,
+            contact = command.contact
         )
         val countContact = profileReader.countContact(command.contact)
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit + 1)

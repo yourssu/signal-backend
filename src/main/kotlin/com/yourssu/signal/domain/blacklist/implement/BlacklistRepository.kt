@@ -1,7 +1,5 @@
 package com.yourssu.signal.domain.blacklist.implement
 
-import com.yourssu.signal.domain.blacklist.implement.Blacklist
-
 interface BlacklistRepository {
     fun save(blacklist: Blacklist): Blacklist
     fun existsByProfileId(profileId: Long): Boolean

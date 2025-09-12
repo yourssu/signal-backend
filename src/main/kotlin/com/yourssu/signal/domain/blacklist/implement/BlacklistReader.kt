@@ -1,6 +1,5 @@
 package com.yourssu.signal.domain.blacklist.implement
 
-import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import org.springframework.stereotype.Component
 
 @Component

@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.blacklist.storage
 
 import com.yourssu.signal.domain.blacklist.implement.Blacklist
+import com.yourssu.signal.domain.common.storage.BaseEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -20,7 +21,7 @@ class BlacklistEntity(
 
     @Column(name =  "created_by_admin", nullable = false)
     val createdByAdmin: Boolean,
-) {
+): BaseEntity() {
     companion object {
         fun from(blacklist: Blacklist): BlacklistEntity {
             return BlacklistEntity(

@@ -8,8 +8,8 @@ private const val TEN_MINUTE = 60 * 1000L
 
 @Component
 class ProfileRankingCacheScheduler {
-    @Scheduled(fixedRate = TEN_MINUTE)
-    @CacheEvict(value = ["profileRankingCache"], allEntries = true)
-    fun evictProfileRankingCache() {
-    }
+//    @Scheduled(fixedRate = TEN_MINUTE)
+//    @CacheEvict(value = ["profileRankingCache"], allEntries = true)
+//    fun evictProfileRankingCache() {
+//    }
 }

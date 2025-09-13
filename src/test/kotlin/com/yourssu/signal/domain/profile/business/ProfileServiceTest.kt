@@ -4,6 +4,7 @@ import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
+import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.user.implement.User
@@ -57,11 +58,12 @@ class ProfileServiceTest : DescribeSpec({
             uuid: String = "test-uuid",
             nickname: String = "테스트닉네임",
             contact: String = "@test_contact",
-            introSentences: List<String> = listOf("안녕하세요")
+            introSentences: List<String> = listOf("안녕하세요"),
+            gender: Gender = Gender.MALE
         ) = Profile(
             id = id,
             uuid = Uuid(uuid),
-            gender = Gender.MALE,
+            gender = gender,
             department = "컴퓨터학부",
             birthYear = 2000,
             animal = "강아지",
@@ -474,7 +476,7 @@ class ProfileServiceTest : DescribeSpec({
         }
         
         context("getProfileRanking 메서드를 호출할 때") {
-            
+
             context("프로필 랭킹을 조회하면") {
                 it("프로필의 랭킹 정보를 반환한다") {
                     // given
@@ -484,18 +486,254 @@ class ProfileServiceTest : DescribeSpec({
                         uuid = uuid,
                         nickname = "랭킹프로필"
                     )
-                    
+
                     whenever(profileReader.getByUuid(Uuid(uuid))).thenReturn(profile)
-                    whenever(purchasedProfileReader.getProfileRanking(10L)).thenReturn(mock())
+                    whenever(purchasedProfileReader.getProfileRanking(10L, Gender.MALE)).thenReturn(mock())
                     whenever(profileReader.count(Gender.MALE)).thenReturn(50)
-                    
+
                     // when
                     val result = profileService.getProfileRanking(uuid)
-                    
+
                     // then
                     result shouldNotBe null
                     verify(profileReader).getByUuid(Uuid(uuid))
-                    verify(purchasedProfileReader).getProfileRanking(10L)
+                    verify(purchasedProfileReader).getProfileRanking(10L, Gender.MALE)
+                    verify(profileReader).count(Gender.MALE)
+                }
+            }
+        }
+
+        context("gender-specific operations") {
+
+            context("createProfile with different genders") {
+                it("FEMALE 성별로 프로필을 생성한다") {
+                    // given
+                    val command = ProfileCreatedCommand(
+                        uuid = "female-uuid",
+                        gender = "FEMALE",
+                        department = "경영학부",
+                        birthYear = 1999,
+                        animal = "고양이",
+                        contact = "@female_contact",
+                        mbti = "ISFJ",
+                        nickname = "여성닉네임",
+                        introSentences = listOf("안녕하세요, 여성입니다"),
+                        school = "숭실대학교"
+                    )
+
+                    val user = createTestUser("female-uuid")
+                    val createdProfile = createTestProfile(
+                        uuid = "female-uuid",
+                        nickname = "여성닉네임",
+                        contact = "@female_contact",
+                        gender = Gender.FEMALE
+                    )
+
+                    whenever(userReader.getByUuid(Uuid("female-uuid"))).thenReturn(user)
+                    whenever(profileReader.countContact("@female_contact")).thenReturn(1)
+                    whenever(policy.contactLimit).thenReturn(5)
+                    whenever(policy.contactLimitWarning).thenReturn(3)
+                    whenever(profileWriter.createProfile(any())).thenReturn(createdProfile)
+                    whenever(policy.whitelist).thenReturn(false)
+
+                    // when
+                    val result = profileService.createProfile(command)
+
+                    // then
+                    result.uuid shouldBe "female-uuid"
+                    result.nickname shouldBe "여성닉네임"
+                    verify(profileWriter).createProfile(any())
+                }
+
+                it("MALE 성별로 프로필을 생성한다") {
+                    // given
+                    val command = ProfileCreatedCommand(
+                        uuid = "male-uuid",
+                        gender = "MALE",
+                        department = "컴퓨터학부",
+                        birthYear = 2001,
+                        animal = "강아지",
+                        contact = "@male_contact",
+                        mbti = "ENTP",
+                        nickname = "남성닉네임",
+                        introSentences = listOf("안녕하세요, 남성입니다"),
+                        school = "숭실대학교"
+                    )
+
+                    val user = createTestUser("male-uuid")
+                    val createdProfile = createTestProfile(
+                        uuid = "male-uuid",
+                        nickname = "남성닉네임",
+                        contact = "@male_contact",
+                        gender = Gender.MALE
+                    )
+
+                    whenever(userReader.getByUuid(Uuid("male-uuid"))).thenReturn(user)
+                    whenever(profileReader.countContact("@male_contact")).thenReturn(1)
+                    whenever(policy.contactLimit).thenReturn(5)
+                    whenever(policy.contactLimitWarning).thenReturn(3)
+                    whenever(profileWriter.createProfile(any())).thenReturn(createdProfile)
+                    whenever(policy.whitelist).thenReturn(false)
+
+                    // when
+                    val result = profileService.createProfile(command)
+
+                    // then
+                    result.uuid shouldBe "male-uuid"
+                    result.nickname shouldBe "남성닉네임"
+                    verify(profileWriter).createProfile(any())
+                }
+            }
+
+            context("getRandomProfile with gender filtering") {
+                it("FEMALE 성별만 필터링하여 랜덤 프로필을 조회한다") {
+                    // given
+                    val command = RandomProfileFoundCommand(
+                        uuid = "viewer-uuid",
+                        excludeProfiles = emptyList(),
+                        gender = "FEMALE"
+                    )
+
+                    val myProfile = createTestProfile(
+                        uuid = "viewer-uuid",
+                        nickname = "내프로필",
+                        gender = Gender.MALE
+                    )
+
+                    val femaleProfile = createTestProfile(
+                        id = 2L,
+                        uuid = "female-profile-uuid",
+                        nickname = "여성프로필",
+                        gender = Gender.FEMALE
+                    )
+
+                    whenever(profileReader.existsByUuid(Uuid("viewer-uuid"))).thenReturn(true)
+                    whenever(profileReader.getByUuid(Uuid("viewer-uuid"))).thenReturn(myProfile)
+                    whenever(profilePriorityManager.pickRandomProfile(any(), any())).thenReturn(femaleProfile)
+
+                    // when
+                    val result = profileService.getRandomProfile(command)
+
+                    // then
+                    result.profileId shouldBe 2L
+                    result.nickname shouldBe "여성프로필"
+                    verify(profilePriorityManager).pickRandomProfile(any(), any())
+                }
+
+                it("MALE 성별만 필터링하여 랜덤 프로필을 조회한다") {
+                    // given
+                    val command = RandomProfileFoundCommand(
+                        uuid = "viewer-uuid",
+                        excludeProfiles = emptyList(),
+                        gender = "MALE"
+                    )
+
+                    val myProfile = createTestProfile(
+                        uuid = "viewer-uuid",
+                        nickname = "내프로필",
+                        gender = Gender.FEMALE
+                    )
+
+                    val maleProfile = createTestProfile(
+                        id = 3L,
+                        uuid = "male-profile-uuid",
+                        nickname = "남성프로필",
+                        gender = Gender.MALE
+                    )
+
+                    whenever(profileReader.existsByUuid(Uuid("viewer-uuid"))).thenReturn(true)
+                    whenever(profileReader.getByUuid(Uuid("viewer-uuid"))).thenReturn(myProfile)
+                    whenever(profilePriorityManager.pickRandomProfile(any(), any())).thenReturn(maleProfile)
+
+                    // when
+                    val result = profileService.getRandomProfile(command)
+
+                    // then
+                    result.profileId shouldBe 3L
+                    result.nickname shouldBe "남성프로필"
+                    verify(profilePriorityManager).pickRandomProfile(any(), any())
+                }
+            }
+
+            context("countByGender operations") {
+                it("FEMALE 성별 프로필 수를 정확히 조회한다") {
+                    // given
+                    whenever(profileReader.count(Gender.FEMALE)).thenReturn(25)
+
+                    // when
+                    val result = profileService.countByGender("FEMALE")
+
+                    // then
+                    result.count shouldBe 25
+                    verify(profileReader).count(Gender.FEMALE)
+                }
+
+                it("MALE 성별 프로필 수를 정확히 조회한다") {
+                    // given
+                    whenever(profileReader.count(Gender.MALE)).thenReturn(35)
+
+                    // when
+                    val result = profileService.countByGender("MALE")
+
+                    // then
+                    result.count shouldBe 35
+                    verify(profileReader).count(Gender.MALE)
+                }
+
+                it("잘못된 성별 문자열로 조회시 예외를 발생시킨다") {
+                    // when & then
+                    shouldThrow<Exception> {
+                        profileService.countByGender("INVALID_GENDER")
+                    }
+                }
+            }
+
+            context("getProfileRanking with gender consideration") {
+                it("FEMALE 프로필의 랭킹을 성별별로 조회한다") {
+                    // given
+                    val uuid = "female-ranking-uuid"
+                    val femaleProfile = createTestProfile(
+                        id = 5L,
+                        uuid = uuid,
+                        nickname = "여성랭킹프로필",
+                        gender = Gender.FEMALE
+                    )
+
+                    whenever(profileReader.getByUuid(Uuid(uuid))).thenReturn(femaleProfile)
+                    whenever(purchasedProfileReader.getProfileRanking(5L, Gender.FEMALE)).thenReturn(mock())
+                    whenever(profileReader.count(Gender.FEMALE)).thenReturn(30)
+
+                    // when
+                    val result = profileService.getProfileRanking(uuid)
+
+                    // then
+                    result shouldNotBe null
+                    verify(profileReader).getByUuid(Uuid(uuid))
+                    verify(purchasedProfileReader).getProfileRanking(5L, Gender.FEMALE)
+                    verify(profileReader).count(Gender.FEMALE)
+                }
+
+                it("MALE 프로필의 랭킹을 성별별로 조회한다") {
+                    // given
+                    val uuid = "male-ranking-uuid"
+                    val maleProfile = createTestProfile(
+                        id = 6L,
+                        uuid = uuid,
+                        nickname = "남성랭킹프로필",
+                        gender = Gender.MALE
+                    )
+
+                    whenever(profileReader.getByUuid(Uuid(uuid))).thenReturn(maleProfile)
+                    whenever(purchasedProfileReader.getProfileRanking(6L, Gender.MALE)).thenReturn(mock())
+                    whenever(profileReader.count(Gender.MALE)).thenReturn(40)
+
+                    // when
+                    val result = profileService.getProfileRanking(uuid)
+
+                    // then
+                    result shouldNotBe null
+                    verify(profileReader).getByUuid(Uuid(uuid))
+                    verify(purchasedProfileReader).getProfileRanking(6L, Gender.MALE)
                     verify(profileReader).count(Gender.MALE)
                 }
             }

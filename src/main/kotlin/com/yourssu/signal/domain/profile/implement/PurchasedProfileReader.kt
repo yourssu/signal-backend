@@ -15,8 +15,8 @@ class PurchasedProfileReader(
         return purchasedProfileRepository.findProfileIdsOrderByPurchasedAsc()
     }
 
-    fun getProfileRanking(profileId: Long): ProfileRanking {
-        val rankings = purchasedProfileRepository.findProfileCountGroupByProfileId()
+    fun getProfileRanking(profileId: Long, gender: Gender): ProfileRanking {
+        val rankings = purchasedProfileRepository.findProfileCountGroupByProfileId(gender)
         return rankings[profileId] ?: throw ProfileRankingNotFoundException()
     }
 }

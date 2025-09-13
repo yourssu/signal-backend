@@ -4,7 +4,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.domain.profile.implement.PurchasedProfileRepository
 import com.yourssu.signal.domain.profile.implement.ProfileRanking
 import com.yourssu.signal.domain.profile.implement.PurchasedProfile
+import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.storage.QPurchasedProfileEntity.purchasedProfileEntity
+import com.yourssu.signal.domain.profile.storage.QProfileEntity.profileEntity
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
@@ -41,13 +43,21 @@ class PurchasedProfileRepositoryImpl(
     }
 
     @Cacheable("profileRankingCache")
-    override fun findProfileCountGroupByProfileId(): Map<Long, ProfileRanking> {
+    override fun findProfileCountGroupByProfileId(gender: Gender): Map<Long, ProfileRanking> {
+        val profileIdsWithGender = jpaQueryFactory
+            .select(profileEntity.id)
+            .from(profileEntity)
+            .where(profileEntity.gender.eq(gender))
+            .fetch()
+            .toSet()
+
         val results = jpaQueryFactory
             .select(
                 purchasedProfileEntity.profileId,
                 purchasedProfileEntity.profileId.count().castToNum(Int::class.java)
             )
             .from(purchasedProfileEntity)
+            .where(purchasedProfileEntity.profileId.`in`(profileIdsWithGender))
             .groupBy(purchasedProfileEntity.profileId)
             .orderBy(purchasedProfileEntity.profileId.count().desc())
             .fetch()

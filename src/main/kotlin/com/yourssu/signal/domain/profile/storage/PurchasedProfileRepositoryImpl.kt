@@ -42,7 +42,7 @@ class PurchasedProfileRepositoryImpl(
             .fetch()
     }
 
-    @Cacheable("profileRankingCache")
+    @Cacheable("profileRankingCache", key = "#gender")
     override fun findProfileCountGroupByProfileId(gender: Gender): Map<Long, ProfileRanking> {
         val profileIdsWithGender = jpaQueryFactory
             .select(profileEntity.id)

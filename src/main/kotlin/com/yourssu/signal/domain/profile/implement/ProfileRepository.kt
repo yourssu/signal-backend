@@ -11,4 +11,5 @@ interface ProfileRepository {
     fun findIdsByGender(gender: Gender): List<Long>
     fun updateCacheIdsByGender(gender: Gender): List<Long>
     fun getById(id: Long): Profile
+    fun findBy(profiles: List<Long>): List<Profile>
 }

@@ -39,6 +39,11 @@ class ProfileRepositoryImpl(
             .toDomain())
     }
 
+    override fun findBy(profiles: List<Long>): List<Profile> {
+        return profileJpaRepository.findAllById(profiles)
+            .map { decryptContact(it.toDomain()) }
+    }
+
     override fun existsByUuid(uuid: Uuid): Boolean {
         return jpaQueryFactory.selectFrom(profileEntity)
             .where(profileEntity.uuid.eq(uuid.value))

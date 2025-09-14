@@ -46,4 +46,9 @@ class ProfileReader(
     fun count(gender: Gender): Int {
         return profileRepository.findIdsByGender(gender).size
     }
+
+    fun getByIds(profiles: List<Long>): List<Profile> {
+        return profileRepository.findBy(profiles)
+
+    }
 }

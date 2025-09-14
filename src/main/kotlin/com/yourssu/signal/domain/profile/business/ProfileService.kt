@@ -1,22 +1,16 @@
 package com.yourssu.signal.domain.profile.business
 
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
-import com.yourssu.signal.domain.user.implement.UserReader
-import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.blacklist.implement.Blacklist
+import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
-import com.yourssu.signal.domain.profile.implement.ProfilePriorityManager
-import com.yourssu.signal.domain.profile.implement.ProfileReader
-import com.yourssu.signal.domain.profile.implement.ProfileWriter
-import com.yourssu.signal.domain.profile.implement.PurchasedProfileReader
-import com.yourssu.signal.domain.profile.implement.UsedTicketManager
-import com.yourssu.signal.domain.profile.implement.Gender
-import com.yourssu.signal.domain.profile.implement.ProfileValidator
+import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.infrastructure.logging.Notification
@@ -118,5 +112,13 @@ class ProfileService(
         val ranking = purchasedProfileReader.getProfileRanking(profile.id!!, profile.gender)
         val totalProfiles = profileReader.count(profile.gender)
         return ProfileRankingResponse.of(profileRanking = ranking, profile = profile, totalProfiles = totalProfiles)
+    }
+
+    fun getPurchasedProfiles(uuid: String): List<ProfileContactResponse> {
+        val viewer = viewerReader.get(Uuid(uuid))
+        val profileIds = purchasedProfileReader.findByViewerId(viewer.id!!)
+            .map { it.profileId }
+        val profiles = profileReader.getByIds(profileIds)
+        return profiles.map { it -> ProfileContactResponse.from(it) }
     }
 }

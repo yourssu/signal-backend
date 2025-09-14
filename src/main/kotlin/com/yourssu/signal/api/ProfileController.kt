@@ -125,6 +125,20 @@ class ProfileController(
     }
 
     @Operation(
+        summary = "나의 구매한 프로필 조회",
+        description = "나의 구매한 프로필 목록 불러옵니다.. 이전에 티켓을 사용하여 구매한 프로필만 조회할 수 있습니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @GetMapping("/me/purchased")
+    @RequireAuth
+    fun getMyPurchasedProfiles(
+        @Parameter(hidden = true) @UserUuid uuid: String,
+    ): ResponseEntity<Response<List<ProfileContactResponse>>> {
+        val response = profileService.getPurchasedProfiles(uuid)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
         summary = "랜덤 프로필 조회",
         description = "필터 조건에 따라 랜덤한 프로필을 조회합니다. 성별과 제외할 프로필 ID 목록을 파라미터로 받습니다.",
         security = [SecurityRequirement(name = "bearerAuth")]

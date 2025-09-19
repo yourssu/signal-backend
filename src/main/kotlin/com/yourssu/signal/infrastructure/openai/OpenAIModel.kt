@@ -1,6 +1,9 @@
 package com.yourssu.signal.infrastructure.openai
 
 import com.yourssu.signal.config.properties.OpenAIConfigurationProperties
+import com.yourssu.signal.infrastructure.openai.ChatModel
+import com.yourssu.signal.infrastructure.openai.dto.ContentRequest
+import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedRequest
 import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedResponse
 import com.yourssu.signal.infrastructure.openai.exception.FailedOpenAIModelException
 import kotlinx.serialization.encodeToString
@@ -21,73 +24,63 @@ class OpenAIModel(
     private val okHttpClient: OkHttpClient,
     private val properties: OpenAIConfigurationProperties
 ) : ChatModel {
+//    @Cacheable("nicknameCache", key = "T(java.lang.String).join(',', #statements)")
     override fun suggestNickname(statements: List<String>): NicknameSuggestedResponse {
-        val responseBody = okHttpClient.newCall(request(statements)).execute().body
-        return NicknameSuggestedResponse(parse(responseBody))
+        val response = okHttpClient.newCall(request(statements)).execute().body
+        return NicknameSuggestedResponse(parse(response))
     }
 
     private fun request(statements: List<String>): Request {
-        val inputItems = toInput(statements)
-
-        val modelName = properties.model.ifBlank { "gpt-5-mini" }
-        val bodyJson = buildJsonObject {
-            put("model", JsonPrimitive(modelName))
-            put("reasoning", buildJsonObject {
-                put("effort", JsonPrimitive("low"))
-            })
-            put("input", JsonArray(inputItems))
-        }
-
-        val requestBody = Json.encodeToString(bodyJson)
+        val contents = toRequestBody(statements)
+        val requestBody = Json.encodeToString(NicknameSuggestedRequest.from(properties.model, contents))
             .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-
-        val baseUrl = properties.url.ifBlank { "https://api.openai.com/v1/responses" }
-
         return Request.Builder()
-            .url(baseUrl)
+            .url(properties.url)
             .addHeader("Content-Type", "application/json")
             .addHeader("Authorization", "Bearer ${properties.apiKey}")
             .post(requestBody)
             .build()
     }
 
-    private fun toInput(statements: List<String>): List<JsonObject> {
-        val userJoined = if (statements.size >= DEFAULT_STATEMENTS_SIZE) {
-            statements.subList(0, DEFAULT_STATEMENTS_SIZE - 1).joinToString()
-        } else {
-            statements.joinToString()
-        }.take(properties.userInput)
-
+    private fun toRequestBody(statements: List<String>): List<ContentRequest> {
+        if (statements.size >= DEFAULT_STATEMENTS_SIZE) {
+            return listOf(
+                ContentRequest.of("developer", properties.prompt),
+                ContentRequest.of(
+                    "user", statements.subList(0, DEFAULT_STATEMENTS_SIZE - 1)
+                        .joinToString()
+                        .take(properties.userInput)
+                ),
+            )
+        }
         return listOf(
-            buildJsonObject {
-                put("role", JsonPrimitive("developer"))
-                put("content", JsonPrimitive(properties.prompt))
-            },
-            buildJsonObject {
-                put("role", JsonPrimitive("user"))
-                put("content", JsonPrimitive(userJoined))
-            }
+            ContentRequest.of("developer", properties.prompt),
+            ContentRequest.of(
+                "user", statements.joinToString()
+                    .take(properties.userInput)
+            ),
         )
     }
 
     private fun parse(responseBody: ResponseBody): String {
-        val root = Json.parseToJsonElement(responseBody.string()).jsonObject
-        validateError(root)
-        val output = root["output"]?.jsonArray ?: throw FailedOpenAIModelException()
-        val assistantMsg = output.find { it.jsonObject["type"]?.jsonPrimitive?.content == "message" }
-            ?.jsonObject ?: throw FailedOpenAIModelException()
-        val content = assistantMsg["content"]?.jsonArray ?: throw FailedOpenAIModelException()
-        val textPart = content.find { it.jsonObject["type"]?.jsonPrimitive?.content == "output_text" }
-            ?.jsonObject ?: throw FailedOpenAIModelException()
-        return textPart["text"]?.jsonPrimitive?.content ?: throw FailedOpenAIModelException()
+        val json = Json.parseToJsonElement(responseBody.string()).jsonObject
+        validateError(json)
+        return parseResult(json)
     }
 
     private fun validateError(root: JsonObject) {
         val error = root["error"]
         if (error != null && error !is JsonNull) {
-            val errorMessage = error.jsonObject["message"]?.jsonPrimitive?.content ?: "Unknown OpenAI error"
-            throw FailedOpenAIModelException("OpenAI API Error: $errorMessage")
+            val errorMessage = error.jsonObject["message"]!!.jsonPrimitive.content
+            throw FailedOpenAIModelException()
         }
     }
-}
 
+    private fun parseResult(root: JsonObject): String {
+        val outputArray = root["output"]!!.jsonArray
+        val firstOutput = outputArray[0].jsonObject
+        val contentArray = firstOutput["content"]!!.jsonArray
+        val firstContent = contentArray[0].jsonObject
+        return firstContent["text"]!!.jsonPrimitive.content
+    }
+}

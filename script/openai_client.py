@@ -10,7 +10,7 @@ class OpenAIClient:
         load_dotenv(override=True)
         self.api_key = os.getenv('OPENAI_API_KEY')
         self.base_url = os.getenv('OPENAI_URL', 'https://api.openai.com/v1/responses')
-        self.model = os.getenv('OPENAI_MODEL', 'gpt-5-mini')
+        self.model = 'gpt-5-mini'
         self.policy_prompt = os.getenv('OPENAI_POLICY_PROMPT')
     
     def check_policy_violation(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:

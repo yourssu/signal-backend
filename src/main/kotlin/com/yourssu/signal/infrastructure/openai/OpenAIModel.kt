@@ -1,6 +1,7 @@
 package com.yourssu.signal.infrastructure.openai
 
 import com.yourssu.signal.config.properties.OpenAIConfigurationProperties
+import com.yourssu.signal.domain.profile.implement.ChatModel
 import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedResponse
 import com.yourssu.signal.infrastructure.openai.exception.FailedOpenAIModelException
 import kotlinx.serialization.encodeToString

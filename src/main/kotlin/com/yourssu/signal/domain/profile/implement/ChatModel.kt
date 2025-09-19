@@ -1,4 +1,4 @@
-package com.yourssu.signal.infrastructure.openai
+package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.infrastructure.openai.dto.NicknameSuggestedResponse
 

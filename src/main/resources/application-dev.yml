@@ -39,6 +39,12 @@ infra:
     model: ${OPENAI_MODEL}
     prompt: ${OPENAI_PROMPT}
     user-input: ${USER_INPUT_LIMIT}
+  openrouter:
+    url: https://openrouter.ai/api/v1/chat/completions
+    api-key: ${OPENROUTER_API_KEY}
+    model: openrouter/sonoma-dusk-alpha
+    prompt: ${OPENAI_PROMPT}
+    user-input: ${USER_INPUT_LIMIT}
   kakaopay:
     admin-key: ${KAKAOPAY_ADMIN_KEY}
     cid: ${KAKAOPAY_CID}

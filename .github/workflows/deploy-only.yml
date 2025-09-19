@@ -53,7 +53,9 @@ jobs:
           OPENAI_PROMPT: ${{ vars.OPENAI_PROMPT }}
           OPENAI_POLICY_PROMPT: ${{ vars.OPENAI_POLICY_PROMPT }}
           USER_INPUT_LIMIT: ${{ vars.USER_INPUT_LIMIT }}
-          
+
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
@@ -107,7 +109,9 @@ jobs:
           echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
           echo "OPENAI_POLICY_PROMPT=\"$OPENAI_POLICY_PROMPT\"" >> .env
           echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
-          
+
+          echo "OPENROUTER_API_KEY=$OPENROUTER_API_KEY" >> .env
+
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env
           echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env

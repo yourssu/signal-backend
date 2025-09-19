@@ -3,7 +3,7 @@
 # ================================================
 # 변경이 필요한 부분:
 # - server_name: api.signal.yourssu.com
-# - proxy_pass: http://localhost:9011
+# - proxy_pass: http://localhost:9012
 # - ssl_certificate 경로
 # ================================================
 
@@ -41,7 +41,7 @@ server {
         # 메인 프록시 설정
         location / {
                 # 프록시 대상 서버
-                proxy_pass http://localhost:9011/;
+                proxy_pass http://localhost:9012/;
 
                 # 프록시 기본 설정
                 proxy_redirect off;

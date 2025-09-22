@@ -19,11 +19,11 @@ object Notification {
     }
 
     fun notifyContactExceedsLimitWarning(contactLimitPolicy: Int) {
-        logger.info { "ContactExceedsLimitWarning&$contactLimitPolicy" }
+        logger.info { "ContactExceedsLimitWarning&${contactLimitPolicy + 1}" }
     }
 
     fun notifyFailedProfileContactExceedsLimit(contactLimitPolicy: Int) {
-        logger.info { "FailedProfileContactExceedsLimit&$contactLimitPolicy" }
+        logger.info { "FailedProfileContactExceedsLimit&${contactLimitPolicy + 1}" }
     }
 
     fun notifyTicketIssued(verification: Verification, ticket: Int, availableTicket: Int) {

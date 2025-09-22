@@ -67,4 +67,15 @@ class JwtUtils(
             throw InvalidJwtTokenException()
         }
     }
+
+    fun getEmailWithoutVerifying(token: String): String? {
+        try {
+            val payload = token.split('.')[1]
+            val decodedPayload = String(Base64.getUrlDecoder().decode(payload))
+            val claims = objectMapper.readTree(decodedPayload)
+            return claims.get("email").asText()
+        } catch (_: Exception) {
+            return null
+        }
+    }
 }

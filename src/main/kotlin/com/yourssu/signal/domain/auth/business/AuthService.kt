@@ -67,6 +67,7 @@ class AuthService(
         val idToken = oAuthOutputPort.exchangeCodeForIdToken(command.code)
             ?: throw InvalidGoogleCodeException()
         val identifier = jwtUtils.getSubWithoutVerifying(idToken)
+        val email = jwtUtils.getEmailWithoutVerifying(idToken)
         val user = userReader.getByUuid(command.toUuid())
         val uuid = googleUserReader.findUuidByIdentifier(identifier)
         val isExistsUser = googleUserReader.existsByUuid(user.uuid)
@@ -75,7 +76,7 @@ class AuthService(
             throw GoogleAccountAlreadyLinkedException()
         }
         if (uuid == null) {
-            googleUserWriter.save(command.toDomain(identifier))
+            googleUserWriter.save(command.toDomain(identifier, email))
             return generateTokenResponse(user)
         }
         val linkedUser = userReader.getByUuid(uuid)

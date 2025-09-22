@@ -11,10 +11,11 @@ class GoogleOAuthCommand(
         return Uuid(uuid)
     }
     
-    fun toDomain(identifier: String): GoogleUser {
+    fun toDomain(identifier: String, email: String?): GoogleUser {
         return GoogleUser(
             uuid = uuid,
             identifier =  identifier,
+            email = email,
         )
     }
 }

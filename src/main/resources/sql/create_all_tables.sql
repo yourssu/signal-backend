@@ -171,9 +171,11 @@ CREATE TABLE google_user (
     id BIGINT NOT NULL AUTO_INCREMENT,
     uuid VARCHAR(36) NOT NULL,
     identifier VARCHAR(255) NOT NULL,
+    email VARCHAR(255) DEFAULT NULL,
     created_time DATETIME(6) NOT NULL,
     updated_time DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE KEY uk_google_user_uuid (uuid),
     UNIQUE KEY uk_google_user_identifier (identifier),
     INDEX idx_google_user_uuid (uuid),
     INDEX idx_google_user_identifier (identifier)

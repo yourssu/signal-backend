@@ -21,6 +21,10 @@ class GoogleUserEntity(
 
     @Column(nullable = false, unique = true)
     val identifier: String,
+
+    @Column(nullable = true)
+    val email: String?,
+
 ): BaseEntity() {
     companion object {
         fun from(googleUser: GoogleUser): GoogleUserEntity {
@@ -28,6 +32,7 @@ class GoogleUserEntity(
                 id = googleUser.id,
                 uuid = googleUser.uuid,
                 identifier = googleUser.identifier,
+                email = googleUser.email,
             )
         }
     }
@@ -37,6 +42,7 @@ class GoogleUserEntity(
             id = id,
             uuid = uuid,
             identifier = identifier,
+            email = email,
         )
     }
 }

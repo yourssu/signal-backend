@@ -4,4 +4,5 @@ class GoogleUser(
     val id: Long? = null,
     val uuid: String,
     val identifier: String,
+    val email: String?,
 )

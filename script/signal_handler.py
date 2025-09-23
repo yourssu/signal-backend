@@ -76,7 +76,7 @@ class SignalHandler:
             if violation_result.get('violation', False):
                 reason = violation_result.get('reason', 'Policy violation detected by AI')
 
-                violation_message = f"""🚨 *정책 위반 프로필 감지* 🚨
+                violation_message = f"""<!channel> 🚨 *정책 위반 프로필 감지* 🚨
     -  💖 *프로필 ID*: {id}
     -  🚨 *위반 사유*: {reason}
     """

@@ -211,7 +211,7 @@ class SignalHandler:
         ticket_policy_message = f"- 💰 현재 가격 정책: {self.config.ticket_price_policy}"
         ticket_registered_message = f"- 🌱 프로필 등록 완료 첫 구매 고객: {self.config.ticket_price_registered_policy}"
 
-        message = f"""🚨 *이용권 발급 실패* 🚨
+        message = f"""<!channel> 🚨 *이용권 발급 실패* 🚨
     💌 입금금액에 해당하는 티켓 가격 정보가 없습니다.
     -  💌 *받는 분 통장 표시*: {name}
     -  💰 *금액*: {depositAmount.strip()}원

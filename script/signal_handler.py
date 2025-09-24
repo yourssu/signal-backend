@@ -226,7 +226,7 @@ class SignalHandler:
         name, depositAmount = line[line.find('&') + 1:].split(' ')
         now_kst = self._get_kst_now()
 
-        message = f"""🚨 *이용권 발급 실패* 🚨
+        message = f"""<!channel> 🚨 *이용권 발급 실패* 🚨
     💌 받는 분 통장 표시에 해당하는 인증번호가 없습니다.
     -  💌 *받는 분 통장 표시*: {name}
     -  💰 *금액*: {depositAmount.strip()}원
@@ -251,7 +251,7 @@ class SignalHandler:
         name, depositAmount = line[line.find('&') + 1:].split(' ')
         now_kst = self._get_kst_now()
 
-        message = f"""🚨 *현장 확인 필요! 프로필을 등록하지 않거나 첫번째 구매가 아닌 사용자입니다.* 🚨
+        message = f"""<!channel> 🚨 *현장 확인 필요! 프로필을 등록하지 않거나 첫번째 구매가 아닌 사용자입니다.* 🚨
         -  💌 *받는 분 통장 표시*: {name}
         -  💰 *금액*: {depositAmount}
         -  ⏰ *시간*: {now_kst.strftime('%Y-%m-%d %H:%M:%S')} KST

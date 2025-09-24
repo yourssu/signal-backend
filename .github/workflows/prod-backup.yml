@@ -1,4 +1,4 @@
-name: Docker - Build, Push to ECR and Deploy (Prod)
+name: Docker - Build, Push to ECR and Deploy (Prod Home)
 
 on:
   workflow_dispatch:

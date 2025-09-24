@@ -28,9 +28,9 @@ if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
     docker rm $CONTAINER_NAME
 fi
 
-# Remove old images (keep only the 3 most recent)
+# Remove old images (keep only the 1 most recent)
 echo "Cleaning up old images..."
-docker images $ECR_REGISTRY/yourssu/${PROJECT_NAME} --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | sort -k4 -r | tail -n +4 | awk '{print $3}' | xargs -r docker rmi
+docker images $ECR_REGISTRY/yourssu/${PROJECT_NAME} --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | sort -k4 -r | tail -n +2 | awk '{print $3}' | xargs -r docker rmi
 
 # Run the new container
 echo "Starting new container..."

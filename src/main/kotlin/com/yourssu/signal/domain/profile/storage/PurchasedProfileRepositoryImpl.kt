@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.profile.implement.PurchasedProfile
 import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.storage.QPurchasedProfileEntity.purchasedProfileEntity
 import com.yourssu.signal.domain.profile.storage.QProfileEntity.profileEntity
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
@@ -16,6 +17,7 @@ class PurchasedProfileRepositoryImpl(
     private val purchasedProfileJpaRepository: PurchasedProfileJpaRepository,
     private val jpaQueryFactory: JPAQueryFactory,
 ): PurchasedProfileRepository {
+    @CacheEvict(value = ["profileRankingCache"], allEntries = true)
     override fun save(purchasedProfile: PurchasedProfile): PurchasedProfile {
         return purchasedProfileJpaRepository.save(PurchasedProfileEntity.from(purchasedProfile))
             .toDomain()

@@ -28,6 +28,13 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
+      - name: Reset Docker configuration
+        run: |
+          # Docker 설정 초기화
+          sudo systemctl restart docker
+          docker logout || true
+          rm -rf ~/.docker/config.json || true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 

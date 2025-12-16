@@ -115,8 +115,8 @@ jobs:
 
       - name: Deploy to EC2
         env:
-          YOURSSU_PEM: ${{ secrets.YOURSSU_PEM }}
-          HOST_URL: ${{ vars.HOST_URL }}
+          YOURSSU_PEM: ${{ secrets.HOME_PEM }}
+          HOST_URL: ${{ vars.HOME_URL }}
 
           SERVER_PORT: ${{ vars.SERVER_PORT }}
           CORS_ALLOWED_ORIGIN: ${{ vars.CORS_ALLOWED_ORIGIN }}

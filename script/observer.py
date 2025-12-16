@@ -115,7 +115,7 @@ if __name__ == "__main__":
     observer.start()
     start_message = f"Observer started: {TimeUtils.get_kst_now()}"
     print(start_message)
-    notifier.send_log_notification(start_message)
+    # notifier.send_log_notification(start_message)
     try:
         while True:
             time.sleep(1)

@@ -21,8 +21,8 @@ spring:
 domain:
   permission:
     admin:
-      access-key: "DonaEmilyEatSteakLeopold"
-      contact-secret-key : "ThisIsASecretKeyForContact"
+      access-key: "test-admin-access-key"
+      contact-secret-key: "test-contact-secret-key"
   policy:
     whitelist: false
     contact-limit: 4
@@ -34,26 +34,26 @@ domain:
 infra:
   openai:
     url: "https://api.openai.com/v1/responses"
-    api-key: "api-key-value"
+    api-key: "test-openai-api-key"
     model: "gpt-4o-mini"
-    prompt: "prompt for a developer"
+    prompt: "test prompt"
     user-input: 100
   kakaopay:
-    admin-key: "DEV4FF69BE65A3296232BCF721254981D9C38784"
+    admin-key: "test-kakaopay-admin-key"
     cid: "TC0ONETIME"
     "approval_url": "https://yourssu.signal.com/payment/success"
     "cancel_url": "https://yourssu.signal.com/payment/cancel"
     "fail_url": "https://yourssu.signal.com/payment/fail"
   google:
     oauth:
-      client-id: ${GOOGLE_OAUTH_CLIENT_ID:your-google-client-id}
-      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:your-google-client-secret}
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID:test-google-client-id}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET:test-google-client-secret}
       redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI:http://localhost:8080/auth/callback}
 
 jwt:
-  secret: "ThisIsAVeryLongSecretKeyForJWTTokenGenerationAndValidationMinimum256Bits"
-  access-token-expiration: 1800000  # 30 minutes
-  refresh-token-expiration: 2592000000  # 30 days
+  secret: "test-jwt-secret-minimum-256-bits-long-string-for-testing-only-do-not-use-in-prod"
+  access-token-expiration: 1800000
+  refresh-token-expiration: 2592000000
 
 springdoc:
   api-docs:

@@ -1,38 +1,50 @@
-HELP.md
-.gradle/
-build/
-.gitattributes
-
-!**/src/main/**/build/
-!**/src/test/**/build/
-
+# ===============================
+# Monorepo root
+# ===============================
 .env
+.env.*
+!.env.example
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# ===============================
+# app/ — Java / Spring Boot / Gradle
+# ===============================
+app/.gradle/
+app/build/
+app/out/
+app/bin/
 
-### IntelliJ IDEA ###
-.idea
+# Local-only Spring config (contains secrets)
+app/src/main/resources/application-local.yml
+app/src/main/resources/application-local.properties
+
+# IntelliJ HTTP client env (contains access keys)
+app/src/main/resources/http/http-client.env.json
+
+# IDE
+.idea/
 *.iws
 *.iml
 *.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-logs/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/s
+# Spring Boot
+HELP.md
+
+# ===============================
+# observer/ — Python
+# ===============================
+observer/.env
+observer/.env.*
+!observer/.env.example
+observer/env/
+observer/__pycache__/
+observer/**/__pycache__/
+observer/*.pyc
+observer/**/*.pyc
+observer/logs/
+observer/.idea/
+
+# ===============================
+# OS
+# ===============================
+.DS_Store
+Thumbs.db

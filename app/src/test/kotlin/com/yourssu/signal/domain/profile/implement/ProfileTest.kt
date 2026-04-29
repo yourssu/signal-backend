@@ -158,7 +158,7 @@ class ProfileTest : DescribeSpec({
                 context("출생년도가 현재 년도보다 크면") {
                     it("BirthYearViolatedException을 발생시킨다") {
                         shouldThrow<BirthYearViolatedException> {
-                            createValidProfile(birthYear = 2026)
+                            createValidProfile(birthYear = 2027)
                         }
                     }
                 }

@@ -1,5 +1,5 @@
 # Multi-stage build for better caching
-FROM openjdk:21-jdk-slim as base
+FROM eclipse-temurin:21-jre-alpine AS base
 
 # Set timezone to KST
 ENV TZ=Asia/Seoul

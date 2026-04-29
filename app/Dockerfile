@@ -20,7 +20,7 @@ FROM base as python-deps
 WORKDIR /app
 
 # Copy requirements file first for better Docker layer caching
-COPY script/requirements.txt /tmp/requirements.txt
+COPY observer/script/requirements.txt /tmp/requirements.txt
 
 # Create Python virtual environment and install dependencies
 # This layer will be cached unless requirements.txt changes
@@ -37,10 +37,10 @@ WORKDIR /app
 COPY --from=python-deps /app/venv /app/venv
 
 # Copy pre-built JAR (built in GitHub Actions)
-COPY build/libs/*-SNAPSHOT.jar app.jar
+COPY app/build/libs/*-SNAPSHOT.jar app.jar
 
 # Copy observer scripts
-COPY script/ /app/script/
+COPY observer/script/ /app/script/
 
 # Create logs directory
 RUN mkdir -p /app/logs

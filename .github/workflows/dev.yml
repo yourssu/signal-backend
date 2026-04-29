@@ -55,6 +55,7 @@ jobs:
           cache: gradle
 
       - name: Grant execute permission for gradlew
+        working-directory: ./app
         run: chmod +x gradlew
 
       # Additional Gradle caches for better performance
@@ -70,8 +71,8 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Clean Build with Gradle (with Testing)
+        working-directory: ./app
         run: |
-          # 캐시 활용을 위한 빌드 옵션 추가
           ./gradlew clean build --build-cache --parallel --daemon
 
       # Docker 베이스 이미지 캐시
@@ -79,9 +80,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('script/requirements.txt', 'Dockerfile') }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('observer/script/requirements.txt', 'app/Dockerfile') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ hashFiles('script/requirements.txt', 'Dockerfile') }}-
+            ${{ runner.os }}-buildx-${{ hashFiles('observer/script/requirements.txt', 'app/Dockerfile') }}-
             ${{ runner.os }}-buildx-
 
       - name: Build, tag, and push image to Amazon ECR
@@ -98,6 +99,7 @@ jobs:
           
           # Build multi-platform image (ARM64 + AMD64) and push with enhanced cache
           docker buildx build \
+            -f app/Dockerfile \
             --platform linux/arm64,linux/amd64 \
             --push \
             --provenance=false \
@@ -131,7 +133,6 @@ jobs:
           WHITELIST: ${{ vars.WHITELIST }}
           CONTACT_LIMIT: ${{ vars.CONTACT_LIMIT }}
           CONTACT_LIMIT_WARNING: ${{ vars.CONTACT_LIMIT_WARNING }}
-          CONTACT_PRICE: ${{ vars.CONTACT_PRICE }}
           TICKET_COST: ${{ vars.TICKET_COST }}
           TICKET_PRICE_POLICY: ${{ vars.TICKET_PRICE_POLICY }}
           TICKET_PRICE_REGISTERED_POLICY: ${{ vars.TICKET_PRICE_REGISTERED_POLICY }}
@@ -155,7 +156,8 @@ jobs:
           KAKAOPAY_APPROVAL_URL: ${{ vars.KAKAOPAY_APPROVAL_URL }}
           KAKAOPAY_CANCEL_URL: ${{ vars.KAKAOPAY_CANCEL_URL }}
           KAKAOPAY_FAIL_URL: ${{ vars.KAKAOPAY_FAIL_URL }}
-          
+
+
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_ACCESS_TOKEN_EXPIRATION: ${{ vars.JWT_ACCESS_TOKEN_EXPIRATION }}
           JWT_REFRESH_TOKEN_EXPIRATION: ${{ vars.JWT_REFRESH_TOKEN_EXPIRATION }}
@@ -185,7 +187,6 @@ jobs:
           echo "WHITELIST=$WHITELIST" >> .env
           echo "CONTACT_LIMIT=$CONTACT_LIMIT" >> .env
           echo "CONTACT_LIMIT_WARNING=$CONTACT_LIMIT_WARNING" >> .env
-          echo "CONTACT_PRICE=$CONTACT_PRICE" >> .env
           echo "TICKET_COST=$TICKET_COST" >> .env
           echo "TICKET_PRICE_POLICY=$TICKET_PRICE_POLICY" >> .env
           echo "TICKET_PRICE_REGISTERED_POLICY=$TICKET_PRICE_REGISTERED_POLICY" >> .env
@@ -225,7 +226,7 @@ jobs:
           
           # Deploy environment file and docker script to host machine
           scp -i yourssu.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
-          scp -i yourssu.pem script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -i yourssu.pem observer/script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
           
           # Make the script executable
           ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"

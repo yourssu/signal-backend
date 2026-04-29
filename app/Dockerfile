@@ -1,5 +1,5 @@
 # Multi-stage build for better caching
-FROM eclipse-temurin:21-jre-alpine AS base
+FROM eclipse-temurin:21-jre-jammy AS base
 
 # Set timezone to KST
 ENV TZ=Asia/Seoul
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Python dependencies stage
-FROM base as python-deps
+FROM base AS python-deps
 
 WORKDIR /app
 
@@ -29,7 +29,7 @@ RUN python3 -m venv /app/venv && \
     /app/venv/bin/pip install -r /tmp/requirements.txt --no-cache-dir
 
 # Final runtime stage
-FROM base as runtime
+FROM base AS runtime
 
 WORKDIR /app
 

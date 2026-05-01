@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
+import com.yourssu.signal.domain.profile.business.dto.DeckResponse
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
@@ -59,6 +60,14 @@ class ProfileService(
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit + 1)
         val savedProfile = profileWriter.updateProfile(updatedProfile)
         return MyProfileResponse.from(savedProfile)
+    }
+
+    fun getDeck(command: DeckCommand): DeckResponse {
+        val myProfileId = if (profileReader.existsByUuid(Uuid(command.uuid)))
+            profileReader.getByUuid(Uuid(command.uuid)).id
+        else null
+        val orderedIds = profilePriorityManager.buildDeck(myProfileId, Gender.of(command.gender))
+        return DeckResponse.from(profileReader.getOrderedByIds(orderedIds))
     }
 
     fun getRandomProfile(command: RandomProfileFoundCommand): ProfileResponse {

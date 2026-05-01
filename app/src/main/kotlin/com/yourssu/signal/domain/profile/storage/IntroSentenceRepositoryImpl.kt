@@ -26,6 +26,15 @@ class IntroSentenceRepositoryImpl(
             .toList()
     }
 
+    override fun findAllByUuids(uuids: List<Uuid>): Map<Uuid, List<String>> {
+        val uuidValues = uuids.map { it.value }
+        return jpaQueryFactory.select(introSentenceEntity.uuid, introSentenceEntity.introSentence)
+            .from(introSentenceEntity)
+            .where(introSentenceEntity.uuid.`in`(uuidValues))
+            .fetch()
+            .groupBy({ Uuid(it.get(introSentenceEntity.uuid)!!) }, { it.get(introSentenceEntity.introSentence)!! })
+    }
+
     override fun deleteByUuid(uuid: Uuid) {
         jpaQueryFactory.delete(introSentenceEntity)
             .where(introSentenceEntity.uuid.eq(uuid.value))

@@ -1,5 +1,6 @@
 package com.yourssu.signal.api
 
+import com.yourssu.signal.api.dto.DeckRequest
 import com.yourssu.signal.api.dto.ProfileCreatedRequest
 import com.yourssu.signal.api.dto.ProfilesFoundRequest
 import com.yourssu.signal.api.dto.ProfileUpdateRequest
@@ -13,6 +14,7 @@ import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
+import com.yourssu.signal.domain.profile.business.dto.DeckResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.api.dto.RandomProfileRequest
 import io.swagger.v3.oas.annotations.Operation
@@ -135,6 +137,21 @@ class ProfileController(
         @Parameter(hidden = true) @UserUuid uuid: String,
     ): ResponseEntity<Response<List<ProfileContactResponse>>> {
         val response = profileService.getPurchasedProfiles(uuid)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "프로필 탐색 덱 조회",
+        description = "미구매 프로필(가우시안 순서) + 구매된 프로필(구매 순) 전체 목록을 1회 반환합니다.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    @PostMapping("/deck")
+    @RequireAuth
+    fun getDeck(
+        @Valid @ModelAttribute request: DeckRequest,
+        @Parameter(hidden = true) @UserUuid uuid: String,
+    ): ResponseEntity<Response<DeckResponse>> {
+        val response = profileService.getDeck(request.toCommand(uuid))
         return ResponseEntity.ok(Response(result = response))
     }
 

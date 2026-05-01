@@ -48,3 +48,8 @@ observer/.idea/
 # ===============================
 .DS_Store
 Thumbs.db
+
+/.claude
+/signal-api-2025-2
+/signal-api-2025-1
+/ref

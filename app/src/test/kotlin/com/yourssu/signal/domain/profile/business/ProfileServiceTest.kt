@@ -4,6 +4,7 @@ import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
+import com.yourssu.signal.domain.profile.business.dto.DeckResponse
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
@@ -499,6 +500,68 @@ class ProfileServiceTest : DescribeSpec({
                     verify(profileReader).getByUuid(Uuid(uuid))
                     verify(purchasedProfileReader).getProfileRanking(10L, Gender.MALE)
                     verify(profileReader).count(Gender.MALE)
+                }
+            }
+        }
+
+        context("getDeck 메서드를 호출할 때") {
+
+            context("프로필이 있는 유저가 덱을 요청하면") {
+                it("본인 프로필 ID를 제외하고 buildDeck을 호출한다") {
+                    val command = DeckCommand(uuid = "my-uuid", gender = "FEMALE")
+                    val myProfile = createTestProfile(id = 1L, uuid = "my-uuid")
+                    val deckProfiles = listOf(
+                        createTestProfile(id = 2L, uuid = "uuid-2", nickname = "프로필2"),
+                        createTestProfile(id = 3L, uuid = "uuid-3", nickname = "프로필3"),
+                    )
+
+                    whenever(profileReader.existsByUuid(Uuid("my-uuid"))).thenReturn(true)
+                    whenever(profileReader.getByUuid(Uuid("my-uuid"))).thenReturn(myProfile)
+                    whenever(profilePriorityManager.buildDeck(1L, Gender.FEMALE)).thenReturn(listOf(2L, 3L))
+                    whenever(profileReader.getOrderedByIds(listOf(2L, 3L))).thenReturn(deckProfiles)
+
+                    val result = profileService.getDeck(command)
+
+                    result.profiles.size shouldBe 2
+                    result.profiles[0].nickname shouldBe "프로필2"
+                    result.profiles[1].nickname shouldBe "프로필3"
+                    verify(profilePriorityManager).buildDeck(1L, Gender.FEMALE)
+                }
+            }
+
+            context("프로필이 없는 유저가 덱을 요청하면") {
+                it("myProfileId null로 buildDeck을 호출한다") {
+                    val command = DeckCommand(uuid = "no-profile-uuid", gender = "MALE")
+                    val deckProfiles = listOf(
+                        createTestProfile(id = 5L, uuid = "uuid-5", nickname = "프로필5"),
+                    )
+
+                    whenever(profileReader.existsByUuid(Uuid("no-profile-uuid"))).thenReturn(false)
+                    whenever(profilePriorityManager.buildDeck(null, Gender.MALE)).thenReturn(listOf(5L))
+                    whenever(profileReader.getOrderedByIds(listOf(5L))).thenReturn(deckProfiles)
+
+                    val result = profileService.getDeck(command)
+
+                    result.profiles.size shouldBe 1
+                    result.profiles[0].nickname shouldBe "프로필5"
+                    verify(profilePriorityManager).buildDeck(null, Gender.MALE)
+                    verify(profileReader, never()).getByUuid(any())
+                }
+            }
+
+            context("덱이 비어있으면") {
+                it("빈 profiles 목록을 반환한다") {
+                    val command = DeckCommand(uuid = "my-uuid", gender = "FEMALE")
+                    val myProfile = createTestProfile(id = 1L, uuid = "my-uuid")
+
+                    whenever(profileReader.existsByUuid(Uuid("my-uuid"))).thenReturn(true)
+                    whenever(profileReader.getByUuid(Uuid("my-uuid"))).thenReturn(myProfile)
+                    whenever(profilePriorityManager.buildDeck(1L, Gender.FEMALE)).thenReturn(emptyList())
+                    whenever(profileReader.getOrderedByIds(emptyList())).thenReturn(emptyList())
+
+                    val result = profileService.getDeck(command)
+
+                    result.profiles shouldBe emptyList()
                 }
             }
         }

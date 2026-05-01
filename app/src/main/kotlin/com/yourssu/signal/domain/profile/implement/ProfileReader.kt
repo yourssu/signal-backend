@@ -49,6 +49,15 @@ class ProfileReader(
 
     fun getByIds(profiles: List<Long>): List<Profile> {
         return profileRepository.findBy(profiles)
+    }
 
+    fun getOrderedByIds(orderedIds: List<Long>): List<Profile> {
+        if (orderedIds.isEmpty()) return emptyList()
+        val profiles = profileRepository.findBy(orderedIds).associateBy { it.id!! }
+        val introSentencesMap = introSentenceRepository.findAllByUuids(profiles.values.map { it.uuid })
+        val profilesWithIntros = profiles.mapValues { (_, profile) ->
+            profile.copy(introSentences = introSentencesMap[profile.uuid] ?: emptyList())
+        }
+        return orderedIds.mapNotNull { profilesWithIntros[it] }
     }
 }

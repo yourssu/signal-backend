@@ -16,8 +16,6 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.user.implement.UserWriter
-import com.yourssu.signal.domain.profile.implement.ProfileReader
-import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.domain.viewer.implement.exception.AdminPermissionDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,8 +30,6 @@ class AuthService(
     private val googleUserReader: GoogleUserReader,
     private val googleUserWriter: GoogleUserWriter,
     private val oAuthOutputPort: OAuthOutputPort,
-    private val profileReader: ProfileReader,
-    private val viewerReader: ViewerReader,
 ) {
     @Transactional
     fun register(): TokenResponse {
@@ -68,24 +64,21 @@ class AuthService(
             ?: throw InvalidGoogleCodeException()
         val identifier = jwtUtils.getSubWithoutVerifying(idToken)
         val email = jwtUtils.getEmailWithoutVerifying(idToken)
+
+        // 이미 연결된 구글 계정이 있으면 기존 UUID로 복귀 (토큰 재발급만)
+        val linkedUuid = googleUserReader.findUuidByIdentifier(identifier)
+        if (linkedUuid != null) {
+            val linkedUser = userReader.getByUuid(linkedUuid)
+            return generateTokenResponse(linkedUser)
+        }
+
+        // 신규 연결: 현재 UUID에 이미 다른 구글 계정이 연결돼 있으면 거부
         val user = userReader.getByUuid(command.toUuid())
-        val uuid = googleUserReader.findUuidByIdentifier(identifier)
-        val isExistsUser = googleUserReader.existsByUuid(user.uuid)
-        val isCurrentUserAlreadyLinked = (uuid == null && isExistsUser)
-        if (isCurrentUserAlreadyLinked || isGoogleAccountLinkedToOtherViewer(uuid, user)) {
+        if (googleUserReader.existsByUuid(user.uuid)) {
             throw GoogleAccountAlreadyLinkedException()
         }
-        if (uuid == null) {
-            googleUserWriter.save(command.toDomain(identifier, email))
-            return generateTokenResponse(user)
-        }
-        val linkedUser = userReader.getByUuid(uuid)
-        return generateTokenResponse(linkedUser)
-    }
-
-    private fun isGoogleAccountLinkedToOtherViewer(uuid: Uuid?, user: User): Boolean {
-        val linkedViewer = viewerReader.existsByUuid(user.uuid)
-        return uuid != null && uuid != user.uuid && linkedViewer
+        googleUserWriter.save(command.toDomain(identifier, email))
+        return generateTokenResponse(user)
     }
 
     private fun generateTokenResponse(user: User): TokenResponse {

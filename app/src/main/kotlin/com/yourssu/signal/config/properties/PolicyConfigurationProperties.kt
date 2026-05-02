@@ -12,5 +12,6 @@ data class PolicyConfigurationProperties(
     val ticketPricePolicy: String,
     val ticketPriceRegisteredPolicy: String,
     val whitelist: Boolean = false,
+    val bannedWords: List<String> = emptyList(),
 ) {
 }

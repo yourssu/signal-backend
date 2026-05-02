@@ -33,6 +33,8 @@ class ProfileService(
 ) {
     fun createProfile(command: ProfileCreatedCommand): MyProfileResponse {
         userReader.getByUuid(command.toUuid())
+        validateBannedWords(command.nickname, command.introSentences)
+
         val profile = command.toDomain()
         val countContact = profileReader.countContact(profile.contact)
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit)
@@ -51,6 +53,8 @@ class ProfileService(
     }
 
     fun updateProfile(command: ProfileUpdateCommand): MyProfileResponse {
+        validateBannedWords(command.nickname, command.introSentences)
+
         val profile = profileReader.getByUuid(Uuid(command.uuid))
         val updatedProfile = profile.copy(
             nickname = command.nickname,
@@ -131,5 +135,11 @@ class ProfileService(
             .map { it.profileId }
         val profiles = profileReader.getByIds(profileIds)
         return profiles.map { it -> ProfileContactResponse.from(it) }
+    }
+
+    private fun validateBannedWords(nickname: String, introSentences: List<String>) {
+        val bannedWords = policy.bannedWords.toSet()
+        ProfileValidator.validateNicknameBannedWord(nickname, bannedWords)
+        ProfileValidator.validateIntroSentencesBannedWord(introSentences, bannedWords)
     }
 }

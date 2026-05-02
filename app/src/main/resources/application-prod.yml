@@ -31,6 +31,7 @@ domain:
     contact-price: ${TICKET_COST}
     ticket-price-policy: ${TICKET_PRICE_POLICY}
     ticket-price-registered-policy: ${TICKET_PRICE_REGISTERED_POLICY}
+    banned-words: ${BANNED_WORDS}
 
 infra:
   openai:

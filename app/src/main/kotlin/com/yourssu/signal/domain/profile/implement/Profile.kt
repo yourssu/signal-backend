@@ -17,6 +17,7 @@ class Profile(
     val nickname: String,
     val introSentences: List<String>,
     val school: String,
+    val egenTeto: EgenTeto? = null,
 ) {
     init {
         validateNickname(nickname)
@@ -24,7 +25,7 @@ class Profile(
         validateBirthYear(birthYear)
     }
 
-    fun copy(introSentences: List<String> = this.introSentences, contact: String = this.contact, nickname: String = this.nickname): Profile {
+    fun copy(introSentences: List<String> = this.introSentences, contact: String = this.contact, nickname: String = this.nickname, egenTeto: EgenTeto? = this.egenTeto): Profile {
         return Profile(
             id = id,
             uuid = uuid,
@@ -36,7 +37,8 @@ class Profile(
             mbti = mbti,
             nickname = nickname,
             introSentences = introSentences,
-            school = school
+            school = school,
+            egenTeto = egenTeto
         )
     }
 }

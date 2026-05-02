@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.profile.storage
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.profile.implement.Gender
+import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.Profile
 import jakarta.persistence.*
 
@@ -41,6 +42,10 @@ class ProfileEntity(
 
     @Column(nullable = false)
     val school: String,
+
+    @Column(nullable = true)
+    @Enumerated(EnumType.STRING)
+    val egenTeto: EgenTeto? = null,
 ): BaseEntity() {
     companion object {
         fun from(profile: Profile, encryptedContact: String): ProfileEntity {
@@ -55,6 +60,7 @@ class ProfileEntity(
                 mbti = profile.mbti,
                 nickname = profile.nickname,
                 school = profile.school,
+                egenTeto = profile.egenTeto,
             )
         }
     }
@@ -72,6 +78,7 @@ class ProfileEntity(
             nickname = nickname,
             introSentences = introSentences,
             school = school,
+            egenTeto = egenTeto,
         )
     }
 }

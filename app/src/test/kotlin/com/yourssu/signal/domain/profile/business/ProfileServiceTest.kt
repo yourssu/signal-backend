@@ -8,6 +8,7 @@ import com.yourssu.signal.domain.profile.business.dto.DeckResponse
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.EgenTeto
+import com.yourssu.signal.domain.profile.implement.exception.BannedWordException
 import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.user.implement.UserReader
@@ -90,8 +91,9 @@ class ProfileServiceTest : DescribeSpec({
         )
         
         beforeEach {
-            reset(profileWriter, profileReader, userReader, viewerReader, usedTicketManager, 
+            reset(profileWriter, profileReader, userReader, viewerReader, usedTicketManager,
                   profilePriorityManager, purchasedProfileReader, policy, adminAccessChecker, blacklistWriter)
+            whenever(policy.bannedWords).thenReturn(emptyList())
         }
         
         context("createProfile 메서드를 호출할 때") {
@@ -565,6 +567,87 @@ class ProfileServiceTest : DescribeSpec({
                     val result = profileService.getDeck(command)
 
                     result.profiles shouldBe emptyList()
+                }
+            }
+        }
+
+        context("금지어 검사") {
+
+            context("프로필 생성 시 닉네임에 금지어가 포함되면") {
+                it("BannedWordException을 던진다") {
+                    val command = ProfileCreatedCommand(
+                        uuid = "test-uuid",
+                        gender = "MALE",
+                        department = "컴퓨터학부",
+                        birthYear = 2000,
+                        animal = "강아지",
+                        contact = "@test_contact",
+                        mbti = "ENFP",
+                        nickname = "나쁜말닉네임",
+                        introSentences = listOf("안녕하세요"),
+                        school = "숭실대학교"
+                    )
+                    whenever(userReader.getByUuid(any())).thenReturn(createTestUser())
+                    whenever(policy.bannedWords).thenReturn(listOf("나쁜말"))
+
+                    shouldThrow<BannedWordException> {
+                        profileService.createProfile(command)
+                    }
+                }
+            }
+
+            context("프로필 생성 시 소개글에 금지어가 포함되면") {
+                it("BannedWordException을 던진다") {
+                    val command = ProfileCreatedCommand(
+                        uuid = "test-uuid",
+                        gender = "MALE",
+                        department = "컴퓨터학부",
+                        birthYear = 2000,
+                        animal = "강아지",
+                        contact = "@test_contact",
+                        mbti = "ENFP",
+                        nickname = "정상닉네임",
+                        introSentences = listOf("badword 포함 소개"),
+                        school = "숭실대학교"
+                    )
+                    whenever(userReader.getByUuid(any())).thenReturn(createTestUser())
+                    whenever(policy.bannedWords).thenReturn(listOf("badword"))
+
+                    shouldThrow<BannedWordException> {
+                        profileService.createProfile(command)
+                    }
+                }
+            }
+
+            context("프로필 수정 시 닉네임에 금지어가 포함되면") {
+                it("BannedWordException을 던진다") {
+                    val command = ProfileUpdateCommand(
+                        uuid = "test-uuid",
+                        nickname = "나쁜말닉네임",
+                        introSentences = listOf("안녕하세요"),
+                        contact = "@test_contact"
+                    )
+                    whenever(policy.bannedWords).thenReturn(listOf("나쁜말"))
+
+                    shouldThrow<BannedWordException> {
+                        profileService.updateProfile(command)
+                    }
+                }
+            }
+
+            context("프로필 수정 시 소개글에 금지어가 포함되면") {
+                it("BannedWordException을 던진다") {
+                    val command = ProfileUpdateCommand(
+                        uuid = "test-uuid",
+                        nickname = "정상닉네임",
+                        introSentences = listOf("안녕", "badword 섞인 소개"),
+                        contact = "@test_contact"
+                    )
+                    whenever(policy.bannedWords).thenReturn(listOf("badword"))
+
+                    shouldThrow<BannedWordException> {
+                        profileService.updateProfile(command)
+                    }
                 }
             }
         }

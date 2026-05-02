@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.profile.business.command
 
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.Gender
+import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.Profile
 
 class ProfileCreatedCommand(
@@ -14,7 +15,8 @@ class ProfileCreatedCommand(
     val mbti: String,
     val nickname: String,
     val introSentences: List<String>,
-    val school: String
+    val school: String,
+    val egenTeto: String? = null
 ) {
     fun toUuid(): Uuid {
         return Uuid(uuid)
@@ -32,6 +34,7 @@ class ProfileCreatedCommand(
             nickname = nickname,
             introSentences = introSentences,
             school = school,
+            egenTeto = egenTeto?.let { EgenTeto.of(it) },
         )
     }
 }

@@ -15,6 +15,8 @@ data class ProfileUpdateRequest(
 
     @field:ContactFormat
     val contact: String,
+
+    val egenTeto: String? = null,
 ) {
     fun toCommand(uuid: String): ProfileUpdateCommand {
         return ProfileUpdateCommand(
@@ -22,6 +24,7 @@ data class ProfileUpdateRequest(
             nickname = nickname,
             introSentences = introSentences,
             contact = contact,
+            egenTeto = egenTeto,
         )
     }
 }

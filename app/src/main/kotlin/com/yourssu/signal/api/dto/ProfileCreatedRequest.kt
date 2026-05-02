@@ -34,6 +34,8 @@ data class ProfileCreatedRequest(
     val introSentences: List<String>,
 
     val school: String? = null,
+
+    val egenTeto: String? = null,
 ) {
     fun toCommand(uuid: String): ProfileCreatedCommand {
         return ProfileCreatedCommand(
@@ -47,6 +49,7 @@ data class ProfileCreatedRequest(
             nickname = nickname,
             introSentences = introSentences,
             school = school ?: "숭실대",
+            egenTeto = egenTeto,
         )
     }
 

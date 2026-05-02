@@ -5,4 +5,5 @@ data class ProfileUpdateCommand(
     val nickname: String,
     val introSentences: List<String>,
     val contact: String,
+    val egenTeto: String? = null,
 )

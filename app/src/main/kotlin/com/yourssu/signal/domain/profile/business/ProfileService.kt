@@ -11,6 +11,7 @@ import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
@@ -54,7 +55,8 @@ class ProfileService(
         val updatedProfile = profile.copy(
             nickname = command.nickname,
             introSentences = command.introSentences,
-            contact = command.contact
+            contact = command.contact,
+            egenTeto = command.egenTeto?.let { EgenTeto.of(it) } ?: profile.egenTeto
         )
         val countContact = profileReader.countContact(command.contact)
         ProfileValidator.checkContactLimit(countContact, policy.contactLimit + 1)

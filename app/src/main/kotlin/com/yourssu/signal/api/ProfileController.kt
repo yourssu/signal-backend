@@ -145,7 +145,7 @@ class ProfileController(
         description = "미구매 프로필(가우시안 순서) + 구매된 프로필(구매 순) 전체 목록을 1회 반환합니다.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    @PostMapping("/deck")
+    @GetMapping("/deck")
     @RequireAuth
     fun getDeck(
         @Valid @ModelAttribute request: DeckRequest,

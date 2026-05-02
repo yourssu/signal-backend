@@ -13,6 +13,7 @@ class ProfileContactResponse(
     val nickname: String,
     val introSentences: List<String>,
     val school: String,
+    val egenTeto: String? = null,
 ) {
     companion object {
         fun from(profile: Profile): ProfileContactResponse {
@@ -27,6 +28,7 @@ class ProfileContactResponse(
                 nickname = profile.nickname,
                 introSentences = profile.introSentences,
                 school = profile.school,
+                egenTeto = profile.egenTeto?.name,
             )
         }
     }

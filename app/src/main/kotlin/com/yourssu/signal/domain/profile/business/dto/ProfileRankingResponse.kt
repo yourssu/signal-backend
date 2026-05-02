@@ -14,7 +14,8 @@ data class ProfileRankingResponse(
     val mbti: String,
     val nickname: String,
     val introSentences: List<String>,
-    val school: String
+    val school: String,
+    val egenTeto: String? = null
 ) {
     companion object {
         fun of(profileRanking: ProfileRanking, profile: Profile, totalProfiles: Int): ProfileRankingResponse {
@@ -29,7 +30,8 @@ data class ProfileRankingResponse(
                 mbti = profile.mbti,
                 nickname = profile.nickname,
                 introSentences = profile.introSentences,
-                school = profile.school
+                school = profile.school,
+                egenTeto = profile.egenTeto?.name
             )
         }
     }

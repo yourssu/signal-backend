@@ -57,4 +57,12 @@ object ProfileValidator {
             Notification.notifyContactExceedsLimitWarning(contactLimitWarning)
         }
     }
+
+    fun validateNicknameBannedWord(nickname: String, bannedWords: Set<String>) {
+        BannedWordValidator.validate(nickname, bannedWords)
+    }
+
+    fun validateIntroSentencesBannedWord(introSentences: List<String>, bannedWords: Set<String>) {
+        introSentences.forEach { BannedWordValidator.validate(it, bannedWords) }
+    }
 }

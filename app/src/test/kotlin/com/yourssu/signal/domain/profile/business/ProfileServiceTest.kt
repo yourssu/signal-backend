@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.DeckResponse
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.user.implement.UserReader
@@ -60,7 +61,8 @@ class ProfileServiceTest : DescribeSpec({
             nickname: String = "테스트닉네임",
             contact: String = "@test_contact",
             introSentences: List<String> = listOf("안녕하세요"),
-            gender: Gender = Gender.MALE
+            gender: Gender = Gender.MALE,
+            egenTeto: EgenTeto? = null
         ) = Profile(
             id = id,
             uuid = Uuid(uuid),
@@ -72,7 +74,8 @@ class ProfileServiceTest : DescribeSpec({
             mbti = "ENFP",
             nickname = nickname,
             introSentences = introSentences,
-            school = "숭실대학교"
+            school = "숭실대학교",
+            egenTeto = egenTeto
         )
         
         fun createTestViewer(
@@ -562,6 +565,104 @@ class ProfileServiceTest : DescribeSpec({
                     val result = profileService.getDeck(command)
 
                     result.profiles shouldBe emptyList()
+                }
+            }
+        }
+
+        context("egenTeto 필드 동작") {
+
+            context("프로필 생성 시 egenTeto 없이 요청하면") {
+                it("응답의 egenTeto가 null이다") {
+                    val command = ProfileCreatedCommand(
+                        uuid = "test-uuid",
+                        gender = "MALE",
+                        department = "컴퓨터학부",
+                        birthYear = 2000,
+                        animal = "강아지",
+                        contact = "@test_contact",
+                        mbti = "ENFP",
+                        nickname = "닉네임",
+                        introSentences = listOf("안녕하세요"),
+                        school = "숭실대학교",
+                        egenTeto = null
+                    )
+                    val createdProfile = createTestProfile(egenTeto = null)
+
+                    whenever(userReader.getByUuid(any())).thenReturn(createTestUser())
+                    whenever(profileReader.countContact(any())).thenReturn(0)
+                    whenever(policy.contactLimit).thenReturn(5)
+                    whenever(policy.contactLimitWarning).thenReturn(3)
+                    whenever(profileWriter.createProfile(any())).thenReturn(createdProfile)
+                    whenever(policy.whitelist).thenReturn(false)
+
+                    val result = profileService.createProfile(command)
+
+                    result.egenTeto shouldBe null
+                }
+            }
+
+            context("프로필 생성 시 egenTeto: EGEN으로 요청하면") {
+                it("응답에 EGEN이 반환된다") {
+                    val command = ProfileCreatedCommand(
+                        uuid = "test-uuid",
+                        gender = "MALE",
+                        department = "컴퓨터학부",
+                        birthYear = 2000,
+                        animal = "강아지",
+                        contact = "@test_contact",
+                        mbti = "ENFP",
+                        nickname = "닉네임",
+                        introSentences = listOf("안녕하세요"),
+                        school = "숭실대학교",
+                        egenTeto = "EGEN"
+                    )
+                    val createdProfile = createTestProfile(egenTeto = EgenTeto.EGEN)
+
+                    whenever(userReader.getByUuid(any())).thenReturn(createTestUser())
+                    whenever(profileReader.countContact(any())).thenReturn(0)
+                    whenever(policy.contactLimit).thenReturn(5)
+                    whenever(policy.contactLimitWarning).thenReturn(3)
+                    whenever(profileWriter.createProfile(any())).thenReturn(createdProfile)
+                    whenever(policy.whitelist).thenReturn(false)
+
+                    val result = profileService.createProfile(command)
+
+                    result.egenTeto shouldBe "EGEN"
+                }
+            }
+
+            context("프로필 수정 시 egenTeto: TETO로 요청하면") {
+                it("변경된 TETO가 반영된다") {
+                    val command = ProfileUpdateCommand(
+                        uuid = "test-uuid",
+                        nickname = "닉네임",
+                        introSentences = listOf("안녕하세요"),
+                        contact = "@test_contact",
+                        egenTeto = "TETO"
+                    )
+                    val existingProfile = createTestProfile(egenTeto = null)
+                    val updatedProfile = createTestProfile(egenTeto = EgenTeto.TETO)
+
+                    whenever(profileReader.getByUuid(any())).thenReturn(existingProfile)
+                    whenever(profileReader.countContact(any())).thenReturn(0)
+                    whenever(policy.contactLimit).thenReturn(5)
+                    whenever(profileWriter.updateProfile(any())).thenReturn(updatedProfile)
+
+                    val result = profileService.updateProfile(command)
+
+                    result.egenTeto shouldBe "TETO"
+                }
+            }
+
+            context("egenTeto가 null인 기존 프로필을 조회하면") {
+                it("응답의 egenTeto가 null이다") {
+                    val profile = createTestProfile(egenTeto = null)
+
+                    whenever(profileReader.getByUuid(any())).thenReturn(profile)
+
+                    val result = profileService.getProfile("test-uuid")
+
+                    result.egenTeto shouldBe null
                 }
             }
         }

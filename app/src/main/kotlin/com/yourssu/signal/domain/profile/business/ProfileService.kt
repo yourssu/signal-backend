@@ -6,6 +6,7 @@ import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.DeckResponse
+import com.yourssu.signal.domain.profile.business.dto.EgenTetoStatsResponse
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
@@ -69,11 +70,11 @@ class ProfileService(
     }
 
     fun getDeck(command: DeckCommand): DeckResponse {
-        val myProfileId = if (profileReader.existsByUuid(Uuid(command.uuid)))
-            profileReader.getByUuid(Uuid(command.uuid)).id
+        val myProfile = if (profileReader.existsByUuid(Uuid(command.uuid)))
+            profileReader.getByUuid(Uuid(command.uuid))
         else null
-        val orderedIds = profilePriorityManager.buildDeck(myProfileId, Gender.of(command.gender))
-        return DeckResponse.from(profileReader.getOrderedByIds(orderedIds))
+        val orderedIds = profilePriorityManager.buildDeck(myProfile?.id, Gender.of(command.gender))
+        return DeckResponse.from(profileReader.getOrderedByIds(orderedIds), myProfile)
     }
 
     fun getRandomProfile(command: RandomProfileFoundCommand): ProfileResponse {
@@ -82,7 +83,7 @@ class ProfileService(
         if (profileReader.existsByUuid(uuid)) {
             val myProfile = profileReader.getByUuid(uuid)
             val profile = profilePriorityManager.pickRandomProfile(command.toExcludeProfiles(myProfile), gender)
-            return ProfileResponse.from(profile)
+            return ProfileResponse.from(profile, myProfile)
         }
         val profile = profilePriorityManager.pickRandomProfile(command.toExcludeProfiles(), gender)
         return ProfileResponse.from(profile)
@@ -135,6 +136,13 @@ class ProfileService(
             .map { it.profileId }
         val profiles = profileReader.getByIds(profileIds)
         return profiles.map { it -> ProfileContactResponse.from(it) }
+    }
+
+    fun getEgenTetoStats(): EgenTetoStatsResponse {
+        val egenCount = profileReader.countByEgenTeto(EgenTeto.EGEN)
+        val tetoCount = profileReader.countByEgenTeto(EgenTeto.TETO)
+        val total = profileReader.countAll()
+        return EgenTetoStatsResponse.of(egenCount, tetoCount, total)
     }
 
     private fun validateBannedWords(nickname: String, introSentences: List<String>) {

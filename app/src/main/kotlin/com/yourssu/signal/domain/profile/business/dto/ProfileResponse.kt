@@ -1,5 +1,6 @@
 package com.yourssu.signal.domain.profile.business.dto
 
+import com.yourssu.signal.domain.profile.implement.CompatibilityMatcher
 import com.yourssu.signal.domain.profile.implement.Profile
 
 class ProfileResponse(
@@ -13,9 +14,10 @@ class ProfileResponse(
     val introSentences: List<String>,
     val school: String,
     val egenTeto: String? = null,
+    val compatibilityLabel: String? = null,
 ) {
     companion object {
-        fun from(profile: Profile): ProfileResponse {
+        fun from(profile: Profile, myProfile: Profile? = null): ProfileResponse {
             return ProfileResponse(
                 profileId = profile.id!!,
                 gender = profile.gender.name,
@@ -27,6 +29,7 @@ class ProfileResponse(
                 introSentences = profile.introSentences,
                 school = profile.school,
                 egenTeto = profile.egenTeto?.name,
+                compatibilityLabel = myProfile?.let { CompatibilityMatcher.match(it, profile)?.message },
             )
         }
     }

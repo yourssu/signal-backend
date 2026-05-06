@@ -91,7 +91,7 @@ class PurchasedProfileRepositoryImpl(
             .toSet()
 
         return jpaQueryFactory
-            .select(purchasedProfileEntity.profileId.countDistinct().castToNum(Int::class.java))
+            .select(purchasedProfileEntity.count().castToNum(Int::class.java))
             .from(purchasedProfileEntity)
             .where(purchasedProfileEntity.profileId.`in`(profileIdsWithGender))
             .fetchOne() ?: 0

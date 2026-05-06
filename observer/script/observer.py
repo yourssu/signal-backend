@@ -1,5 +1,6 @@
 import time
 import os
+import glob
 import requests
 import pytz
 from datetime import datetime
@@ -116,7 +117,16 @@ class LogHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    path = "logs/"
+    path = os.path.abspath("logs/")
+    # 재시작 시 기존 로그 파일의 현재 줄 수를 미리 기록
+    # (같은 날 재시작 시 기존 내용을 신규 로그로 오인하지 않도록)
+    for existing_log in glob.glob(os.path.join(path, "**/*.log"), recursive=True):
+        try:
+            with open(existing_log, "r", encoding="utf-8") as f:
+                last_checked_line[existing_log] = len(f.readlines())
+        except Exception:
+            pass
+
     event_handler = LogHandler()
     observer = Observer()
     observer.schedule(event_handler, path, recursive=True)

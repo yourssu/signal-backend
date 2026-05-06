@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
+import com.yourssu.signal.domain.profile.business.dto.ConnectionsCountResponse
 import com.yourssu.signal.domain.profile.business.dto.DeckResponse
 import com.yourssu.signal.domain.profile.business.dto.EgenTetoStatsResponse
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
@@ -143,6 +144,12 @@ class ProfileService(
         val tetoCount = profileReader.countByEgenTeto(EgenTeto.TETO)
         val total = profileReader.countAll()
         return EgenTetoStatsResponse.of(egenCount, tetoCount, total)
+    }
+
+    fun getConnectionsCount(): ConnectionsCountResponse {
+        val maleCount = purchasedProfileReader.countByGender(Gender.MALE)
+        val femaleCount = purchasedProfileReader.countByGender(Gender.FEMALE)
+        return ConnectionsCountResponse.of(maleCount, femaleCount)
     }
 
     private fun validateBannedWords(nickname: String, introSentences: List<String>) {

@@ -5,7 +5,8 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 private val PERFECT = CompatibilityLabel.PERFECT_MATCH
-private val GOOD = CompatibilityLabel.GOOD_MATCH
+private val MBTI = CompatibilityLabel.MBTI_MATCH
+private val ANIMAL = CompatibilityLabel.ANIMAL_MATCH
 
 class CompatibilityMatcherTest : DescribeSpec({
 
@@ -91,20 +92,20 @@ class CompatibilityMatcherTest : DescribeSpec({
         }
 
         context("MBTI만 맞고 동물상은 안 맞으면") {
-            it("GOOD_MATCH 반환") {
+            it("MBTI_MATCH 반환") {
                 // 여자: INFP+여우, 남자: ENFJ+강아지 → MBTI 맞음, 동물상 여우→[공룡,사슴] 미매칭
                 val f = female("INFP", "여우", 2001)
                 val m = male("ENFJ", "강아지", 2000)
-                CompatibilityMatcher.match(f, m) shouldBe GOOD
+                CompatibilityMatcher.match(f, m) shouldBe MBTI
             }
         }
 
         context("동물상만 맞고 MBTI는 안 맞으면") {
-            it("GOOD_MATCH 반환") {
+            it("ANIMAL_MATCH 반환") {
                 // 여자: ENFP+고양이, 남자: ENFJ+강아지 → 동물상 고양이→[강아지,곰] 맞음, MBTI ENFP→[INFJ,INTJ] 미매칭
                 val f = female("ENFP", "고양이", 2001)
                 val m = male("ENFJ", "강아지", 2000)
-                CompatibilityMatcher.match(f, m) shouldBe GOOD
+                CompatibilityMatcher.match(f, m) shouldBe ANIMAL
             }
         }
 

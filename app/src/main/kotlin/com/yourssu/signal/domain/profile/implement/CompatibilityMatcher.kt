@@ -8,7 +8,8 @@ object CompatibilityMatcher {
         val animalMatch = AnimalCompatibilityTable.isCompatible(myProfile, targetProfile)
         return when {
             mbtiMatch && animalMatch -> CompatibilityLabel.PERFECT_MATCH
-            mbtiMatch || animalMatch -> CompatibilityLabel.GOOD_MATCH
+            mbtiMatch -> CompatibilityLabel.MBTI_MATCH
+            animalMatch -> CompatibilityLabel.ANIMAL_MATCH
             else -> null
         }
     }

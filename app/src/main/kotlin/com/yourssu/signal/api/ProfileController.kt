@@ -15,6 +15,7 @@ import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
 import com.yourssu.signal.domain.profile.business.dto.DeckResponse
+import com.yourssu.signal.domain.profile.business.dto.EgenTetoStatsResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.api.dto.RandomProfileRequest
 import io.swagger.v3.oas.annotations.Operation
@@ -84,6 +85,16 @@ class ProfileController(
     @GetMapping
     fun getAllProfiles(@Valid @ModelAttribute request: ProfilesFoundRequest): ResponseEntity<Response<List<ProfileResponse>>> {
         val response = profileService.getAllProfiles(request.toCommand())
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "에겐/테토 통계 조회",
+        description = "에겐·테토별 등록자 수와 비율을 조회합니다."
+    )
+    @GetMapping("/egenteto/stats")
+    fun getEgenTetoStats(): ResponseEntity<Response<EgenTetoStatsResponse>> {
+        val response = profileService.getEgenTetoStats()
         return ResponseEntity.ok(Response(result = response))
     }
 

@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.profile.storage
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.yourssu.signal.config.security.DataCipher
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.ProfileRepository
 import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.implement.Profile
@@ -77,6 +78,10 @@ class ProfileRepositoryImpl(
             .fetch()
     }
 
+    override fun countByEgenTeto(egenTeto: EgenTeto): Int {
+        return profileJpaRepository.countByEgenTeto(egenTeto).toInt()
+    }
+
     private fun decryptContact(profile: Profile): Profile {
         return profile.copy(
             contact = dataCipher.decrypt(profile.contact)
@@ -84,5 +89,6 @@ class ProfileRepositoryImpl(
     }
 }
 
-interface ProfileJpaRepository: JpaRepository<ProfileEntity, Long> {
+interface ProfileJpaRepository : JpaRepository<ProfileEntity, Long> {
+    fun countByEgenTeto(egenTeto: EgenTeto): Long
 }

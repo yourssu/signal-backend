@@ -6,4 +6,5 @@ interface PurchasedProfileRepository {
     fun findByViewerId(viewerId: Long): List<PurchasedProfile>
     fun findProfileIdsOrderByPurchasedAsc(): List<Long>
     fun findProfileCountGroupByProfileId(gender: Gender): Map<Long, ProfileRanking>
+    fun countByGender(gender: Gender): Int
 }

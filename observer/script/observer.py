@@ -84,7 +84,7 @@ def process_line_with_handlers(line, handlers):
 def check(file_path):
     global last_checked_line
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
         if file_path not in last_checked_line:
             last_checked_line[file_path] = len(lines)
@@ -98,6 +98,14 @@ def check(file_path):
 
 
 class LogHandler(FileSystemEventHandler):
+    @staticmethod
+    def on_created(event):
+        if event.is_directory:
+            return
+        if event.src_path.endswith('.log'):
+            # 새로 생성된 파일은 처음부터 처리 (날짜 변경 등으로 새 파일 생성 시)
+            last_checked_line[event.src_path] = 0
+
     @staticmethod
     def on_modified(event):
         if event.is_directory:
@@ -115,7 +123,7 @@ if __name__ == "__main__":
     observer.start()
     start_message = f"Observer started: {TimeUtils.get_kst_now()}"
     print(start_message)
-    # notifier.send_log_notification(start_message)
+    notifier.send_log_notification(start_message)
     try:
         while True:
             time.sleep(1)

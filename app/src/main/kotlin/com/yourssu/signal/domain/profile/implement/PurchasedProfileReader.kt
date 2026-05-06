@@ -19,4 +19,8 @@ class PurchasedProfileReader(
         val rankings = purchasedProfileRepository.findProfileCountGroupByProfileId(gender)
         return rankings[profileId] ?: throw ProfileRankingNotFoundException()
     }
+
+    fun countByGender(gender: Gender): Int {
+        return purchasedProfileRepository.countByGender(gender)
+    }
 }

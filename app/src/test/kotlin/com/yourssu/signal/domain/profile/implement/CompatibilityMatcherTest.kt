@@ -7,6 +7,7 @@ import io.kotest.matchers.shouldBe
 private val PERFECT = CompatibilityLabel.PERFECT_MATCH
 private val MBTI = CompatibilityLabel.MBTI_MATCH
 private val ANIMAL = CompatibilityLabel.ANIMAL_MATCH
+private val AGE = CompatibilityLabel.AGE_MATCH
 
 class CompatibilityMatcherTest : DescribeSpec({
 
@@ -55,16 +56,16 @@ class CompatibilityMatcherTest : DescribeSpec({
                 CompatibilityMatcher.match(m, f) shouldBe PERFECT
             }
 
-            it("남자가 4살 이상 연상이면 null 반환") {
+            it("남자가 4살 이상 연상이면 나이 조건 불충족으로 PERFECT_MATCH 불가, MBTI 우선으로 MBTI_MATCH 반환") {
                 val m = male("INFP", "강아지", 1997)
                 val f = female("ENFJ", "고양이", 2001)
-                CompatibilityMatcher.match(m, f) shouldBe null
+                CompatibilityMatcher.match(m, f) shouldBe MBTI
             }
 
-            it("남자가 연하이면 null 반환") {
+            it("남자가 연하이면 나이 조건 불충족으로 PERFECT_MATCH 불가, MBTI 우선으로 MBTI_MATCH 반환") {
                 val m = male("INFP", "강아지", 2003)
                 val f = female("ENFJ", "고양이", 2001)
-                CompatibilityMatcher.match(m, f) shouldBe null
+                CompatibilityMatcher.match(m, f) shouldBe MBTI
             }
 
             it("여자 기준으로 남자가 동갑~3살 연상 조건을 정확히 검증한다") {
@@ -110,10 +111,17 @@ class CompatibilityMatcherTest : DescribeSpec({
         }
 
         context("MBTI와 동물상 모두 안 맞으면") {
-            it("null 반환") {
-                // 여자: ENFP+여우, 남자: ENFJ+강아지 → 둘 다 미매칭
+            it("나이만 맞으면 AGE_MATCH 반환") {
+                // 여자: ENFP+여우, 남자: ENFJ+강아지 → MBTI/동물상 미매칭, 나이 1살 연상으로 매칭
                 val f = female("ENFP", "여우", 2001)
                 val m = male("ENFJ", "강아지", 2000)
+                CompatibilityMatcher.match(f, m) shouldBe AGE
+            }
+
+            it("나이도 안 맞으면 null 반환") {
+                // 여자: ENFP+여우, 남자: ENFJ+강아지 → 모두 미매칭, 남자 연하
+                val f = female("ENFP", "여우", 2001)
+                val m = male("ENFJ", "강아지", 2003)
                 CompatibilityMatcher.match(f, m) shouldBe null
             }
         }

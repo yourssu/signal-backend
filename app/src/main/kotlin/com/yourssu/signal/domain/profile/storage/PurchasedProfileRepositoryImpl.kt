@@ -81,6 +81,21 @@ class PurchasedProfileRepositoryImpl(
             )
         }
     }
+
+    override fun countByGender(gender: Gender): Int {
+        val profileIdsWithGender = jpaQueryFactory
+            .select(profileEntity.id)
+            .from(profileEntity)
+            .where(profileEntity.gender.eq(gender))
+            .fetch()
+            .toSet()
+
+        return jpaQueryFactory
+            .select(purchasedProfileEntity.count().castToNum(Int::class.java))
+            .from(purchasedProfileEntity)
+            .where(purchasedProfileEntity.profileId.`in`(profileIdsWithGender))
+            .fetchOne() ?: 0
+    }
 }
 
 interface PurchasedProfileJpaRepository : JpaRepository<PurchasedProfileEntity, Long> {

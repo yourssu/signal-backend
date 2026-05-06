@@ -11,6 +11,7 @@ import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
 import com.yourssu.signal.domain.profile.business.ProfileService
 import com.yourssu.signal.domain.profile.business.command.ProfileFoundCommand
+import com.yourssu.signal.domain.profile.business.dto.ConnectionsCountResponse
 import com.yourssu.signal.domain.profile.business.dto.MyProfileResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileContactResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
@@ -197,6 +198,16 @@ class ProfileController(
     @GetMapping("/ranking")
     fun getProfileRanking(@RequestParam uuid: String): ResponseEntity<Response<ProfileRankingResponse>> {
         val response = profileService.getProfileRanking(uuid)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "연결 횟수 조회",
+        description = "성별별로 구매된 프로필의 개수를 조회합니다. 남성, 여성, 전체 연결 횟수를 반환합니다."
+    )
+    @GetMapping("/connections")
+    fun getConnectionsCount(): ResponseEntity<Response<ConnectionsCountResponse>> {
+        val response = profileService.getConnectionsCount()
         return ResponseEntity.ok(Response(result = response))
     }
 }

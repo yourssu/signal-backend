@@ -985,5 +985,44 @@ class ProfileServiceTest : DescribeSpec({
                 }
             }
         }
+
+        describe("getConnectionsCount 메서드를 호출할 때") {
+
+            context("남성/여성 구매 기록이 있으면") {
+                it("성별별 카운트와 totalCount를 반환한다") {
+                    // given
+                    whenever(purchasedProfileReader.countByGender(Gender.MALE)).thenReturn(3)
+                    whenever(purchasedProfileReader.countByGender(Gender.FEMALE)).thenReturn(2)
+
+                    // when
+                    val result = profileService.getConnectionsCount()
+
+                    // then
+                    result.maleCount shouldBe 3
+                    result.femaleCount shouldBe 2
+                    result.totalCount shouldBe 5
+                    verify(purchasedProfileReader).countByGender(Gender.MALE)
+                    verify(purchasedProfileReader).countByGender(Gender.FEMALE)
+                }
+            }
+
+            context("구매 기록이 없으면") {
+                it("모든 카운트가 0을 반환한다") {
+                    // given
+                    whenever(purchasedProfileReader.countByGender(Gender.MALE)).thenReturn(0)
+                    whenever(purchasedProfileReader.countByGender(Gender.FEMALE)).thenReturn(0)
+
+                    // when
+                    val result = profileService.getConnectionsCount()
+
+                    // then
+                    result.maleCount shouldBe 0
+                    result.femaleCount shouldBe 0
+                    result.totalCount shouldBe 0
+                    verify(purchasedProfileReader).countByGender(Gender.MALE)
+                    verify(purchasedProfileReader).countByGender(Gender.FEMALE)
+                }
+            }
+        }
     }
 })

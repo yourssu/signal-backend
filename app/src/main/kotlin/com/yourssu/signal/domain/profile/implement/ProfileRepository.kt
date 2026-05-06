@@ -12,4 +12,5 @@ interface ProfileRepository {
     fun updateCacheIdsByGender(gender: Gender): List<Long>
     fun getById(id: Long): Profile
     fun findBy(profiles: List<Long>): List<Profile>
+    fun countByEgenTeto(egenTeto: EgenTeto): Int
 }

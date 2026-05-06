@@ -51,6 +51,10 @@ class ProfileReader(
         return profileRepository.findBy(profiles)
     }
 
+    fun countByEgenTeto(egenTeto: EgenTeto): Int {
+        return profileRepository.countByEgenTeto(egenTeto)
+    }
+
     fun getOrderedByIds(orderedIds: List<Long>): List<Profile> {
         if (orderedIds.isEmpty()) return emptyList()
         val profiles = profileRepository.findBy(orderedIds).associateBy { it.id!! }

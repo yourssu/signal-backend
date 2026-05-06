@@ -1,7 +1,6 @@
 import pytz
 from datetime import datetime
 from openai_client import openai_client
-from signal_server_client import server_client
 
 
 class SignalHandler:

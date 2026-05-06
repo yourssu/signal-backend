@@ -3,13 +3,14 @@ package com.yourssu.signal.domain.profile.implement
 object CompatibilityMatcher {
 
     fun match(myProfile: Profile, targetProfile: Profile): CompatibilityLabel? {
-        if (!isAgeCompatible(myProfile, targetProfile)) return null
+        val ageMatch = isAgeCompatible(myProfile, targetProfile)
         val mbtiMatch = MbtiCompatibilityTable.isCompatible(myProfile.mbti, targetProfile.mbti)
         val animalMatch = AnimalCompatibilityTable.isCompatible(myProfile, targetProfile)
         return when {
-            mbtiMatch && animalMatch -> CompatibilityLabel.PERFECT_MATCH
+            ageMatch && mbtiMatch && animalMatch -> CompatibilityLabel.PERFECT_MATCH
             mbtiMatch -> CompatibilityLabel.MBTI_MATCH
             animalMatch -> CompatibilityLabel.ANIMAL_MATCH
+            ageMatch -> CompatibilityLabel.AGE_MATCH
             else -> null
         }
     }

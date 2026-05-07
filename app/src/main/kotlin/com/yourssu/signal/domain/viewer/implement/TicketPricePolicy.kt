@@ -49,9 +49,7 @@ class TicketPricePolicy(
         return ticketPackages.findByPrice(price, isFirstPurchasedTicket(uuid))
     }
 
-    private fun isFirstPurchasedTicket(uuid: Uuid): Boolean {
-        return profileReader.existsByUuid(uuid) && !viewerReader.existsByUuid(uuid)
-    }
+    private fun isFirstPurchasedTicket(uuid: Uuid): Boolean = false
 
     fun getTicketPackages(): TicketPackages {
         return ticketPackages

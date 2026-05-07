@@ -139,7 +139,7 @@ class SignalHandler:
 
     *이용권 발급 방법 안내*
     *자동 발급*
-        - 🎁 계좌번호: KB국민은행 21830104402044
+        - 🎁 계좌번호: KB국민은행 93770201426024
         - 💌 받는 분 통장 표시: {str(verification).zfill(4)}
         {ticket_policy_message}
         {ticket_registered_message}
@@ -168,7 +168,7 @@ class SignalHandler:
 
     *이용권 발급 방법 안내*
     *자동 발급*
-        - 🎁 계좌번호: 카카오뱅크 79421782258
+        - 🎁 계좌번호: KB국민은행 93770201426024
         - 💌 받는 분 통장 표시: {str(verification).zfill(4)}
         {ticket_policy_message}
         {ticket_registered_message}

@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.profile.storage
 
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.common.storage.BaseEntity
+import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.Profile
@@ -55,7 +56,7 @@ class ProfileEntity(
                 uuid = profile.uuid.value,
                 department = profile.department,
                 birthYear = profile.birthYear,
-                animal = profile.animal,
+                animal = profile.animal.name,
                 contact = encryptedContact,
                 mbti = profile.mbti,
                 nickname = profile.nickname,
@@ -72,7 +73,7 @@ class ProfileEntity(
             uuid = Uuid(uuid),
             department = department,
             birthYear = birthYear,
-            animal = animal,
+            animal = Animal.of(animal),
             contact = contact,
             mbti = mbti,
             nickname = nickname,

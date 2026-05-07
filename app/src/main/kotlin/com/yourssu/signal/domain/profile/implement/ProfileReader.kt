@@ -47,8 +47,11 @@ class ProfileReader(
         return profileRepository.findIdsByGender(gender).size
     }
 
-    fun getByIds(profiles: List<Long>): List<Profile> {
-        return profileRepository.findBy(profiles)
+    fun getByIds(ids: List<Long>): List<Profile> {
+        val profiles = profileRepository.findBy(ids)
+        if (profiles.isEmpty()) return emptyList()
+        val introSentencesMap = introSentenceRepository.findAllByUuids(profiles.map { it.uuid })
+        return profiles.map { it.copy(introSentences = introSentencesMap[it.uuid] ?: emptyList()) }
     }
 
     fun countByEgenTeto(egenTeto: EgenTeto): Int {

@@ -129,7 +129,7 @@ class PurchasedProfileRepositoryImplIntegrationTest {
                 gender = gender,
                 department = "컴퓨터학부",
                 birthYear = 2000,
-                animal = "강아지",
+                animal = "DOG",
                 contact = contact,
                 mbti = "ENFP",
                 nickname = nickname,

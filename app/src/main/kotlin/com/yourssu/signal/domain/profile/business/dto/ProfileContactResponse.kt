@@ -22,7 +22,7 @@ class ProfileContactResponse(
                 gender = profile.gender.name,
                 department = profile.department,
                 birthYear = profile.birthYear,
-                animal = profile.animal,
+                animal = profile.animal.name,
                 contact = profile.contact,
                 mbti = profile.mbti,
                 nickname = profile.nickname,

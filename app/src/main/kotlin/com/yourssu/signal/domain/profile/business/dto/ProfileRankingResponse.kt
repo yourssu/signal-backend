@@ -26,7 +26,7 @@ data class ProfileRankingResponse(
                 gender = profile.gender.name,
                 department = profile.department,
                 birthYear = profile.birthYear,
-                animal = profile.animal,
+                animal = profile.animal.name,
                 mbti = profile.mbti,
                 nickname = profile.nickname,
                 introSentences = profile.introSentences,

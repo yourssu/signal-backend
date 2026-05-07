@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.profile.business.command
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.Profile
@@ -28,7 +29,7 @@ class ProfileCreatedCommand(
             gender = Gender.of(gender),
             department = department,
             birthYear = birthYear,
-            animal = animal,
+            animal = Animal.of(animal),
             contact = contact,
             mbti = mbti,
             nickname = nickname,

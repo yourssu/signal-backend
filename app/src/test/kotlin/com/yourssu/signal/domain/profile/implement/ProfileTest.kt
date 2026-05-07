@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.exception.BirthYearViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLengthViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
@@ -22,7 +23,7 @@ class ProfileTest : DescribeSpec({
             gender: Gender = Gender.MALE,
             department: String = "컴퓨터학부",
             birthYear: Int = 2000,
-            animal: String = "강아지",
+            animal: Animal = Animal.DOG,
             contact: String = "@test_contact",
             mbti: String = "ENFP",
             nickname: String = "테스트닉네임",
@@ -58,7 +59,7 @@ class ProfileTest : DescribeSpec({
                     profile.gender shouldBe Gender.MALE
                     profile.department shouldBe "컴퓨터학부"
                     profile.birthYear shouldBe 2000
-                    profile.animal shouldBe "강아지"
+                    profile.animal shouldBe Animal.DOG
                     profile.contact shouldBe "@test_contact"
                     profile.mbti shouldBe "ENFP"
                     profile.nickname shouldBe "테스트닉네임"

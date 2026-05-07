@@ -4,6 +4,7 @@ import com.yourssu.signal.domain.profile.implement.exception.BirthYearViolatedEx
 import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLengthViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
+import com.yourssu.signal.domain.profile.implement.exception.MbtiNotFoundException
 import com.yourssu.signal.domain.profile.implement.exception.NicknameLengthViolatedException
 import com.yourssu.signal.infrastructure.logging.Notification
 import java.time.LocalDate
@@ -36,6 +37,12 @@ object ProfileValidator {
     fun validateBirthYear(birthYear: Int) {
         if (birthYear < MINIMUM_BIRTH_YEAR || birthYear > LocalDate.now().year) {
             throw BirthYearViolatedException()
+        }
+    }
+
+    fun validateMbti(mbti: String) {
+        if (!MbtiCompatibilityTable.isValid(mbti)) {
+            throw MbtiNotFoundException()
         }
     }
 

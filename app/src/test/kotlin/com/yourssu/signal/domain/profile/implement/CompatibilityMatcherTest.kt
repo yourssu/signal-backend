@@ -11,7 +11,7 @@ private val AGE = CompatibilityLabel.AGE_MATCH
 
 class CompatibilityMatcherTest : DescribeSpec({
 
-    fun male(mbti: String, animal: String, birthYear: Int = 2000) = Profile(
+    fun male(mbti: String, animal: Animal, birthYear: Int = 2000) = Profile(
         id = 1L,
         uuid = Uuid.randomUUID(),
         gender = Gender.MALE,
@@ -25,7 +25,7 @@ class CompatibilityMatcherTest : DescribeSpec({
         school = "숭실대학교",
     )
 
-    fun female(mbti: String, animal: String, birthYear: Int = 2001) = Profile(
+    fun female(mbti: String, animal: Animal, birthYear: Int = 2001) = Profile(
         id = 2L,
         uuid = Uuid.randomUUID(),
         gender = Gender.FEMALE,
@@ -43,105 +43,99 @@ class CompatibilityMatcherTest : DescribeSpec({
 
         context("나이 조건 검사") {
             it("남자가 동갑이면 나이 조건을 만족한다") {
-                // male 2001, female 2001 → 동갑
-                val m = male("INFP", "강아지", 2001)
-                val f = female("ENFJ", "고양이", 2001)
+                val m = male("INFP", Animal.DOG, 2001)
+                val f = female("ENFJ", Animal.CAT, 2001)
                 CompatibilityMatcher.match(m, f) shouldBe PERFECT
             }
 
             it("남자가 3살 연상이면 나이 조건을 만족한다") {
-                // male 1998, female 2001 → 3살 연상
-                val m = male("INFP", "강아지", 1998)
-                val f = female("ENFJ", "고양이", 2001)
+                val m = male("INFP", Animal.DOG, 1998)
+                val f = female("ENFJ", Animal.CAT, 2001)
                 CompatibilityMatcher.match(m, f) shouldBe PERFECT
             }
 
             it("남자가 4살 이상 연상이면 나이 조건 불충족으로 PERFECT_MATCH 불가, MBTI 우선으로 MBTI_MATCH 반환") {
-                val m = male("INFP", "강아지", 1997)
-                val f = female("ENFJ", "고양이", 2001)
+                val m = male("INFP", Animal.DOG, 1997)
+                val f = female("ENFJ", Animal.CAT, 2001)
                 CompatibilityMatcher.match(m, f) shouldBe MBTI
             }
 
             it("남자가 연하이면 나이 조건 불충족으로 PERFECT_MATCH 불가, MBTI 우선으로 MBTI_MATCH 반환") {
-                val m = male("INFP", "강아지", 2003)
-                val f = female("ENFJ", "고양이", 2001)
+                val m = male("INFP", Animal.DOG, 2003)
+                val f = female("ENFJ", Animal.CAT, 2001)
                 CompatibilityMatcher.match(m, f) shouldBe MBTI
             }
 
             it("여자 기준으로 남자가 동갑~3살 연상 조건을 정확히 검증한다") {
-                // female 기준으로 myProfile=female인 경우도 동일하게 동작해야 함
-                val f = female("INFP", "고양이", 2001)
-                val m = male("ENFJ", "강아지", 1998) // 3살 연상
+                val f = female("INFP", Animal.CAT, 2001)
+                val m = male("ENFJ", Animal.DOG, 1998)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
             }
         }
 
         context("MBTI와 동물상이 모두 맞으면") {
             it("PERFECT_MATCH 반환 (여자 기준)") {
-                // 여자: INFP+고양이, 남자: ENFJ+강아지
-                val f = female("INFP", "고양이", 2001)
-                val m = male("ENFJ", "강아지", 2000)
+                val f = female("INFP", Animal.CAT, 2001)
+                val m = male("ENFJ", Animal.DOG, 2000)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
             }
 
             it("PERFECT_MATCH 반환 (남자 기준)") {
-                // 남자: INFP+강아지, 여자: ENFJ+고양이
-                val m = male("INFP", "강아지", 2000)
-                val f = female("ENFJ", "고양이", 2001)
+                val m = male("INFP", Animal.DOG, 2000)
+                val f = female("ENFJ", Animal.CAT, 2001)
                 CompatibilityMatcher.match(m, f) shouldBe PERFECT
             }
         }
 
         context("MBTI만 맞고 동물상은 안 맞으면") {
             it("MBTI_MATCH 반환") {
-                // 여자: INFP+여우, 남자: ENFJ+강아지 → MBTI 맞음, 동물상 여우→[공룡,사슴] 미매칭
-                val f = female("INFP", "여우", 2001)
-                val m = male("ENFJ", "강아지", 2000)
+                // FOX(여) → 매칭 상대: DINOSAUR, DEER / DOG은 해당 없음
+                val f = female("INFP", Animal.FOX, 2001)
+                val m = male("ENFJ", Animal.DOG, 2000)
                 CompatibilityMatcher.match(f, m) shouldBe MBTI
             }
         }
 
         context("동물상만 맞고 MBTI는 안 맞으면") {
             it("ANIMAL_MATCH 반환") {
-                // 여자: ENFP+고양이, 남자: ENFJ+강아지 → 동물상 고양이→[강아지,곰] 맞음, MBTI ENFP→[INFJ,INTJ] 미매칭
-                val f = female("ENFP", "고양이", 2001)
-                val m = male("ENFJ", "강아지", 2000)
+                // CAT(여) → 매칭 상대: DOG, BEAR / ENFP → 매칭 상대: INFJ, INTJ (ENFJ 해당 없음)
+                val f = female("ENFP", Animal.CAT, 2001)
+                val m = male("ENFJ", Animal.DOG, 2000)
                 CompatibilityMatcher.match(f, m) shouldBe ANIMAL
             }
         }
 
         context("MBTI와 동물상 모두 안 맞으면") {
             it("나이만 맞으면 AGE_MATCH 반환") {
-                // 여자: ENFP+여우, 남자: ENFJ+강아지 → MBTI/동물상 미매칭, 나이 1살 연상으로 매칭
-                val f = female("ENFP", "여우", 2001)
-                val m = male("ENFJ", "강아지", 2000)
+                // FOX(여) → DINOSAUR, DEER / DOG 해당 없음. ENFP → INFJ, INTJ / ENFJ 해당 없음
+                val f = female("ENFP", Animal.FOX, 2001)
+                val m = male("ENFJ", Animal.DOG, 2000)
                 CompatibilityMatcher.match(f, m) shouldBe AGE
             }
 
             it("나이도 안 맞으면 null 반환") {
-                // 여자: ENFP+여우, 남자: ENFJ+강아지 → 모두 미매칭, 남자 연하
-                val f = female("ENFP", "여우", 2001)
-                val m = male("ENFJ", "강아지", 2003)
+                val f = female("ENFP", Animal.FOX, 2001)
+                val m = male("ENFJ", Animal.DOG, 2003)
                 CompatibilityMatcher.match(f, m) shouldBe null
             }
         }
 
         context("동물상 궁합 검증") {
-            it("햄스터(여)+햄스터(남)은 매칭된다") {
-                val f = female("ENFP", "햄스터", 2001)
-                val m = male("INFJ", "햄스터", 2001)
+            it("HAMSTER(여)+HAMSTER(남)은 매칭된다") {
+                val f = female("ENFP", Animal.HAMSTER, 2001)
+                val m = male("INFJ", Animal.HAMSTER, 2001)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
             }
 
-            it("꼬부기(여)+햄스터(남)은 매칭된다") {
-                val f = female("ENFP", "꼬부기", 2001)
-                val m = male("INFJ", "햄스터", 2001)
+            it("TURTLE(여)+HAMSTER(남)은 매칭된다") {
+                val f = female("ENFP", Animal.TURTLE, 2001)
+                val m = male("INFJ", Animal.HAMSTER, 2001)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
             }
 
-            it("토끼(여)+사슴(남)은 매칭된다") {
-                val f = female("ENFP", "토끼", 2001)
-                val m = male("INFJ", "사슴", 2001)
+            it("RABBIT(여)+DEER(남)은 매칭된다") {
+                val f = female("ENFP", Animal.RABBIT, 2001)
+                val m = male("INFJ", Animal.DEER, 2001)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
             }
         }

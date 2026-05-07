@@ -23,4 +23,6 @@ object MbtiCompatibilityTable {
 
     fun isCompatible(my: String, target: String): Boolean =
         table[my]?.contains(target) == true
+
+    fun isValid(mbti: String): Boolean = table.containsKey(mbti)
 }

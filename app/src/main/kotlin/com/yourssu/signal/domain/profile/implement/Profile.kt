@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.profile.implement
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateBirthYear
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateIntroSentences
+import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateMbti
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateNickname
 
 class Profile(
@@ -11,7 +12,7 @@ class Profile(
     val gender: Gender,
     val department: String,
     val birthYear: Int,
-    val animal: String,
+    val animal: Animal,
     val contact: String,
     val mbti: String,
     val nickname: String,
@@ -23,6 +24,7 @@ class Profile(
         validateNickname(nickname)
         validateIntroSentences(introSentences)
         validateBirthYear(birthYear)
+        validateMbti(mbti)
     }
 
     fun copy(introSentences: List<String> = this.introSentences, contact: String = this.contact, nickname: String = this.nickname, egenTeto: EgenTeto? = this.egenTeto): Profile {

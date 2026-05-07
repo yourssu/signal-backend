@@ -13,6 +13,8 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.user.implement.UserWriter
+import com.yourssu.signal.domain.viewer.implement.Viewer
+import com.yourssu.signal.domain.viewer.implement.ViewerWriter
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -28,6 +30,7 @@ class AuthServiceTest : DescribeSpec({
     val googleUserReader = mock<GoogleUserReader>()
     val googleUserWriter = mock<GoogleUserWriter>()
     val oAuthOutputPort = mock<OAuthOutputPort>()
+    val viewerWriter = mock<ViewerWriter>()
 
     val authService = AuthService(
         jwtUtils = jwtUtils,
@@ -38,6 +41,7 @@ class AuthServiceTest : DescribeSpec({
         googleUserReader = googleUserReader,
         googleUserWriter = googleUserWriter,
         oAuthOutputPort = oAuthOutputPort,
+        viewerWriter = viewerWriter,
     )
 
     fun stubTokenGeneration(uuid: String) {
@@ -49,7 +53,26 @@ class AuthServiceTest : DescribeSpec({
 
     beforeEach {
         reset(jwtUtils, jwtProperties, userWriter, userReader, adminProperties,
-            googleUserReader, googleUserWriter, oAuthOutputPort)
+            googleUserReader, googleUserWriter, oAuthOutputPort, viewerWriter)
+    }
+
+    describe("register") {
+        context("신규 유저 등록 시") {
+            it("User를 생성하고 ticket=0인 Viewer를 초기화한다") {
+                val newUuid = Uuid("new-uuid")
+                val newUser = User(id = 1L, uuid = newUuid)
+                val newViewer = Viewer(uuid = newUuid, ticket = 0, updatedTime = null)
+                whenever(userWriter.generateUser()).thenReturn(newUser)
+                whenever(viewerWriter.create(newUuid)).thenReturn(newViewer)
+                stubTokenGeneration(newUuid.value)
+
+                val result = authService.register()
+
+                verify(userWriter).generateUser()
+                verify(viewerWriter).create(newUuid)
+                result.accessToken shouldBe "access-token"
+            }
+        }
     }
 
     describe("loginWithGoogle") {

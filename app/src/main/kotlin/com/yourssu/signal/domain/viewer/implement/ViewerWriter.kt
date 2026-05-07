@@ -9,6 +9,11 @@ class ViewerWriter(
     private val viewerRepository: ViewerRepository,
 ) {
     @Transactional
+    fun create(uuid: Uuid): Viewer {
+        return createViewer(uuid, 0)
+    }
+
+    @Transactional
     fun issueTicket(uuid: Uuid, ticket: Int): Viewer {
         if (viewerRepository.existsByUuid(uuid)) {
             val viewer = viewerRepository.getByUuid(uuid)

@@ -16,6 +16,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.user.implement.User
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.user.implement.UserWriter
+import com.yourssu.signal.domain.viewer.implement.ViewerWriter
 import com.yourssu.signal.domain.viewer.implement.exception.AdminPermissionDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,10 +31,12 @@ class AuthService(
     private val googleUserReader: GoogleUserReader,
     private val googleUserWriter: GoogleUserWriter,
     private val oAuthOutputPort: OAuthOutputPort,
+    private val viewerWriter: ViewerWriter,
 ) {
     @Transactional
     fun register(): TokenResponse {
         val user = userWriter.generateUser()
+        viewerWriter.create(user.uuid)
         return generateTokenResponse(user)
     }
 

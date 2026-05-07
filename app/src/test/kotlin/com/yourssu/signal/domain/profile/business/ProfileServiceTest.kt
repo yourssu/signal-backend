@@ -1024,5 +1024,45 @@ class ProfileServiceTest : DescribeSpec({
                 }
             }
         }
+
+        context("getPurchasedProfiles 메서드를 호출할 때") {
+
+            context("구매한 프로필이 있으면") {
+                it("introSentences를 포함한 프로필 목록을 반환한다") {
+                    val viewer = createTestViewer("viewer-uuid")
+                    val purchased = PurchasedProfile(profileId = 10L, viewerId = 1L)
+                    val profile = createTestProfile(
+                        id = 10L,
+                        uuid = "profile-uuid",
+                        introSentences = listOf("소개문장1", "소개문장2")
+                    )
+
+                    whenever(viewerReader.get(Uuid("viewer-uuid"))).thenReturn(viewer)
+                    whenever(purchasedProfileReader.findByViewerId(1L)).thenReturn(listOf(purchased))
+                    whenever(profileReader.getByIds(listOf(10L))).thenReturn(listOf(profile))
+
+                    val result = profileService.getPurchasedProfiles("viewer-uuid")
+
+                    result.size shouldBe 1
+                    result[0].profileId shouldBe 10L
+                    result[0].introSentences shouldBe listOf("소개문장1", "소개문장2")
+                    verify(profileReader).getByIds(listOf(10L))
+                }
+            }
+
+            context("구매한 프로필이 없으면") {
+                it("빈 목록을 반환한다") {
+                    val viewer = createTestViewer("viewer-uuid")
+
+                    whenever(viewerReader.get(Uuid("viewer-uuid"))).thenReturn(viewer)
+                    whenever(purchasedProfileReader.findByViewerId(1L)).thenReturn(emptyList())
+                    whenever(profileReader.getByIds(emptyList())).thenReturn(emptyList())
+
+                    val result = profileService.getPurchasedProfiles("viewer-uuid")
+
+                    result shouldBe emptyList()
+                }
+            }
+        }
     }
 })

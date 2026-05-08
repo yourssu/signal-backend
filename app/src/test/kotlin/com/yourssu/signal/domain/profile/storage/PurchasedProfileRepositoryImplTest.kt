@@ -117,6 +117,45 @@ class PurchasedProfileRepositoryImplIntegrationTest {
         assertEquals(0, femaleCount)
     }
 
+    @Test
+    fun `한 번이라도 구매된 고유 프로필 수를 반환한다`() {
+        // given - 2개 프로필 각 1번씩 구매
+        val profile1 = createAndSaveProfile(gender = Gender.MALE, uuid = "uuid-1")
+        val profile2 = createAndSaveProfile(gender = Gender.FEMALE, uuid = "uuid-2")
+        purchasedProfileJpaRepository.save(PurchasedProfileEntity(profileId = profile1.id!!, viewerId = 1L))
+        purchasedProfileJpaRepository.save(PurchasedProfileEntity(profileId = profile2.id!!, viewerId = 2L))
+
+        // when
+        val result = purchasedProfileRepository.countDistinctPurchasedProfiles()
+
+        // then
+        assertEquals(2, result)
+    }
+
+    @Test
+    fun `같은 프로필을 여러 명이 구매해도 고유 프로필 수는 1이다`() {
+        // given - 1개 프로필을 3명이 구매
+        val profile = createAndSaveProfile(gender = Gender.MALE, uuid = "uuid-1")
+        purchasedProfileJpaRepository.save(PurchasedProfileEntity(profileId = profile.id!!, viewerId = 1L))
+        purchasedProfileJpaRepository.save(PurchasedProfileEntity(profileId = profile.id!!, viewerId = 2L))
+        purchasedProfileJpaRepository.save(PurchasedProfileEntity(profileId = profile.id!!, viewerId = 3L))
+
+        // when
+        val result = purchasedProfileRepository.countDistinctPurchasedProfiles()
+
+        // then
+        assertEquals(1, result)
+    }
+
+    @Test
+    fun `구매 기록이 없으면 countDistinctPurchasedProfiles는 0을 반환한다`() {
+        // when
+        val result = purchasedProfileRepository.countDistinctPurchasedProfiles()
+
+        // then
+        assertEquals(0, result)
+    }
+
     private fun createAndSaveProfile(
         gender: Gender,
         uuid: String,

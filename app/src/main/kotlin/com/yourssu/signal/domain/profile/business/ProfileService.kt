@@ -156,6 +156,10 @@ class ProfileService(
         return ConnectionsCountResponse.of(maleCount, femaleCount)
     }
 
+    fun countDistinctPurchasedProfiles(): ProfilesCountResponse {
+        return ProfilesCountResponse.of(purchasedProfileReader.countDistinctPurchasedProfiles())
+    }
+
     private fun validateBannedWords(nickname: String, introSentences: List<String>) {
         val bannedWords = policy.bannedWords.toSet()
         ProfileValidator.validateNicknameBannedWord(nickname, bannedWords)

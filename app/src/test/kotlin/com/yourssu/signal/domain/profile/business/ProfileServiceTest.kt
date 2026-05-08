@@ -569,6 +569,32 @@ class ProfileServiceTest : DescribeSpec({
                     result.profiles shouldBe emptyList()
                 }
             }
+
+            context("이미 구매한 프로필이 있는 유저가 덱을 요청하면") {
+                it("구매한 프로필을 제외하고 buildDeck을 호출한다") {
+                    val command = DeckCommand(uuid = "buyer-uuid", gender = "FEMALE")
+                    val myProfile = createTestProfile(id = 1L, uuid = "buyer-uuid")
+                    val viewer = createTestViewer("buyer-uuid")
+                    val deckProfiles = listOf(
+                        createTestProfile(id = 3L, uuid = "uuid-3", nickname = "프로필3"),
+                    )
+
+                    whenever(profileReader.existsByUuid(Uuid("buyer-uuid"))).thenReturn(true)
+                    whenever(profileReader.getByUuid(Uuid("buyer-uuid"))).thenReturn(myProfile)
+                    whenever(viewerReader.existsByUuid(Uuid("buyer-uuid"))).thenReturn(true)
+                    whenever(viewerReader.get(Uuid("buyer-uuid"))).thenReturn(viewer)
+                    whenever(purchasedProfileReader.findProfileIdsByViewerId(1L)).thenReturn(setOf(2L))
+                    whenever(profilePriorityManager.buildDeck(eq(1L), eq(Gender.FEMALE), eq(setOf(2L)))).thenReturn(listOf(3L))
+                    whenever(profileReader.getOrderedByIds(listOf(3L))).thenReturn(deckProfiles)
+
+                    val result = profileService.getDeck(command)
+
+                    result.profiles.size shouldBe 1
+                    result.profiles[0].nickname shouldBe "프로필3"
+                    verify(purchasedProfileReader).findProfileIdsByViewerId(1L)
+                    verify(profilePriorityManager).buildDeck(eq(1L), eq(Gender.FEMALE), eq(setOf(2L)))
+                }
+            }
         }
 
         context("금지어 검사") {

@@ -11,6 +11,10 @@ class PurchasedProfileReader(
         return purchasedProfileRepository.findByViewerId(viewerId)
     }
 
+    fun findProfileIdsByViewerId(viewerId: Long): Set<Long> {
+        return purchasedProfileRepository.findByViewerId(viewerId).map { it.profileId }.toSet()
+    }
+
     fun findProfileIdsOrderByPurchasedAsc(): List<Long> {
         return purchasedProfileRepository.findProfileIdsOrderByPurchasedAsc()
     }

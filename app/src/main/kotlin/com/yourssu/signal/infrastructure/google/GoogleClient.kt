@@ -3,6 +3,7 @@ package com.yourssu.signal.infrastructure.google
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yourssu.signal.config.properties.GoogleOAuthConfigurationProperties
 import com.yourssu.signal.domain.auth.implement.OAuthOutputPort
+import io.github.oshai.kotlinlogging.KotlinLogging
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Component
 import java.io.IOException
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+
+private val logger = KotlinLogging.logger {}
 
 @Component
 class GoogleClient(
@@ -40,10 +43,16 @@ class GoogleClient(
                     val tokenResponse = objectMapper.readTree(responseBody)
                     tokenResponse.get("id_token")?.asText()
                 } else {
+                    val errorBody = response.body.string()
+                    val errorJson = runCatching { objectMapper.readTree(errorBody) }.getOrNull()
+                    val error = errorJson?.get("error")?.asText() ?: "unknown"
+                    val description = errorJson?.get("error_description")?.asText() ?: errorBody
+                    logger.error { "Google OAuth token exchange failed: status=${response.code} error=$error description=$description" }
                     null
                 }
             }
-        } catch (_: IOException) {
+        } catch (e: IOException) {
+            logger.error { "Google OAuth token exchange IOException: ${e.message}" }
             null
         }
     }

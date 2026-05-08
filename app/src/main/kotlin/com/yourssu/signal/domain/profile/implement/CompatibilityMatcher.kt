@@ -8,6 +8,8 @@ object CompatibilityMatcher {
         val animalMatch = AnimalCompatibilityTable.isCompatible(myProfile, targetProfile)
         return when {
             ageMatch && mbtiMatch && animalMatch -> CompatibilityLabel.PERFECT_MATCH
+            ageMatch && mbtiMatch -> CompatibilityLabel.MBTI_AGE_MATCH
+            ageMatch && animalMatch -> CompatibilityLabel.ANIMAL_AGE_MATCH
             mbtiMatch -> CompatibilityLabel.MBTI_MATCH
             animalMatch -> CompatibilityLabel.ANIMAL_MATCH
             ageMatch -> CompatibilityLabel.AGE_MATCH

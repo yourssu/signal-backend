@@ -74,7 +74,11 @@ class ProfileService(
         val myProfile = if (profileReader.existsByUuid(Uuid(command.uuid)))
             profileReader.getByUuid(Uuid(command.uuid))
         else null
-        val orderedIds = profilePriorityManager.buildDeck(myProfile?.id, Gender.of(command.gender))
+        val myPurchasedProfileIds = if (viewerReader.existsByUuid(Uuid(command.uuid))) {
+            val viewer = viewerReader.get(Uuid(command.uuid))
+            purchasedProfileReader.findProfileIdsByViewerId(viewer.id!!)
+        } else emptySet()
+        val orderedIds = profilePriorityManager.buildDeck(myProfile?.id, Gender.of(command.gender), myPurchasedProfileIds)
         return DeckResponse.from(profileReader.getOrderedByIds(orderedIds), myProfile)
     }
 

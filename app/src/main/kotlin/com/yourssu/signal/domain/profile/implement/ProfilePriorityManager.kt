@@ -29,11 +29,11 @@ class ProfilePriorityManager(
         return profileReader.getById(candidateProfileId[profileIndex])
     }
 
-    fun buildDeck(myProfileId: Long?, gender: Gender): List<Long> {
+    fun buildDeck(myProfileId: Long?, gender: Gender, myPurchasedProfileIds: Set<Long> = emptySet()): List<Long> {
         val profileIdsByGender = profileReader.findIdsByGender(gender).toSet()
         val purchasedProfileIds = purchasedProfileReader.findProfileIdsOrderByPurchasedAsc().toSet()
         val blacklistProfileIds = blacklistReader.getAllBlacklistIds()
-        val excludeIds = blacklistProfileIds + setOfNotNull(myProfileId)
+        val excludeIds = blacklistProfileIds + setOfNotNull(myProfileId) + myPurchasedProfileIds
         val unpurchasedIds = profileIdsByGender
             .filter { it !in purchasedProfileIds && it !in excludeIds }
             .shuffled()

@@ -986,6 +986,37 @@ class ProfileServiceTest : DescribeSpec({
             }
         }
 
+        describe("countDistinctPurchasedProfiles 메서드를 호출할 때") {
+
+            context("구매된 고유 프로필이 있으면") {
+                it("고유 프로필 수를 반환한다") {
+                    // given
+                    whenever(purchasedProfileReader.countDistinctPurchasedProfiles()).thenReturn(4)
+
+                    // when
+                    val result = profileService.countDistinctPurchasedProfiles()
+
+                    // then
+                    result.count shouldBe 4
+                    verify(purchasedProfileReader).countDistinctPurchasedProfiles()
+                }
+            }
+
+            context("구매된 프로필이 없으면") {
+                it("0을 반환한다") {
+                    // given
+                    whenever(purchasedProfileReader.countDistinctPurchasedProfiles()).thenReturn(0)
+
+                    // when
+                    val result = profileService.countDistinctPurchasedProfiles()
+
+                    // then
+                    result.count shouldBe 0
+                    verify(purchasedProfileReader).countDistinctPurchasedProfiles()
+                }
+            }
+        }
+
         describe("getConnectionsCount 메서드를 호출할 때") {
 
             context("남성/여성 구매 기록이 있으면") {

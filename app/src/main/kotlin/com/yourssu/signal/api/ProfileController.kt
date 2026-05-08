@@ -210,4 +210,14 @@ class ProfileController(
         val response = profileService.getConnectionsCount()
         return ResponseEntity.ok(Response(result = response))
     }
+
+    @Operation(
+        summary = "구매된 고유 프로필 수 조회",
+        description = "한 번이라도 구매된 고유 프로필의 수를 조회합니다. 벌써 00명이 시그널로 연결됐어요 기능에 사용"
+    )
+    @GetMapping("/purchased/count")
+    fun countDistinctPurchasedProfiles(): ResponseEntity<Response<ProfilesCountResponse>> {
+        val response = profileService.countDistinctPurchasedProfiles()
+        return ResponseEntity.ok(Response(result = response))
+    }
 }

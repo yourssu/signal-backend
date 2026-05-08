@@ -96,6 +96,13 @@ class PurchasedProfileRepositoryImpl(
             .where(purchasedProfileEntity.profileId.`in`(profileIdsWithGender))
             .fetchOne() ?: 0
     }
+
+    override fun countDistinctPurchasedProfiles(): Int {
+        return jpaQueryFactory
+            .select(purchasedProfileEntity.profileId.countDistinct().castToNum(Int::class.java))
+            .from(purchasedProfileEntity)
+            .fetchOne() ?: 0
+    }
 }
 
 interface PurchasedProfileJpaRepository : JpaRepository<PurchasedProfileEntity, Long> {

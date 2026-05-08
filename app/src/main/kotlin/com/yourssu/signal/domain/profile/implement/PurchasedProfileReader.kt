@@ -23,4 +23,8 @@ class PurchasedProfileReader(
     fun countByGender(gender: Gender): Int {
         return purchasedProfileRepository.countByGender(gender)
     }
+
+    fun countDistinctPurchasedProfiles(): Int {
+        return purchasedProfileRepository.countDistinctPurchasedProfiles()
+    }
 }

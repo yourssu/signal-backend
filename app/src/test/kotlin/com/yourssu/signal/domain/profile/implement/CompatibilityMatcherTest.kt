@@ -5,6 +5,8 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 
 private val PERFECT = CompatibilityLabel.PERFECT_MATCH
+private val MBTI_AGE = CompatibilityLabel.MBTI_AGE_MATCH
+private val ANIMAL_AGE = CompatibilityLabel.ANIMAL_AGE_MATCH
 private val MBTI = CompatibilityLabel.MBTI_MATCH
 private val ANIMAL = CompatibilityLabel.ANIMAL_MATCH
 private val AGE = CompatibilityLabel.AGE_MATCH
@@ -87,20 +89,38 @@ class CompatibilityMatcherTest : DescribeSpec({
             }
         }
 
-        context("MBTI만 맞고 동물상은 안 맞으면") {
-            it("MBTI_MATCH 반환") {
+        context("MBTI와 나이가 맞고 동물상이 안 맞으면") {
+            it("MBTI_AGE_MATCH 반환") {
                 // FOX(여) → 매칭 상대: DINOSAUR, DEER / DOG은 해당 없음
                 val f = female("INFP", Animal.FOX, 2001)
                 val m = male("ENFJ", Animal.DOG, 2000)
+                CompatibilityMatcher.match(f, m) shouldBe MBTI_AGE
+            }
+        }
+
+        context("동물상과 나이가 맞고 MBTI가 안 맞으면") {
+            it("ANIMAL_AGE_MATCH 반환") {
+                // CAT(여) → 매칭 상대: DOG, BEAR / ENFP → 매칭 상대: INFJ, INTJ (ENFJ 해당 없음)
+                val f = female("ENFP", Animal.CAT, 2001)
+                val m = male("ENFJ", Animal.DOG, 2000)
+                CompatibilityMatcher.match(f, m) shouldBe ANIMAL_AGE
+            }
+        }
+
+        context("MBTI만 맞고 동물상·나이 모두 안 맞으면") {
+            it("MBTI_MATCH 반환") {
+                // FOX(여) → 매칭 상대: DINOSAUR, DEER / DOG은 해당 없음. 남자 연하 → 나이 불충족
+                val f = female("INFP", Animal.FOX, 2001)
+                val m = male("ENFJ", Animal.DOG, 2003)
                 CompatibilityMatcher.match(f, m) shouldBe MBTI
             }
         }
 
-        context("동물상만 맞고 MBTI는 안 맞으면") {
+        context("동물상만 맞고 MBTI·나이 모두 안 맞으면") {
             it("ANIMAL_MATCH 반환") {
-                // CAT(여) → 매칭 상대: DOG, BEAR / ENFP → 매칭 상대: INFJ, INTJ (ENFJ 해당 없음)
+                // CAT(여) → 매칭 상대: DOG, BEAR / ENFP → INFJ, INTJ (ENFJ 해당 없음). 남자 연하 → 나이 불충족
                 val f = female("ENFP", Animal.CAT, 2001)
-                val m = male("ENFJ", Animal.DOG, 2000)
+                val m = male("ENFJ", Animal.DOG, 2003)
                 CompatibilityMatcher.match(f, m) shouldBe ANIMAL
             }
         }

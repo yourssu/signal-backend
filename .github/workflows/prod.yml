@@ -80,9 +80,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('observer/script/requirements.txt', 'app/Dockerfile') }}-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('observer/script/**', 'app/Dockerfile') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-${{ hashFiles('observer/script/requirements.txt', 'app/Dockerfile') }}-
+            ${{ runner.os }}-buildx-${{ hashFiles('observer/script/**', 'app/Dockerfile') }}-
             ${{ runner.os }}-buildx-
 
       - name: Build, tag, and push image to Amazon ECR

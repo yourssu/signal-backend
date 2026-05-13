@@ -37,8 +37,11 @@ class SlackNotifier:
             'Authorization': f'Bearer {self.config.slack_token}',
             'Content-Type': 'application/json'
         }
-        response = requests.post(self.config.slack_webhook_url, json=payload, headers=headers)
-        print(response.text)
+        try:
+            response = requests.post(self.config.slack_webhook_url, json=payload, headers=headers, timeout=10)
+            print(response.text)
+        except Exception as e:
+            print(f"Slack 알림 전송 실패: {e}")
         
     def send_notification(self, message: str):
         self._send_notification(self.config.slack_channel, message)

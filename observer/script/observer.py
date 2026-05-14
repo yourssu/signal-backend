@@ -137,9 +137,18 @@ if __name__ == "__main__":
     start_message = f"Observer started: {TimeUtils.get_kst_now()}"
     print(start_message)
     notifier.send_log_notification(start_message)
+    HEALTH_CHECK_INTERVAL = 30
+    tick = 0
     try:
         while True:
             time.sleep(1)
+            tick += 1
+            if tick >= HEALTH_CHECK_INTERVAL:
+                tick = 0
+                if not observer.is_alive():
+                    msg = f"🚨 Observer watchdog thread died: {TimeUtils.get_kst_now()}\n재시작 필요: docker restart signal-backend-container"
+                    print(msg)
+                    notifier.send_log_notification(msg)
     except KeyboardInterrupt:
         observer.stop()
     observer.join()

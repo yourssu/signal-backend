@@ -88,7 +88,7 @@ def process_line_with_handlers(line, handlers):
 def check(file_path):
     global last_checked_line
 
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
         lines = file.readlines()
         if file_path not in last_checked_line:
             last_checked_line[file_path] = len(lines)

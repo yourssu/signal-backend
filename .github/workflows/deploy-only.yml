@@ -42,6 +42,7 @@ jobs:
           WHITELIST: ${{ vars.WHITELIST }}
           CONTACT_LIMIT: ${{ vars.CONTACT_LIMIT }}
           CONTACT_LIMIT_WARNING: ${{ vars.CONTACT_LIMIT_WARNING }}
+          BANNED_WORDS: ${{ vars.BANNED_WORDS }}
           CONTACT_PRICE: ${{ vars.CONTACT_PRICE }}
           TICKET_COST: ${{ vars.TICKET_COST }}
           TICKET_PRICE_POLICY: ${{ vars.TICKET_PRICE_POLICY }}
@@ -96,6 +97,7 @@ jobs:
           echo "WHITELIST=$WHITELIST" >> .env
           echo "CONTACT_LIMIT=$CONTACT_LIMIT" >> .env
           echo "CONTACT_LIMIT_WARNING=$CONTACT_LIMIT_WARNING" >> .env
+          echo "BANNED_WORDS=$BANNED_WORDS" >> .env
           echo "CONTACT_PRICE=$CONTACT_PRICE" >> .env
           echo "TICKET_COST=$TICKET_COST" >> .env
           echo "TICKET_PRICE_POLICY=$TICKET_PRICE_POLICY" >> .env

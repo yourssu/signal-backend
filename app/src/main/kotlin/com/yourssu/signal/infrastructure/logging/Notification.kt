@@ -14,7 +14,8 @@ object Notification {
                     "&${profile.department}" +
                     "&${profile.contact}" +
                     "&${profile.nickname}" +
-                    "&${profile.introSentences.joinToString(",")}"
+                    "&${profile.introSentences.joinToString(",")}" +
+                    "&${profile.gender}"
         }
     }
 

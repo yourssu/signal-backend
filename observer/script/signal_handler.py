@@ -51,10 +51,12 @@ class SignalHandler:
 
     def create_profile_message(self, line):
         """프로필 등록 완료 메시지 및 정책 위반 검사"""
-        id, department, contact, nickname, introSentences = line[line.find('&') + 1:].split('&')
+        id, department, contact, nickname, introSentences, gender = line[line.find('&') + 1:].split('&')
+        gender_display = '여성' if gender.strip() == 'FEMALE' else '남성'
         message = f"""🩷 *프로필 등록 완료* 🩷
     -  💖 *식별 번호*: {id}
     -  🏢 *학과*: {department}
+    -  🚻 *성별*: {gender_display}
     -  📞 *연락처*: https://www.instagram.com/{contact.replace('@', '')}
     -  👤 *닉네임*: {nickname}
     -  📝 *자기소개*: {introSentences}

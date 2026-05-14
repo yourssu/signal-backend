@@ -75,6 +75,16 @@ jobs:
         run: |
           ./gradlew clean build --build-cache --parallel --daemon
 
+      # Docker 베이스 이미지 캐시
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('observer/script/**', 'app/Dockerfile') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ hashFiles('observer/script/**', 'app/Dockerfile') }}-
+            ${{ runner.os }}-buildx-
+
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
@@ -83,21 +93,27 @@ jobs:
           echo "ECR_REGISTRY: $ECR_REGISTRY"
           echo "ECR_REPOSITORY: yourssu/${{ vars.PROJECT_NAME }}"
           echo "Full image path: $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:latest"
-
+          
           # Create and use a new builder instance
           docker buildx create --use --name arm-builder
-
-          # Build multi-platform image (ARM64 + AMD64) and push
+          
+          # Build multi-platform image (ARM64 + AMD64) and push with enhanced cache
           docker buildx build \
             -f app/Dockerfile \
             --platform linux/arm64,linux/amd64 \
             --push \
             --provenance=false \
             --cache-from type=gha \
+            --cache-from type=local,src=/tmp/.buildx-cache \
             --cache-to type=gha,mode=max \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             -t $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:$IMAGE_TAG \
             -t $ECR_REGISTRY/yourssu/${{ vars.PROJECT_NAME }}:latest \
             .
+          
+          # 캐시 교체
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Deploy to EC2
         env:

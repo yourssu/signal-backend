@@ -40,7 +40,7 @@ object Notification {
     }
 
     fun notifyIssueTicketByBankDepositSms(message: SMSMessage) {
-        logger.info { "IssueTicketByBankDepositSms&${message.name} ${message.depositAmount}" }
+        logger.info { "IssueTicketByBankDepositSms&${message.name} ${message.depositAmount} ${message.remainingAmount ?: 0}" }
     }
 
     fun notifyIssueFailedTicketByDepositAmount(message: SMSMessage) {

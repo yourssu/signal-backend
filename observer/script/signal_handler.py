@@ -195,11 +195,13 @@ class SignalHandler:
 
     def create_issue_ticket_message(self, line):
         """입금 확인 완료 메시지"""
-        name, deposit_amount = line[line.find('&') + 1:].split(' ')
+        parts = line[line.find('&') + 1:].strip().rsplit(' ', 2)
+        name, deposit_amount, remaining_amount = parts[0], parts[1], parts[2]
         now_kst = self._get_kst_now()
         message = f"""💰 *입금 확인 완료* 💰
         -  💌 *받는 분 통장 표시*: {name}
         -  💰 *금액*: {deposit_amount.strip()}원
+        -  🏦 *잔액*: {remaining_amount.strip()}원
         -  ⏰ *시간*: {now_kst.strftime('%Y-%m-%d %H:%M:%S')} KST
         """
         self.notifier.send_notification(message)

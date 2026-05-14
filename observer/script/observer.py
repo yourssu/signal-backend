@@ -37,8 +37,16 @@ class SlackNotifier:
             'Authorization': f'Bearer {self.config.slack_token}',
             'Content-Type': 'application/json'
         }
-        response = requests.post(self.config.slack_webhook_url, json=payload, headers=headers)
-        print(response.text)
+        try:
+            response = requests.post(
+                self.config.slack_webhook_url,
+                json=payload,
+                headers=headers,
+                timeout=10
+            )
+            print(response.text)
+        except requests.RequestException as e:
+            print(f"Slack notification failed: {e}")
         
     def send_notification(self, message: str):
         self._send_notification(self.config.slack_channel, message)
@@ -134,9 +142,18 @@ if __name__ == "__main__":
     start_message = f"Observer started: {TimeUtils.get_kst_now()}"
     print(start_message)
     notifier.send_log_notification(start_message)
+    HEALTH_CHECK_INTERVAL = 30
+    tick = 0
     try:
         while True:
             time.sleep(1)
+            tick += 1
+            if tick >= HEALTH_CHECK_INTERVAL:
+                tick = 0
+                if not observer.is_alive():
+                    msg = f"🚨 Observer watchdog thread died: {TimeUtils.get_kst_now()}\n재시작 필요: docker restart signal-backend-container"
+                    print(msg)
+                    notifier.send_log_notification(msg)
     except KeyboardInterrupt:
         observer.stop()
     observer.join()

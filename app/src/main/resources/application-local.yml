@@ -1,0 +1,68 @@
+server:
+  port: 9012
+
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN}
+  datasource:
+    url: ${DB_URL:jdbc:sqlite:./build/db/signal-local.db}
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+
+domain:
+  permission:
+    admin:
+      access-key: ${ADMIN_ACCESS_KEY}
+      contact-secret-key: ${CONTACT_SECRET_KEY}
+  policy:
+    whitelist: ${WHITELIST}
+    contact-limit: ${CONTACT_LIMIT}
+    contact-limit-warning: ${CONTACT_LIMIT_WARNING}
+    contact-price: ${TICKET_COST}
+    ticket-price-policy: ${TICKET_PRICE_POLICY}
+    ticket-price-registered-policy: ${TICKET_PRICE_REGISTERED_POLICY}
+    banned-words: ${BANNED_WORDS:}
+
+infra:
+  openai:
+    url: ${OPENAI_URL}
+    api-key: ${OPENAI_API_KEY}
+    model: ${OPENAI_MODEL}
+    prompt: ${OPENAI_PROMPT}
+    user-input: ${USER_INPUT_LIMIT}
+  kakaopay:
+    admin-key: ${KAKAOPAY_ADMIN_KEY}
+    cid: ${KAKAOPAY_CID}
+    approval-url: ${KAKAOPAY_APPROVAL_URL}
+    cancel-url: ${KAKAOPAY_CANCEL_URL}
+    fail-url: ${KAKAOPAY_FAIL_URL}
+  google:
+    oauth:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID:test-google-client-id}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      redirect-uri: ${GOOGLE_OAUTH_REDIRECT_URI:http://localhost:9012/auth/google}
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json

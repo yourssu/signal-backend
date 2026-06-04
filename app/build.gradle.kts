@@ -17,6 +17,8 @@ val kotestVersion = "5.9.1"
 val jacksonVersion = "2.18.2"
 val h2Version = "2.3.232"
 val mysqlVersion = "9.1.0"
+val sqliteVersion = "3.50.1.0"
+val hibernateCommunityDialectsVersion = "6.6.15.Final"
 val junitPlatformVersion = "1.11.4"
 val guavaVersion = "33.3.0-jre"
 val swaggerVersion = "2.8.3"
@@ -65,6 +67,8 @@ dependencies {
 
     runtimeOnly("com.h2database:h2:$h2Version")
     runtimeOnly("com.mysql:mysql-connector-j:$mysqlVersion")
+    runtimeOnly("org.xerial:sqlite-jdbc:$sqliteVersion")
+    implementation("org.hibernate.orm:hibernate-community-dialects:$hibernateCommunityDialectsVersion")
 
     implementation("com.google.guava:guava:$guavaVersion")
 

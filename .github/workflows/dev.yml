@@ -148,6 +148,7 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
           SLACK_ADMIN_CHANNEL: ${{ vars.SLACK_ADMIN_CHANNEL }}
           SLACK_LOG_CHANNEL: ${{ vars.SLACK_LOG_CHANNEL }}
@@ -203,6 +204,7 @@ jobs:
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env
           echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
+          echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET" >> .env
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
           echo "SLACK_ADMIN_CHANNEL=$SLACK_ADMIN_CHANNEL" >> .env
           echo "SLACK_LOG_CHANNEL=$SLACK_LOG_CHANNEL" >> .env

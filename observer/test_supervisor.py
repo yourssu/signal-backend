@@ -33,9 +33,10 @@ class SupervisorScenarioTest(unittest.TestCase):
 
             with open(restart_log, encoding="utf-8") as file:
                 restarts = file.read().splitlines()
-            self.assertEqual(restarts, ["restart test-spring", "restart test-observer"])
+            self.assertEqual(restarts, ["restart test-spring", "restart test-observer", "restart test-admin"])
             self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "spring-manual-alerted")))
             self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "observer-manual-alerted")))
+            self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "admin-manual-alerted")))
 
     @staticmethod
     def _executable(directory, name, content):

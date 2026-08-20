@@ -57,6 +57,7 @@ check_component() {
 while true; do
   check_component spring
   check_component observer
+  check_component admin
   if [ "${SUPERVISOR_ONCE:-0}" = 1 ]; then break; fi
   sleep 30
 done

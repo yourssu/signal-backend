@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import urllib.request
+import socket
 
 
 def observer_healthy(path="/app/logs/state/observer-health.json", max_age=10):
@@ -22,7 +23,20 @@ def spring_healthy(port):
         return False
 
 
+def admin_healthy(port=3005):
+    try:
+        with socket.create_connection(("127.0.0.1", port), timeout=5):
+            return True
+    except OSError:
+        return False
+
+
 if __name__ == "__main__":
     component = sys.argv[1]
-    healthy = observer_healthy() if component == "observer" else spring_healthy(os.getenv("SERVER_PORT", "8080"))
+    checks = {
+        "spring": lambda: spring_healthy(os.getenv("SERVER_PORT", "8080")),
+        "observer": observer_healthy,
+        "admin": admin_healthy,
+    }
+    healthy = checks.get(component, lambda: False)()
     raise SystemExit(0 if healthy else 1)

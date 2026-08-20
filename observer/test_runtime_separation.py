@@ -4,7 +4,6 @@ import unittest
 
 ROOT = os.path.dirname(__file__)
 ADMIN_ONLY_ENVIRONMENT = (
-    "SLACK_SIGNING_SECRET",
     "SLACK_CHANNEL_PROD",
     "SLACK_CHANNEL_DEV",
     "SLACK_CHANNEL_ADMIN",
@@ -16,7 +15,7 @@ ADMIN_ONLY_ENVIRONMENT = (
 
 
 class RuntimeSeparationTest(unittest.TestCase):
-    def test_docker_runs_only_spring_and_log_observer(self):
+    def test_docker_runs_spring_observer_and_admin_independently(self):
         with open(os.path.join(ROOT, "..", "app", "Dockerfile"), encoding="utf-8") as file:
             dockerfile = file.read()
         with open(os.path.join(ROOT, "script", "docker-deploy.sh"), encoding="utf-8") as file:
@@ -25,15 +24,15 @@ class RuntimeSeparationTest(unittest.TestCase):
             requirements = file.read()
 
         self.assertIn('observer) exec /app/venv/bin/python /app/script/observer.py', dockerfile)
+        self.assertIn('admin) exec /app/venv/bin/python /app/script/admin.py', dockerfile)
         self.assertIn('-e COMPONENT=spring', deploy_script)
         self.assertIn('-e COMPONENT=observer', deploy_script)
+        self.assertIn('-e COMPONENT=admin', deploy_script)
         self.assertIn('--health-retries 3', deploy_script)
         self.assertNotIn('wait -n $SPRING_PID $OBSERVER_PID', dockerfile)
-        self.assertNotIn("admin.py", dockerfile)
-        self.assertNotIn("ADMIN_PID", dockerfile)
-        self.assertNotIn("EXPOSE 3005", dockerfile)
-        self.assertNotIn("-p 3005:3005", deploy_script)
-        self.assertNotIn("slack-bolt", requirements)
+        self.assertIn("EXPOSE 3005", dockerfile)
+        self.assertIn("-p 127.0.0.1:3005:3005", deploy_script)
+        self.assertIn("slack-bolt", requirements)
         self.assertIn("-v $(pwd)/logs:/app/logs", deploy_script)
 
     def test_deployment_keeps_only_existing_slack_channel_contract(self):
@@ -50,7 +49,7 @@ class RuntimeSeparationTest(unittest.TestCase):
                 content = file.read()
                 for variable in ADMIN_ONLY_ENVIRONMENT:
                     self.assertNotIn(variable, content)
-                for variable in ("SLACK_TOKEN", "SLACK_CHANNEL", "SLACK_ADMIN_CHANNEL", "SLACK_LOG_CHANNEL"):
+                for variable in ("SLACK_TOKEN", "SLACK_SIGNING_SECRET", "SLACK_CHANNEL", "SLACK_ADMIN_CHANNEL", "SLACK_LOG_CHANNEL"):
                     self.assertIn(variable, content)
 
 

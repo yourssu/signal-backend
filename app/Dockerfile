@@ -53,12 +53,14 @@ cd /app\n\
 case "${COMPONENT:-spring}" in\n\
   spring) exec java -Duser.timezone=Asia/Seoul -jar /app/app.jar --spring.profiles.active=${ENVIRONMENT:-dev} --server.port=${SERVER_PORT:-8080} ;;\n\
   observer) exec /app/venv/bin/python /app/script/observer.py ;;\n\
+  admin) exec /app/venv/bin/python /app/script/admin.py ;;\n\
   *) echo "unknown COMPONENT" >&2; exit 64 ;;\n\
 esac\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Expose port (default 8080, can be overridden by SERVER_PORT)
 EXPOSE ${SERVER_PORT:-8080}
+EXPOSE 3005
 
 # Use the startup script as entrypoint
 ENTRYPOINT ["/bin/bash", "/app/start.sh"]

@@ -19,7 +19,8 @@ API_HOST_DEV = os.getenv('API_HOST_DEV')
 SECRET_KEY_PROD = os.getenv('SECRET_KEY_PROD') or os.getenv('ADMIN_ACCESS_KEY')
 SECRET_KEY_DEV = os.getenv('SECRET_KEY_DEV')
 SERVER_PORT = os.getenv('SERVER_PORT', '8080')
-API_HOST_PROD = API_HOST_PROD or f'http://127.0.0.1:{SERVER_PORT}'
+PROJECT_NAME = os.getenv('PROJECT_NAME', 'signal-backend')
+API_HOST_PROD = API_HOST_PROD or f'http://{PROJECT_NAME}-spring:{SERVER_PORT}'
 
 # 최대 티켓 개수
 max_ticket = 10

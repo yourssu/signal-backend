@@ -28,7 +28,7 @@ class AdminRuntimeTest(unittest.TestCase):
     def test_ticket_command_routes_prod_and_dev_by_channel(self):
         response = Mock(status_code=200)
         with patch.object(admin, "SLACK_CHANNEL_PROD", "prod-channel"), \
-                patch.object(admin, "API_HOST_PROD", "http://127.0.0.1:9012"), \
+                patch.object(admin, "API_HOST_PROD", "http://signal-backend-spring:9012"), \
                 patch.object(admin, "API_HOST_DEV", "https://dev.example"), \
                 patch.object(admin, "SECRET_KEY_PROD", "prod-secret"), \
                 patch.object(admin, "SECRET_KEY_DEV", "dev-secret"), \
@@ -43,13 +43,13 @@ class AdminRuntimeTest(unittest.TestCase):
         )
 
         with patch.object(admin, "SLACK_CHANNEL_PROD", "prod-channel"), \
-                patch.object(admin, "API_HOST_PROD", "http://127.0.0.1:9012"), \
+                patch.object(admin, "API_HOST_PROD", "http://signal-backend-spring:9012"), \
                 patch.object(admin, "SECRET_KEY_PROD", "prod-secret"), \
                 patch.object(admin.requests, "post", return_value=response) as post:
             admin.reply("5678", 2, {"channel_id": "prod-channel"})
 
         post.assert_called_once_with(
-            "http://127.0.0.1:9012/api/viewers",
+            "http://signal-backend-spring:9012/api/viewers",
             json={"secretKey": "prod-secret", "verificationCode": "5678", "ticket": 2},
             headers={"Content-Type": "application/json"},
         )

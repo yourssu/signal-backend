@@ -7,6 +7,7 @@ source .env
 SPRING_CONTAINER="${PROJECT_NAME}-spring"
 OBSERVER_CONTAINER="${PROJECT_NAME}-observer"
 ADMIN_CONTAINER="${PROJECT_NAME}-admin"
+NETWORK_NAME="${PROJECT_NAME}-network"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 IMAGE_NAME="$ECR_REGISTRY/yourssu/${PROJECT_NAME}:${IMAGE_TAG}"
 
@@ -35,8 +36,10 @@ docker images $ECR_REGISTRY/yourssu/${PROJECT_NAME} --format "table {{.Repositor
 # Run the new container
 echo "Starting new container..."
 mkdir -p "$(pwd)/logs/state"
+docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME" >/dev/null
 docker run -d \
   --name "$OBSERVER_CONTAINER" \
+  --network "$NETWORK_NAME" \
   --restart no \
   -v $(pwd)/logs:/app/logs \
   --env-file .env \
@@ -47,6 +50,7 @@ docker run -d \
 
 docker run -d \
   --name "$SPRING_CONTAINER" \
+  --network "$NETWORK_NAME" \
   --restart no \
   -p $SERVER_PORT:$SERVER_PORT \
   -v $(pwd)/logs:/app/logs \
@@ -59,6 +63,7 @@ docker run -d \
 if [ "$ENVIRONMENT" = "prod" ]; then
   docker run -d \
     --name "$ADMIN_CONTAINER" \
+    --network "$NETWORK_NAME" \
     --restart no \
     -p 127.0.0.1:3005:3005 \
     --env-file .env \

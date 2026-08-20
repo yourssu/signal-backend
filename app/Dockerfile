@@ -45,17 +45,29 @@ COPY observer/script/ /app/script/
 # Create logs directory
 RUN mkdir -p /app/logs/events && chmod 750 /app/logs /app/logs/events
 
-# Run one independently restartable component from the same image
+# Create startup script
 RUN printf '#!/bin/bash\n\
-set -eu\n\
+set -e\n\
 umask 027\n\
+\n\
+# Start observer script first\n\
 cd /app\n\
-case "${COMPONENT:-spring}" in\n\
-  spring) exec java -Duser.timezone=Asia/Seoul -jar /app/app.jar --spring.profiles.active=${ENVIRONMENT:-dev} --server.port=${SERVER_PORT:-8080} ;;\n\
-  observer) exec /app/venv/bin/python /app/script/observer.py ;;\n\
-  admin) exec /app/venv/bin/python /app/script/admin.py ;;\n\
-  *) echo "unknown COMPONENT" >&2; exit 64 ;;\n\
-esac\n\
+/app/venv/bin/python /app/script/observer.py &\n\
+OBSERVER_PID=$!\n\
+\n\
+# Start Slack admin commands\n\
+/app/venv/bin/python /app/script/admin.py &\n\
+ADMIN_PID=$!\n\
+\n\
+# Wait a moment for observer to initialize\n\
+sleep 2\n\
+\n\
+# Start Spring Boot application\n\
+java -Duser.timezone=Asia/Seoul -jar /app/app.jar --spring.profiles.active=${ENVIRONMENT:-dev} --server.port=${SERVER_PORT:-8080} &\n\
+SPRING_PID=$!\n\
+\n\
+# Restart the container if Spring, observer, or admin exits\n\
+wait -n $SPRING_PID $OBSERVER_PID $ADMIN_PID\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Expose port (default 8080, can be overridden by SERVER_PORT)

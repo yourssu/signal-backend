@@ -1,60 +1,52 @@
 #!/bin/bash
-set -eu
 
+# Load environment variables
 source .env
 
-LEGACY_CONTAINER="${PROJECT_NAME}-container"
-SPRING_CONTAINER="${PROJECT_NAME}-spring"
-OBSERVER_CONTAINER="${PROJECT_NAME}-observer"
-ADMIN_CONTAINER="${PROJECT_NAME}-admin"
+# Variables
+CONTAINER_NAME="${PROJECT_NAME}-container"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 IMAGE_NAME="$ECR_REGISTRY/yourssu/${PROJECT_NAME}:${IMAGE_TAG}"
 
 echo "Starting deployment process..."
+echo "Container name: $CONTAINER_NAME"
 echo "Image name: $IMAGE_NAME"
 
+# Authenticate to ECR Public (token expires every 12 hours)
 echo "Logging in to Amazon ECR Public..."
 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
+# Pull the latest image
 echo "Pulling the latest image..."
-docker pull "$IMAGE_NAME"
+docker pull $IMAGE_NAME
 
-for container in "$LEGACY_CONTAINER" "$SPRING_CONTAINER" "$OBSERVER_CONTAINER" "$ADMIN_CONTAINER"; do
-  if [ -n "$(docker ps -aq -f name=^/${container}$)" ]; then
-    docker rm -f "$container"
-  fi
-done
+# Check if container is running
+if [ "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+    echo "Stopping existing container..."
+    docker stop $CONTAINER_NAME
+fi
 
+# Remove existing container if it exists
+if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+    echo "Removing existing container..."
+    docker rm $CONTAINER_NAME
+fi
+
+# Remove old images (keep only the 1 most recent)
 echo "Cleaning up old images..."
-docker images "$ECR_REGISTRY/yourssu/${PROJECT_NAME}" --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | sort -k4 -r | tail -n +2 | awk '{print $3}' | xargs -r docker rmi
+docker images $ECR_REGISTRY/yourssu/${PROJECT_NAME} --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | sort -k4 -r | tail -n +2 | awk '{print $3}' | xargs -r docker rmi
 
-echo "Starting independently restartable components..."
-mkdir -p "$(pwd)/logs"
-
+# Run the new container
+echo "Starting new container..."
 docker run -d \
-  --name "$OBSERVER_CONTAINER" \
+  --name $CONTAINER_NAME \
   --restart unless-stopped \
-  -v "$(pwd)/logs:/app/logs" \
-  --env-file .env \
-  -e COMPONENT=observer \
-  "$IMAGE_NAME"
-
-docker run -d \
-  --name "$SPRING_CONTAINER" \
-  --restart unless-stopped \
-  -p "$SERVER_PORT:$SERVER_PORT" \
-  -v "$(pwd)/logs:/app/logs" \
-  --env-file .env \
-  -e COMPONENT=spring \
-  "$IMAGE_NAME"
-
-docker run -d \
-  --name "$ADMIN_CONTAINER" \
-  --restart unless-stopped \
+  -p $SERVER_PORT:$SERVER_PORT \
   -p 127.0.0.1:3005:3005 \
+  -v $(pwd)/logs:/app/logs \
   --env-file .env \
-  -e COMPONENT=admin \
-  "$IMAGE_NAME"
+  $IMAGE_NAME
 
 echo "Deployment completed successfully!"
-docker ps -f name="$PROJECT_NAME"
+echo "Container status:"
+docker ps -f name=$CONTAINER_NAME

@@ -15,7 +15,7 @@ ADMIN_ONLY_ENVIRONMENT = (
 
 
 class RuntimeSeparationTest(unittest.TestCase):
-    def test_docker_runs_spring_observer_and_admin_independently(self):
+    def test_docker_runs_spring_observer_and_admin(self):
         with open(os.path.join(ROOT, "..", "app", "Dockerfile"), encoding="utf-8") as file:
             dockerfile = file.read()
         with open(os.path.join(ROOT, "script", "docker-deploy.sh"), encoding="utf-8") as file:
@@ -23,16 +23,13 @@ class RuntimeSeparationTest(unittest.TestCase):
         with open(os.path.join(ROOT, "script", "requirements.txt"), encoding="utf-8") as file:
             requirements = file.read()
 
-        self.assertIn("observer) exec /app/venv/bin/python /app/script/observer.py", dockerfile)
-        self.assertIn("admin) exec /app/venv/bin/python /app/script/admin.py", dockerfile)
-        self.assertNotIn("wait -n", dockerfile)
+        self.assertIn("python /app/script/observer.py &", dockerfile)
+        self.assertIn("python /app/script/admin.py &", dockerfile)
+        self.assertIn("wait -n $SPRING_PID $OBSERVER_PID $ADMIN_PID", dockerfile)
         self.assertIn("EXPOSE 3005", dockerfile)
         self.assertIn("-p 127.0.0.1:3005:3005", deploy_script)
-        for component in ("spring", "observer", "admin"):
-            self.assertIn(f'${{PROJECT_NAME}}-{component}', deploy_script)
-            self.assertIn(f"-e COMPONENT={component}", deploy_script)
         self.assertIn("slack-bolt", requirements)
-        self.assertIn('-v "$(pwd)/logs:/app/logs"', deploy_script)
+        self.assertIn("-v $(pwd)/logs:/app/logs", deploy_script)
 
     def test_deployment_keeps_only_existing_slack_channel_contract(self):
         paths = [

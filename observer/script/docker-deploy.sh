@@ -21,8 +21,10 @@ aws ecr-public get-login-password --region us-east-1 | docker login --username A
 echo "Pulling the latest image..."
 docker pull $IMAGE_NAME
 
-# Check if container is running
-for container in "$SPRING_CONTAINER" "$OBSERVER_CONTAINER" "$ADMIN_CONTAINER"; do
+# Check if container is running. Admin is a single PROD router for both environments.
+CONTAINERS="$SPRING_CONTAINER $OBSERVER_CONTAINER"
+if [ "$ENVIRONMENT" = "prod" ]; then CONTAINERS="$CONTAINERS $ADMIN_CONTAINER"; fi
+for container in $CONTAINERS; do
   if [ "$(docker ps -aq -f name=^/${container}$)" ]; then docker rm -f "$container"; fi
 done
 
@@ -54,15 +56,17 @@ docker run -d \
   --health-interval 30s --health-retries 3 --health-timeout 10s --health-start-period 60s \
   $IMAGE_NAME
 
-docker run -d \
-  --name "$ADMIN_CONTAINER" \
-  --restart no \
-  -p 127.0.0.1:3005:3005 \
-  --env-file .env \
-  -e COMPONENT=admin \
-  --health-cmd "/app/venv/bin/python /app/script/healthcheck.py admin" \
-  --health-interval 30s --health-retries 3 --health-timeout 10s --health-start-period 30s \
-  $IMAGE_NAME
+if [ "$ENVIRONMENT" = "prod" ]; then
+  docker run -d \
+    --name "$ADMIN_CONTAINER" \
+    --restart no \
+    -p 127.0.0.1:3005:3005 \
+    --env-file .env \
+    -e COMPONENT=admin \
+    --health-cmd "/app/venv/bin/python /app/script/healthcheck.py admin" \
+    --health-interval 30s --health-retries 3 --health-timeout 10s --health-start-period 30s \
+    $IMAGE_NAME
+fi
 
 if [ -f "$(pwd)/supervisor.pid" ]; then kill "$(cat "$(pwd)/supervisor.pid")" 2>/dev/null || true; fi
 nohup bash "$(pwd)/supervise.sh" > "$(pwd)/logs/supervisor.log" 2>&1 &

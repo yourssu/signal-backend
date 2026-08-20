@@ -25,23 +25,38 @@ admin = importlib.import_module("admin")
 
 
 class AdminRuntimeTest(unittest.TestCase):
-    def test_ticket_command_uses_local_spring_and_existing_admin_key(self):
+    def test_ticket_command_routes_prod_and_dev_by_channel(self):
         response = Mock(status_code=200)
-        with patch.object(admin, "API_HOST", "http://127.0.0.1:9012"), \
-                patch.object(admin, "ADMIN_ACCESS_KEY", "admin-secret"), \
+        with patch.object(admin, "SLACK_CHANNEL_PROD", "prod-channel"), \
+                patch.object(admin, "API_HOST_PROD", "http://127.0.0.1:9012"), \
+                patch.object(admin, "API_HOST_DEV", "https://dev.example"), \
+                patch.object(admin, "SECRET_KEY_PROD", "prod-secret"), \
+                patch.object(admin, "SECRET_KEY_DEV", "dev-secret"), \
                 patch.object(admin.requests, "post", return_value=response) as post:
-            actual = admin.reply("1234", 1, {"channel_id": "payment-channel"})
+            actual = admin.reply("1234", 1, {"channel_id": "dev-channel"})
 
         self.assertIs(response, actual)
         post.assert_called_once_with(
+            "https://dev.example/api/viewers",
+            json={"secretKey": "dev-secret", "verificationCode": "1234", "ticket": 1},
+            headers={"Content-Type": "application/json"},
+        )
+
+        with patch.object(admin, "SLACK_CHANNEL_PROD", "prod-channel"), \
+                patch.object(admin, "API_HOST_PROD", "http://127.0.0.1:9012"), \
+                patch.object(admin, "SECRET_KEY_PROD", "prod-secret"), \
+                patch.object(admin.requests, "post", return_value=response) as post:
+            admin.reply("5678", 2, {"channel_id": "prod-channel"})
+
+        post.assert_called_once_with(
             "http://127.0.0.1:9012/api/viewers",
-            json={"secretKey": "admin-secret", "verificationCode": "1234", "ticket": 1},
+            json={"secretKey": "prod-secret", "verificationCode": "5678", "ticket": 2},
             headers={"Content-Type": "application/json"},
         )
 
     def test_admin_command_rejects_non_admin_channel(self):
         ack, say, respond = Mock(), Mock(), Mock()
-        with patch.object(admin, "SLACK_ADMIN_CHANNEL", "admin-channel"), \
+        with patch.object(admin, "SLACK_CHANNEL_ADMIN", "admin-channel"), \
                 patch.object(admin, "reply_add") as reply_add, \
                 patch.object(admin, "reply_delete") as reply_delete:
             admin.handle_command(ack, {"text": "7", "channel_id": "other-channel"}, say, respond)

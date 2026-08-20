@@ -69,7 +69,7 @@ check_component() {
 while true; do
   check_component spring
   check_component observer
-  check_component admin
+  if [ "$ENVIRONMENT" = "prod" ]; then check_component admin; fi
   if [ "${SUPERVISOR_ONCE:-0}" = 1 ]; then break; fi
   sleep 30
 done

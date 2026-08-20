@@ -24,8 +24,11 @@ class RuntimeSeparationTest(unittest.TestCase):
         with open(os.path.join(ROOT, "script", "requirements.txt"), encoding="utf-8") as file:
             requirements = file.read()
 
-        self.assertIn("python /app/script/observer.py &", dockerfile)
-        self.assertIn("wait -n $SPRING_PID $OBSERVER_PID", dockerfile)
+        self.assertIn('observer) exec /app/venv/bin/python /app/script/observer.py', dockerfile)
+        self.assertIn('-e COMPONENT=spring', deploy_script)
+        self.assertIn('-e COMPONENT=observer', deploy_script)
+        self.assertIn('--health-retries 3', deploy_script)
+        self.assertNotIn('wait -n $SPRING_PID $OBSERVER_PID', dockerfile)
         self.assertNotIn("admin.py", dockerfile)
         self.assertNotIn("ADMIN_PID", dockerfile)
         self.assertNotIn("EXPOSE 3005", dockerfile)

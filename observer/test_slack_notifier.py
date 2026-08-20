@@ -4,6 +4,7 @@ import os
 import sys
 import types
 import unittest
+import tempfile
 from unittest.mock import Mock, patch
 
 SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
@@ -22,6 +23,13 @@ class Config:
 
 
 class SlackNotifierTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        Config.slack_queue_path = os.path.join(self.directory.name, "queue.jsonl")
+
+    def tearDown(self):
+        self.directory.cleanup()
+
     @patch("slack_notifier.requests.post")
     def test_http_200_with_slack_error_retries_and_reports_final_failure_without_sensitive_data(self, post):
         response = Mock(status_code=200)

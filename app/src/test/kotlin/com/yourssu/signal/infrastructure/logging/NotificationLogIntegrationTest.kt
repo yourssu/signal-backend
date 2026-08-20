@@ -51,14 +51,14 @@ class NotificationLogIntegrationTest : DescribeSpec({
     }
 
     describe("Notification 전용 이벤트 로그") {
-        it("전용 파일을 100MB 단위로 회전하고 14일 보관한다") {
+        it("전용 파일을 이어읽을 수 있는 형태로 100MB 단위 회전하고 14일 보관한다") {
             val context = LoggerFactory.getILoggerFactory() as LoggerContext
             val logger = context.getLogger("com.yourssu.signal.infrastructure.logging.Notification")
             val appender = logger.getAppender("NOTIFICATION_EVENT_FILE") as RollingFileAppender<ILoggingEvent>
             val rollingPolicy = appender.rollingPolicy as SizeAndTimeBasedRollingPolicy<ILoggingEvent>
 
             appender.file shouldEndWith "events/notification-events.log"
-            rollingPolicy.fileNamePattern shouldEndWith "events/archive/%d{yyyy-MM-dd}.%i.log.gz"
+            rollingPolicy.fileNamePattern shouldEndWith "events/archive/%d{yyyy-MM-dd}.%i.log"
             val maxFileSize = SizeAndTimeBasedRollingPolicy::class.java.getDeclaredField("maxFileSize").run {
                 isAccessible = true
                 get(rollingPolicy) as FileSize

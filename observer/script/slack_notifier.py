@@ -2,14 +2,19 @@ import re
 
 import requests
 
+from durable_queue import DurableSlackQueue
+
 
 class SlackNotifier:
     MAX_ATTEMPTS = 3
 
     def __init__(self, config):
         self.config = config
+        queue_path = getattr(config, 'slack_queue_path', 'logs/state/slack-queue.jsonl')
+        self.queue = DurableSlackQueue(queue_path)
+        self.replaying = False
 
-    def _send_notification(self, channel: str, message: str):
+    def _send_notification(self, channel: str, message: str, queue_on_failure=True):
         payload = {
             'channel': channel,
             'text': message,
@@ -22,6 +27,8 @@ class SlackNotifier:
         for attempt in range(1, self.MAX_ATTEMPTS + 1):
             failure = self._request(payload, headers)
             if failure is None:
+                if not self.replaying:
+                    self._replay_queue()
                 return True
 
             if attempt == self.MAX_ATTEMPTS:
@@ -29,7 +36,25 @@ class SlackNotifier:
             else:
                 print(f"Slack 알림 재시도 ({attempt}/{self.MAX_ATTEMPTS}): {failure}")
 
+        if queue_on_failure:
+            self.queue.enqueue(channel, message)
+            print(f"SLACK DELIVERY FAILED: queued=1 pending={self.queue.pending_count()}")
         return False
+
+    def _replay_queue(self):
+        if self.queue.pending_count() == 0:
+            return
+        self.replaying = True
+        try:
+            completed, remaining = self.queue.replay(
+                lambda queued_channel, queued_message: self._send_notification(
+                    queued_channel, queued_message, queue_on_failure=False
+                )
+            )
+        finally:
+            self.replaying = False
+        if completed:
+            print(f"SLACK QUEUE REPLAYED: completed={completed} remaining={remaining}")
 
     def _request(self, payload, headers):
         try:

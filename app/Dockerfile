@@ -45,25 +45,16 @@ COPY observer/script/ /app/script/
 # Create logs directory
 RUN mkdir -p /app/logs/events && chmod 750 /app/logs /app/logs/events
 
-# Create startup script
+# The same immutable image runs one independently supervised component.
 RUN printf '#!/bin/bash\n\
-set -e\n\
+set -eu\n\
 umask 027\n\
-\n\
-# Start observer script first\n\
 cd /app\n\
-/app/venv/bin/python /app/script/observer.py &\n\
-OBSERVER_PID=$!\n\
-\n\
-# Wait a moment for observer to initialize\n\
-sleep 2\n\
-\n\
-# Start Spring Boot application\n\
-java -Duser.timezone=Asia/Seoul -jar /app/app.jar --spring.profiles.active=${ENVIRONMENT:-dev} --server.port=${SERVER_PORT:-8080} &\n\
-SPRING_PID=$!\n\
-\n\
-# Restart the container if Spring or observer exits\n\
-wait -n $SPRING_PID $OBSERVER_PID\n\
+case "${COMPONENT:-spring}" in\n\
+  spring) exec java -Duser.timezone=Asia/Seoul -jar /app/app.jar --spring.profiles.active=${ENVIRONMENT:-dev} --server.port=${SERVER_PORT:-8080} ;;\n\
+  observer) exec /app/venv/bin/python /app/script/observer.py ;;\n\
+  *) echo "unknown COMPONENT" >&2; exit 64 ;;\n\
+esac\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
 # Expose port (default 8080, can be overridden by SERVER_PORT)

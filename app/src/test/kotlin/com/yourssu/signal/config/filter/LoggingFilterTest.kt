@@ -120,6 +120,54 @@ class LoggingFilterTest : DescribeSpec({
             }
         }
 
+        context("연락처와 운영 시크릿을 포함한 요청이면") {
+            it("contact, token, secretKey 값을 app 로그에서 마스킹한다") {
+                val request = MockHttpServletRequest("POST", "/api/profiles").apply {
+                    setContent(
+                        """{"contact":"@plain_contact","token":"plain-token","secretKey":"plain-secret","nickname":"signal"}"""
+                            .toByteArray(),
+                    )
+                }
+
+                execute(request = request, responseBody = "{}")
+
+                val detailLog = appender.list.first().formattedMessage
+                detailLog shouldContain "\"contact\":\"***\""
+                detailLog shouldContain "\"token\":\"***\""
+                detailLog shouldContain "\"secretKey\":\"***\""
+                detailLog shouldContain "\"nickname\":\"signal\""
+                detailLog shouldNotContain "@plain_contact"
+                detailLog shouldNotContain "plain-token"
+                detailLog shouldNotContain "plain-secret"
+            }
+
+            it("경로 변수 secretKey를 app 로그에서 마스킹한다") {
+                execute(
+                    method = "POST",
+                    uri = "/api/viewers/sms/deposit/plain-path-secret",
+                    responseBody = "{}",
+                )
+
+                val logs = appender.list.joinToString("\n") { it.formattedMessage }
+                logs shouldContain "/api/viewers/sms/deposit/***"
+                logs shouldNotContain "plain-path-secret"
+            }
+
+            it("JSON으로 파싱할 수 없는 payload는 원문을 app 로그에 남기지 않는다") {
+                val request = MockHttpServletRequest("POST", "/api/profiles").apply {
+                    setContent("contact=@plain_contact&token=plain-token&secretKey=plain-secret".toByteArray())
+                }
+
+                execute(request = request, responseBody = "{}")
+
+                val detailLog = appender.list.first().formattedMessage
+                detailLog shouldContain "\"Redacted\":true"
+                detailLog shouldNotContain "@plain_contact"
+                detailLog shouldNotContain "plain-token"
+                detailLog shouldNotContain "plain-secret"
+            }
+        }
+
         context("오류 응답이면") {
             it("GET 성공 응답보다 큰 페이로드도 제한 안에서 보존한다") {
                 val errorBody = "{\"message\":\"${"failure-context".repeat(200)}\"}"

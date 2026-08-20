@@ -1,4 +1,5 @@
 import pytz
+import re
 from datetime import datetime
 from openai_client import openai_client
 
@@ -51,7 +52,11 @@ class SignalHandler:
 
     def create_profile_message(self, line):
         """프로필 등록 완료 메시지 및 정책 위반 검사"""
-        id, department, contact, nickname, introSentences = line[line.find('&') + 1:].split('&')
+        id, department, contact, nickname, introSentences = line[line.find('&') + 1:].split('&', 4)
+        department, contact, nickname, introSentences = (
+            self._decode_create_profile_field(value)
+            for value in (department, contact, nickname, introSentences)
+        )
         message = f"""🩷 *프로필 등록 완료* 🩷
     -  💖 *식별 번호*: {id}
     -  🏢 *학과*: {department}
@@ -103,6 +108,11 @@ class SignalHandler:
     """
             self.notifier.send_admin_notification(error_message)
 
+    @staticmethod
+    def _decode_create_profile_field(value):
+        value = re.sub(r'%u([0-9a-fA-F]{4})', lambda match: chr(int(match.group(1), 16)), value)
+        return value.replace('%26', '&').replace('%25', '%')
+
     def create_failed_profile_contact_message(self, line):
         """프로필 등록 실패 메시지"""
         contact_policy = line[line.find('&') + 1:].strip()
@@ -152,7 +162,7 @@ class SignalHandler:
 
     def create_retry_issued_ticket_message(self, line):
         """결제 확인 요청 이용권 발급 완료 메시지"""
-        verification, uuid, ticket, available_ticket, name = line[line.find('&') + 1:].split(' ')
+        verification, uuid, ticket, available_ticket, name = line[line.find('&') + 1:].split(' ', 4)
         now_kst = self._get_kst_now()
 
         ticket_policy_message = f"- 💰 현재 가격 정책: {self.config.ticket_price_policy}"
@@ -206,7 +216,7 @@ class SignalHandler:
 
     def create_failed_issue_ticket_message_amount(self, line):
         """이용권 발급 실패 - 금액 오류"""
-        name, depositAmount = line[line.find('&') + 1:].split(' ')
+        name, depositAmount = line[line.find('&') + 1:].rsplit(' ', 1)
         now_kst = self._get_kst_now()
 
         ticket_policy_message = f"- 💰 현재 가격 정책: {self.config.ticket_price_policy}"
@@ -224,7 +234,7 @@ class SignalHandler:
 
     def create_failed_issue_ticket_message_verification(self, line):
         """이용권 발급 실패 - 인증번호 오류"""
-        name, depositAmount = line[line.find('&') + 1:].split(' ')
+        name, depositAmount = line[line.find('&') + 1:].rsplit(' ', 1)
         now_kst = self._get_kst_now()
 
         message = f"""<!channel> 🚨 *이용권 발급 실패* 🚨
@@ -237,7 +247,7 @@ class SignalHandler:
 
     def create_pay_notification_message(self, line):
         """결제 확인 요청 메시지"""
-        name, verification = line[line.find('&') + 1:].split(' ')
+        name, verification = line[line.find('&') + 1:].rsplit(' ', 1)
         now_kst = self._get_kst_now()
 
         message = f"""🚨🚨 *결제 확인 요청이 접수되었습니다.* 🚨🚨
@@ -249,7 +259,7 @@ class SignalHandler:
 
     def create_no_first_purchased_ticket_message(self, line):
         """첫 구매 실패 메시지"""
-        name, depositAmount = line[line.find('&') + 1:].split(' ')
+        name, depositAmount = line[line.find('&') + 1:].rsplit(' ', 1)
         now_kst = self._get_kst_now()
 
         message = f"""<!channel> 🚨 *현장 확인 필요! 프로필을 등록하지 않거나 첫번째 구매가 아닌 사용자입니다.* 🚨

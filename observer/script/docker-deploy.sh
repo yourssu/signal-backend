@@ -42,6 +42,7 @@ docker run -d \
   --name $CONTAINER_NAME \
   --restart unless-stopped \
   -p $SERVER_PORT:$SERVER_PORT \
+  -p 3005:3005 \
   -v $(pwd)/logs:/app/logs \
   --env-file .env \
   $IMAGE_NAME

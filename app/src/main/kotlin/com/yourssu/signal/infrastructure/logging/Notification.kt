@@ -5,16 +5,16 @@ import com.yourssu.signal.domain.verification.implement.Verification
 import com.yourssu.signal.infrastructure.sms.SMSMessage
 import io.github.oshai.kotlinlogging.KotlinLogging
 
-private val logger = KotlinLogging.logger {}
+private val logger = KotlinLogging.logger("com.yourssu.signal.infrastructure.logging.Notification")
 
 object Notification {
     fun notifyCreatedProfile(profile: Profile) {
         logger.info {
             "CreateProfile&${profile.id}" +
-                    "&${profile.department}" +
-                    "&${profile.contact}" +
-                    "&${profile.nickname}" +
-                    "&${profile.introSentences.joinToString(",")}"
+                    "&${escapeCreateProfileField(profile.department)}" +
+                    "&${escapeCreateProfileField(profile.contact)}" +
+                    "&${escapeCreateProfileField(profile.nickname)}" +
+                    "&${escapeCreateProfileField(profile.introSentences.joinToString(","))}"
         }
     }
 
@@ -57,5 +57,18 @@ object Notification {
     private fun validateMessage(message: String): String {
         val sanitizedMessage = message.replace(Regex("[\\r\\n\\t\\x0b\\x0c\\s]+"), "")
         return sanitizedMessage.filter { it.isISOControl().not() }
+    }
+
+    private fun escapeCreateProfileField(value: String): String = buildString {
+        value.forEach { character ->
+            append(
+                when {
+                    character == '%' -> "%25"
+                    character == '&' -> "%26"
+                    character.isISOControl() -> "%u${character.code.toString(16).padStart(4, '0')}"
+                    else -> character
+                }
+            )
+        }
     }
 }

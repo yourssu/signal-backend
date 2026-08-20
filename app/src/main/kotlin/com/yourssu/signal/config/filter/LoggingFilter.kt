@@ -34,7 +34,7 @@ class LoggingFilter(
         val duration = System.currentTimeMillis() - startTime
 
         val method = requestWrapper.method
-        val requestUri = requestWrapper.requestURI
+        val requestUri = requestWrapper.requestURI.redactSensitivePath()
         val headers = LOGGED_HEADERS.mapNotNull { headerName ->
             requestWrapper.getHeader(headerName)?.let { headerName to it }
         }.joinToString(", ") { (name, value) -> "\"$name\": \"${value.escapeJson()}\"" }
@@ -79,7 +79,7 @@ class LoggingFilter(
     private fun redactSensitiveFields(payload: String, redactAuthCode: Boolean): String = try {
         objectMapper.readTree(payload).also { node -> redactSensitiveFields(node, redactAuthCode) }.toString()
     } catch (_: Exception) {
-        payload
+        "{\"Redacted\":true,\"Bytes\":${payload.toByteArray(StandardCharsets.UTF_8).size}}"
     }
 
     private fun redactSensitiveFields(node: JsonNode, redactAuthCode: Boolean) {
@@ -110,6 +110,10 @@ class LoggingFilter(
         }
     }
 
+    private fun String.redactSensitivePath(): String = replace(SMS_SECRET_PATH_REGEX) {
+        "${it.groupValues[1]}***"
+    }
+
     companion object {
         private const val MAX_SUCCESS_GET_PAYLOAD_BYTES = 2 * 1024
         private const val MAX_DIAGNOSTIC_PAYLOAD_BYTES = 8 * 1024
@@ -118,6 +122,8 @@ class LoggingFilter(
         private val SENSITIVE_PAYLOAD_FIELDS = setOf(
             "accesstoken",
             "refreshtoken",
+            "token",
+            "contact",
             "secretkey",
             "authorization",
             "cookie",
@@ -126,5 +132,6 @@ class LoggingFilter(
             "/api/profiles/deck",
             "/api/profiles/me/purchased",
         )
+        private val SMS_SECRET_PATH_REGEX = Regex("^(/api/viewers/sms/[^/]+/)[^/]+$")
     }
 }

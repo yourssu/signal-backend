@@ -28,6 +28,10 @@ class ProfileReader(
         return profileRepository.countContacts(contact)
     }
 
+    fun findByContact(contact: String): List<Profile> {
+        return profileRepository.findByContact(contact)
+    }
+
     fun getAll(): List<Profile> {
         return profileRepository.findAll()
     }

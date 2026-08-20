@@ -51,7 +51,6 @@ object ProfileValidator {
             return
         }
         if (countContact >= contactLimitPolicy) {
-            Notification.notifyFailedProfileContactExceedsLimit(contactLimitPolicy)
             throw ContactLimitExceededException(contactLimitPolicy)
         }
     }

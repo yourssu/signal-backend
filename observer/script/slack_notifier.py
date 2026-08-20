@@ -54,7 +54,9 @@ class SlackNotifier:
         finally:
             self.replaying = False
         if completed:
-            print(f"SLACK QUEUE REPLAYED: completed={completed} remaining={remaining}")
+            message = f"[{self.config.environment.upper()}] SLACK QUEUE REPLAYED: completed={completed} remaining={remaining}"
+            print(message)
+            self._send_notification(self.config.slack_log_channel, message)
 
     def _request(self, payload, headers):
         try:

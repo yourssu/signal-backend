@@ -1,7 +1,7 @@
 #!/bin/bash
 set -u
 
-source "$(dirname "$0")/.env"
+source "${SUPERVISOR_ENV_FILE:-$(dirname "$0")/.env}"
 
 PROJECT_NAME=${PROJECT_NAME:?}
 STATE_DIR="$(pwd)/logs/state"
@@ -11,7 +11,9 @@ alert() {
   component=$1
   state=$2
   detail=$3
-  text="[${ENVIRONMENT^^}] ${component^^} ${state}: ${detail}"
+  environment_label=$(printf '%s' "$ENVIRONMENT" | tr '[:lower:]' '[:upper:]')
+  component_label=$(printf '%s' "$component" | tr '[:lower:]' '[:upper:]')
+  text="[${environment_label}] ${component_label} ${state}: ${detail}"
   response=$(curl -fsS --max-time 10 -H @<(printf 'Authorization: Bearer %s\n' "$SLACK_TOKEN") -H 'Content-Type: application/json' \
     --data "$(python3 -c 'import json,sys; print(json.dumps({"channel":sys.argv[1],"text":sys.argv[2]}))' "$SLACK_LOG_CHANNEL" "$text")" \
     https://slack.com/api/chat.postMessage 2>/dev/null || true)
@@ -55,5 +57,6 @@ check_component() {
 while true; do
   check_component spring
   check_component observer
+  if [ "${SUPERVISOR_ONCE:-0}" = 1 ]; then break; fi
   sleep 30
 done

@@ -15,6 +15,7 @@ from slack_notifier import SlackNotifier
 
 
 class Config:
+    environment = "PROD"
     slack_token = "secret-token"
     slack_channel = "payment-channel"
     slack_admin_channel = "admin-channel"
@@ -59,6 +60,22 @@ class SlackNotifierTest(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(post.call_count, 1)
         self.assertEqual(post.call_args.kwargs["json"]["channel"], "admin-channel")
+
+    @patch("slack_notifier.requests.post")
+    def test_recovery_replays_durable_queue_and_reports_completed_count(self, post):
+        response = Mock(status_code=200)
+        response.json.return_value = {"ok": True}
+        post.return_value = response
+        notifier = SlackNotifier(Config())
+        notifier.queue.enqueue("payment-channel", "queued-message")
+
+        self.assertTrue(notifier.send_notification("recovery-probe"))
+
+        self.assertEqual(notifier.queue.pending_count(), 0)
+        sent = [call.kwargs["json"] for call in post.call_args_list]
+        self.assertEqual(sent[1]["text"], "queued-message")
+        self.assertEqual(sent[2]["channel"], "log-channel")
+        self.assertIn("[PROD] SLACK QUEUE REPLAYED: completed=1 remaining=0", sent[2]["text"])
 
 
 if __name__ == "__main__":

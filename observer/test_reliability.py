@@ -69,6 +69,22 @@ class ReliabilityTest(unittest.TestCase):
             cursor.poll(seen.append)
             self.assertEqual(seen, ["new\n"])
 
+    def test_corrupted_offset_replays_from_start_instead_of_skipping_data(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, "app.log")
+            state = os.path.join(directory, "offset.json")
+            with open(path, "w", encoding="utf-8") as file:
+                file.write("must-not-be-lost\n")
+            with open(state, "w", encoding="utf-8") as file:
+                file.write("not-json")
+
+            cursor = DurableLogCursor(path, state, start_at_end_if_missing=True)
+            seen = []
+            cursor.poll(seen.append)
+
+            self.assertEqual(cursor.corrupted_reason, "invalid_state")
+            self.assertEqual(seen, ["must-not-be-lost\n"])
+
     def test_failed_slack_is_durable_and_replayed(self):
         with tempfile.TemporaryDirectory() as directory:
             path = os.path.join(directory, "slack-queue.jsonl")

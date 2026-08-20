@@ -10,7 +10,7 @@ class DurableLogCursor:
         self.state_path = state_path
         self.corrupted_reason = None
         self.state = self._load()
-        if self.state is None and start_at_end_if_missing and os.path.exists(path):
+        if self.state is None and self.corrupted_reason is None and start_at_end_if_missing and os.path.exists(path):
             stat = os.stat(path)
             self.state = {"device": stat.st_dev, "inode": stat.st_ino, "offset": stat.st_size}
             self._save()

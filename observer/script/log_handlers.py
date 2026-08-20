@@ -1,5 +1,6 @@
 from ticket_price_formatter import to_ticket_price_message
 import time
+from datetime import datetime, timezone
 
 
 class LogHandlers:
@@ -22,7 +23,11 @@ class LogHandlers:
         """서버 재시작 메시지 생성"""
         ticket_policy_message = f"- 💰 현재 가격 정책: {to_ticket_price_message(self.config.ticket_price_policy)}"
         ticket_registered_message = f"- 🌱 프로필 등록 완료 첫 구매 고객: {to_ticket_price_message(self.config.ticket_price_registered_policy)}"
-        message = f"[{self.config.environment.upper()}] SPRING STARTED\n{ticket_policy_message}\n{ticket_registered_message}"
+        message = (
+            f"[{self.config.environment.upper()}] SPRING STARTED: "
+            f"started_at={datetime.now(timezone.utc).isoformat()}\n"
+            f"{ticket_policy_message}\n{ticket_registered_message}"
+        )
         self.notifier.send_notification(message)
 
     def create_internal_error_message(self, line):

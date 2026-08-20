@@ -9,6 +9,7 @@ import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.profile.storage.QProfileEntity.profileEntity
 import com.yourssu.signal.domain.profile.storage.execption.ProfileNotFoundException
+import jakarta.persistence.LockModeType
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -60,6 +61,20 @@ class ProfileRepositoryImpl(
             .map { decryptContact(it.toDomain()) }
             .filter { contact == it.contact }
             .size
+    }
+
+    override fun findByContact(contact: String): List<Profile> {
+        val matchingIds = profileJpaRepository.findAll()
+            .map { decryptContact(it.toDomain()) }
+            .filter { contact == it.contact }
+            .mapNotNull { it.id }
+        if (matchingIds.isEmpty()) return emptyList()
+
+        return jpaQueryFactory.selectFrom(profileEntity)
+            .where(profileEntity.id.`in`(matchingIds))
+            .setLockMode(LockModeType.PESSIMISTIC_WRITE)
+            .fetch()
+            .map { decryptContact(it.toDomain()) }
     }
 
     @Cacheable(cacheNames = ["profileCache"], key = "#gender.name")

@@ -8,6 +8,7 @@ interface ProfileRepository {
     fun existsByUuid(uuid: Uuid): Boolean
     fun findAll(): List<Profile>
     fun countContacts(contact: String): Int
+    fun findByContact(contact: String): List<Profile>
     fun findIdsByGender(gender: Gender): List<Long>
     fun updateCacheIdsByGender(gender: Gender): List<Long>
     fun getById(id: Long): Profile

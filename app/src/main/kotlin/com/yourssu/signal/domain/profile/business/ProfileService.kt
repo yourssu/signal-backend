@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.profile.business
 import com.yourssu.signal.config.properties.PolicyConfigurationProperties
 import com.yourssu.signal.domain.blacklist.implement.Blacklist
 import com.yourssu.signal.domain.blacklist.implement.BlacklistWriter
+import com.yourssu.signal.domain.blacklist.implement.BlacklistReader
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.business.command.*
 import com.yourssu.signal.domain.profile.business.dto.ConnectionsCountResponse
@@ -14,11 +15,13 @@ import com.yourssu.signal.domain.profile.business.dto.ProfileRankingResponse
 import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.EgenTeto
+import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.domain.viewer.implement.ViewerReader
 import com.yourssu.signal.infrastructure.logging.Notification
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ProfileService(
@@ -32,21 +35,56 @@ class ProfileService(
     private val policy: PolicyConfigurationProperties,
     private val adminAccessChecker: AdminAccessChecker,
     private val blacklistWriter: BlacklistWriter,
+    private val blacklistReader: BlacklistReader,
+    private val profileNotifier: ProfileNotifier,
+    private val contactNotificationDeduplicator: ContactNotificationDeduplicator,
 ) {
+    @Transactional(noRollbackFor = [ContactLimitExceededException::class])
     fun createProfile(command: ProfileCreatedCommand): MyProfileResponse {
         userReader.getByUuid(command.toUuid())
         validateBannedWords(command.nickname, command.introSentences)
 
         val profile = command.toDomain()
-        val countContact = profileReader.countContact(profile.contact)
-        ProfileValidator.checkContactLimit(countContact, policy.contactLimit)
-        ProfileValidator.checkContactLimitWarning(countContact, policy.contactLimitWarning)
+        val existingProfiles = profileReader.findByContact(profile.contact)
+        handleDuplicateContact(existingProfiles)
+        notifyDuplicateContact(profile.contact, existingProfiles.size)
+        ProfileValidator.checkContactLimit(existingProfiles.size, policy.contactLimit)
         val createdProfile = profileWriter.createProfile(profile)
-        Notification.notifyCreatedProfile(createdProfile.copy(profile.introSentences))
+        profileNotifier.notifyCreatedProfile(createdProfile.copy(profile.introSentences))
         if (policy.whitelist) {
             blacklistWriter.save(Blacklist(profileId = createdProfile.id!!, createdByAdmin = true))
         }
         return MyProfileResponse.from(createdProfile)
+    }
+
+    private fun handleDuplicateContact(existingProfiles: List<Profile>) {
+        if (existingProfiles.isEmpty()) return
+
+        existingProfiles.forEach { profile ->
+            val profileId = profile.id!!
+            when {
+                blacklistReader.isAddedByAdmin(profileId) -> Unit
+                blacklistReader.existsByProfileId(profileId) -> blacklistWriter.updateToAdminBlacklist(profileId)
+                else -> blacklistWriter.save(Blacklist(profileId = profileId, createdByAdmin = true))
+            }
+        }
+    }
+
+    private fun notifyDuplicateContact(contact: String, contactCount: Int) {
+        val contactLimit = policy.contactLimit
+        if (contactLimit != 0 && contactCount >= contactLimit) {
+            if (contactNotificationDeduplicator.shouldNotify(contact, ContactNotificationType.FAILURE)) {
+                profileNotifier.notifyFailedProfileContactExceedsLimit(contactLimit)
+            }
+            return
+        }
+
+        val warningThreshold = policy.contactLimitWarning
+        if (warningThreshold != 0 && contactCount >= warningThreshold &&
+            contactNotificationDeduplicator.shouldNotify(contact, ContactNotificationType.WARNING)
+        ) {
+            profileNotifier.notifyContactExceedsLimitWarning(warningThreshold)
+        }
     }
 
     fun getProfile(uuid: String): MyProfileResponse {

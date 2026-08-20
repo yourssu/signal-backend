@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component
 class PurchasedProfileReader(
     private val purchasedProfileRepository: PurchasedProfileRepository,
 ) {
+    fun exists(profileId: Long, viewerId: Long): Boolean {
+        return purchasedProfileRepository.exists(PurchasedProfile(profileId = profileId, viewerId = viewerId))
+    }
+
     fun findByViewerId(viewerId: Long): List<PurchasedProfile> {
         return purchasedProfileRepository.findByViewerId(viewerId)
     }

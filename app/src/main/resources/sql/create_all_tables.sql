@@ -12,6 +12,7 @@ USE `signal_dev`;
 -- ==========================================
 DROP TABLE IF EXISTS referral_order;
 DROP TABLE IF EXISTS referral;
+DROP TABLE IF EXISTS report;
 DROP TABLE IF EXISTS purchased_profile;
 DROP TABLE IF EXISTS intro_sentence;
 DROP TABLE IF EXISTS blacklist;
@@ -205,6 +206,20 @@ CREATE TABLE referral_order (
     PRIMARY KEY (id),
     INDEX idx_referral_order_referral_code (referral_code),
     INDEX idx_referral_order_viewer_uuid (viewer_uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13. Report table
+CREATE TABLE report (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    reporter_uuid VARCHAR(36) NOT NULL,
+    reported_profile_id BIGINT NOT NULL,
+    reported_contact VARCHAR(1024) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created_time DATETIME(6) NOT NULL,
+    updated_time DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_report_reporter_profile (reporter_uuid, reported_profile_id),
+    INDEX idx_report_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==========================================

@@ -24,6 +24,7 @@ import org.springframework.boot.logging.LoggingInitializationContext
 import org.springframework.boot.logging.logback.LogbackLoggingSystem
 import org.springframework.core.env.StandardEnvironment
 import java.nio.file.Files
+import java.time.LocalDateTime
 import kotlin.io.path.readLines
 import kotlin.io.path.readText
 
@@ -97,6 +98,7 @@ class NotificationLogIntegrationTest : DescribeSpec({
             Notification.notifyIssueFailedTicketByDepositAmount(SMSMessage(700, "payer name"))
             Notification.notifyIssueFailedTicketByUnMatchedVerification(SMSMessage(800, "unknown payer"))
             Notification.notifyPayDeposit(" payer name ", 123)
+            Notification.notifyFalseContactReport(7, 9, "@false&contact\n", LocalDateTime.parse("2026-08-20T12:34:56"))
             LoggerFactory.getLogger("com.yourssu.signal.application.Heartbeat").info("heartbeat")
 
             val eventLines = logDirectory.resolve("events/notification-events.log").readLines()
@@ -111,6 +113,7 @@ class NotificationLogIntegrationTest : DescribeSpec({
                 "IssueFailedTicketByDepositAmount&payer name 700",
                 "IssueFailedTicketByUnMatchedVerification&unknown payer 800",
                 "PayNotification&payername 123",
+                "FalseContactReport&7&9&@false%26contact%u000a&2026-08-20T12:34:56",
             )
             eventLines.size shouldBe eventLines.distinct().size
 

@@ -73,10 +73,35 @@ if [ "$ENVIRONMENT" = "prod" ]; then
     $IMAGE_NAME
 fi
 
-if [ -f "$(pwd)/supervisor.pid" ]; then kill "$(cat "$(pwd)/supervisor.pid")" 2>/dev/null || true; fi
-nohup bash "$(pwd)/supervise.sh" > "$(pwd)/logs/supervisor.log" 2>&1 &
-echo $! > "$(pwd)/supervisor.pid"
+if [ -f "$(pwd)/supervisor.pid" ]; then
+  kill "$(cat "$(pwd)/supervisor.pid")" 2>/dev/null || true
+  unlink "$(pwd)/supervisor.pid" 2>/dev/null || true
+fi
+
+SUPERVISOR_SERVICE="${PROJECT_NAME}-supervisor.service"
+sudo tee "/etc/systemd/system/$SUPERVISOR_SERVICE" >/dev/null <<EOF
+[Unit]
+Description=Signal component health supervisor
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=$(pwd)
+Environment=SUPERVISOR_ENV_FILE=$(pwd)/.env
+ExecStart=/bin/bash $(pwd)/supervise.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable "$SUPERVISOR_SERVICE" >/dev/null
+sudo systemctl restart "$SUPERVISOR_SERVICE"
 
 echo "Deployment completed successfully!"
 echo "Container status:"
 docker ps -f name="$PROJECT_NAME"
+sudo systemctl --no-pager --full status "$SUPERVISOR_SERVICE" || true

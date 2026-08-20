@@ -20,6 +20,8 @@ class RuntimeSeparationTest(unittest.TestCase):
         self.assertIn('if [ "$ENVIRONMENT" = "prod" ]', deploy_script)
         self.assertIn('docker network create "$NETWORK_NAME"', deploy_script)
         self.assertGreaterEqual(deploy_script.count('--network "$NETWORK_NAME"'), 3)
+        self.assertIn('Restart=always', deploy_script)
+        self.assertIn('systemctl enable "$SUPERVISOR_SERVICE"', deploy_script)
         self.assertIn('--health-retries 3', deploy_script)
         self.assertNotIn('wait -n $SPRING_PID $OBSERVER_PID', dockerfile)
         self.assertIn("EXPOSE 3005", dockerfile)

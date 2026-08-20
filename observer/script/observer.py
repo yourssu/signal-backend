@@ -8,6 +8,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from dotenv import load_dotenv
 from log_handlers import LogHandlers
+from log_router import handlers_for_path
 from signal_handler import SignalHandler
 
 
@@ -94,9 +95,12 @@ def check(file_path):
             last_checked_line[file_path] = len(lines)
         lines = lines[last_checked_line.get(file_path):]
 
+    handlers = handlers_for_path(file_path, log_handlers.handlers, signal_handler.handlers)
+    if handlers is None:
+        return
+
     for line in lines:
-        process_line_with_handlers(line, log_handlers.handlers)
-        process_line_with_handlers(line, signal_handler.handlers)
+        process_line_with_handlers(line, handlers)
 
     last_checked_line[file_path] += len(lines)
 

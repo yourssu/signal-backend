@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
     <!-- 콘솔에 출력되는 패턴 -->
     <property name="CONSOLE_LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%5level) %cyan(%logger) - %msg%n"/>
@@ -17,6 +18,7 @@
 
     <!-- 파일로그 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/app.log</file>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
@@ -25,13 +27,31 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 로그파일명 패턴 -->
             <!-- 날짜별로 기록되며 maxFileSize를 넘기면 인덱스(i)를 증가시켜 새로운 이름의 로그파일에 기록을 이어간다 -->
-            <fileNamePattern>logs/%d{yyyy-MM-dd}/%i.log</fileNamePattern>
+            <fileNamePattern>${LOG_PATH}/archive/app/%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <!-- 로그파일 최대사이즈 -->
             <maxFileSize>100MB</maxFileSize>
             <!-- 생성한 로그파일 관리 일수 -->
             <maxHistory>14</maxHistory>
         </rollingPolicy>
     </appender>
+
+    <springProfile name="prod | dev">
+        <appender name="NOTIFICATION_EVENT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/events/notification-events.log</file>
+            <encoder>
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/events/archive/%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <maxFileSize>100MB</maxFileSize>
+                <maxHistory>14</maxHistory>
+            </rollingPolicy>
+        </appender>
+
+        <logger name="com.yourssu.signal.infrastructure.logging.Notification" level="INFO" additivity="false">
+            <appender-ref ref="NOTIFICATION_EVENT_FILE"/>
+        </logger>
+    </springProfile>
 
     <!-- local -->
     <springProfile name="local">

@@ -6,7 +6,7 @@ import urllib.request
 import socket
 
 
-def observer_healthy(path="/app/logs/state/observer-health.json", max_age=10):
+def observer_healthy(path="/app/logs/state/observer-health.json", max_age=20):
     try:
         with open(path, encoding="utf-8") as file:
             health = json.load(file)

@@ -55,10 +55,15 @@ class SlackNotifierTest(unittest.TestCase):
         response.json.return_value = {"ok": True}
         post.return_value = response
 
-        result = SlackNotifier(Config()).send_admin_notification("profile-created")
+        notifier = SlackNotifier(Config())
+        activity = Mock()
+        notifier.activity_callback = activity
+
+        result = notifier.send_admin_notification("profile-created")
 
         self.assertTrue(result)
         self.assertEqual(post.call_count, 1)
+        self.assertEqual(activity.call_count, 2)
         self.assertEqual(post.call_args.kwargs["json"]["channel"], "admin-channel")
 
     @patch("slack_notifier.requests.post")

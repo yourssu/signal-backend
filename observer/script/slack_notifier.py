@@ -13,6 +13,7 @@ class SlackNotifier:
         queue_path = getattr(config, 'slack_queue_path', 'logs/state/slack-queue.jsonl')
         self.queue = DurableSlackQueue(queue_path)
         self.replaying = False
+        self.activity_callback = None
 
     def _send_notification(self, channel: str, message: str, queue_on_failure=True):
         payload = {
@@ -25,7 +26,11 @@ class SlackNotifier:
         }
 
         for attempt in range(1, self.MAX_ATTEMPTS + 1):
-            failure = self._request(payload, headers)
+            self._mark_activity()
+            try:
+                failure = self._request(payload, headers)
+            finally:
+                self._mark_activity()
             if failure is None:
                 if not self.replaying:
                     self._replay_queue()
@@ -40,6 +45,14 @@ class SlackNotifier:
             self.queue.enqueue(channel, message)
             print(f"SLACK DELIVERY FAILED: queued=1 pending={self.queue.pending_count()}")
         return False
+
+    def _mark_activity(self):
+        if self.activity_callback is None:
+            return
+        try:
+            self.activity_callback()
+        except OSError as error:
+            print(f"Observer health 갱신 실패: {type(error).__name__}")
 
     def _replay_queue(self):
         if self.queue.pending_count() == 0:

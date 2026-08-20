@@ -148,17 +148,9 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
           SLACK_ADMIN_CHANNEL: ${{ vars.SLACK_ADMIN_CHANNEL }}
           SLACK_LOG_CHANNEL: ${{ vars.SLACK_LOG_CHANNEL }}
-          SLACK_CHANNEL_PROD: ${{ vars.SLACK_CHANNEL_PROD }}
-          SLACK_CHANNEL_DEV: ${{ vars.SLACK_CHANNEL_DEV }}
-          SLACK_CHANNEL_ADMIN: ${{ vars.SLACK_CHANNEL_ADMIN }}
-          API_HOST_PROD: ${{ vars.API_HOST_PROD }}
-          API_HOST_DEV: ${{ vars.API_HOST_DEV }}
-          SECRET_KEY_PROD: ${{ secrets.SECRET_KEY_PROD }}
-          SECRET_KEY_DEV: ${{ secrets.SECRET_KEY_DEV }}
           
           KAKAOPAY_ADMIN_KEY: ${{ secrets.KAKAOPAY_ADMIN_KEY }}
           KAKAOPAY_CID: ${{ vars.KAKAOPAY_CID }}
@@ -211,17 +203,9 @@ jobs:
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env
           echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
-          echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET" >> .env
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
           echo "SLACK_ADMIN_CHANNEL=$SLACK_ADMIN_CHANNEL" >> .env
           echo "SLACK_LOG_CHANNEL=$SLACK_LOG_CHANNEL" >> .env
-          echo "SLACK_CHANNEL_PROD=$SLACK_CHANNEL_PROD" >> .env
-          echo "SLACK_CHANNEL_DEV=$SLACK_CHANNEL_DEV" >> .env
-          echo "SLACK_CHANNEL_ADMIN=$SLACK_CHANNEL_ADMIN" >> .env
-          echo "API_HOST_PROD=$API_HOST_PROD" >> .env
-          echo "API_HOST_DEV=$API_HOST_DEV" >> .env
-          echo "SECRET_KEY_PROD=$SECRET_KEY_PROD" >> .env
-          echo "SECRET_KEY_DEV=$SECRET_KEY_DEV" >> .env
           
           echo "KAKAOPAY_ADMIN_KEY=$KAKAOPAY_ADMIN_KEY" >> .env
           echo "KAKAOPAY_CID=$KAKAOPAY_CID" >> .env

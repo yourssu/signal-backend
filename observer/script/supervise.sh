@@ -13,7 +13,13 @@ alert() {
   detail=$3
   environment_label=$(printf '%s' "$ENVIRONMENT" | tr '[:lower:]' '[:upper:]')
   component_label=$(printf '%s' "$component" | tr '[:lower:]' '[:upper:]')
-  text="[${environment_label}] ${component_label} ${state}: ${detail}"
+  detected_at=$(date '+%Y-%m-%d %H:%M:%S %Z')
+  text="${state} [${environment_label}] ${component_label}
+\`\`\`
+• 시간: ${detected_at}
+• 컨테이너: ${PROJECT_NAME}-${component}
+• 상세: ${detail}
+\`\`\`"
   response=$(curl -fsS --max-time 10 -H @<(printf 'Authorization: Bearer %s\n' "$SLACK_TOKEN") -H 'Content-Type: application/json' \
     --data "$(python3 -c 'import json,sys; print(json.dumps({"channel":sys.argv[1],"text":sys.argv[2]}))' "$SLACK_LOG_CHANNEL" "$text")" \
     https://slack.com/api/chat.postMessage 2>/dev/null || true)
@@ -32,7 +38,7 @@ check_component() {
   healthy=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' "$container" 2>/dev/null || echo missing)
   if [ "$healthy" = healthy ]; then
     if [ -e "$recovery_pending" ]; then
-      alert "$component" "🟢 RECOVERED" "자동 재시작 후 healthcheck 정상"
+      alert "$component" "🟢 자동 복구 완료" "자동 재시작 후 healthcheck 정상"
       unlink "$recovery_pending" 2>/dev/null || true
     fi
     count=$(cat "$healthy_count" 2>/dev/null || echo 0)
@@ -47,14 +53,14 @@ check_component() {
   [ "$healthy" = starting ] && return
   echo 0 > "$healthy_count"
   if [ "$restarts" -eq 0 ]; then
-    alert "$component" "🔴 UNHEALTHY" "healthcheck 3회 연속 실패; 자동 재시작 1/1 진행"
+    alert "$component" "🔴 장애 감지" "healthcheck 3회 연속 실패; 자동 재시작 1/1 진행"
     echo 1 > "$budget"
     touch "$recovery_pending"
     docker restart "$container" >/dev/null
   else
     marker="$STATE_DIR/${component}-manual-alerted"
     if [ ! -e "$marker" ]; then
-      alert "$component" "🚨 MANUAL ACTION REQUIRED" "자동 재시작 후에도 비정상; EC2에서 docker logs ${container} 확인 필요"
+      alert "$component" "🚨 수동 조치 필요" "자동 재시작 후에도 비정상; EC2에서 docker logs --since 15m ${container} 확인 필요"
       touch "$marker"
     fi
   fi

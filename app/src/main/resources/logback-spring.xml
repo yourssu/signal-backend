@@ -3,9 +3,9 @@
     <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
     <!-- 콘솔에 출력되는 패턴 -->
     <property name="CONSOLE_LOG_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %clr(%5level) %cyan(%logger) - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId=%X{traceId:-none}] %clr(%5level) %cyan(%logger) - %msg%n"/>
     <!-- 파일에 기록되는 패턴 -->
-    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %5level %logger - %msg%n"/>
+    <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [traceId=%X{traceId:-none}] %5level %logger - %msg%n"/>
 
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
 

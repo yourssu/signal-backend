@@ -56,8 +56,9 @@ class SlackNotifier:
         if completed:
             message = (
                 f"🟢 [{self.config.environment.upper()}] Slack 알림 재전송 완료\n"
+                "```\n"
                 f"• 재전송 성공: {completed}건\n"
-                f"• 남은 대기: {remaining}건"
+                f"• 남은 대기: {remaining}건\n```"
             )
             print(message)
             self._send_notification(self.config.slack_log_channel, message)

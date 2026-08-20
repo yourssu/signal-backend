@@ -1,7 +1,6 @@
 import time
 import os
 import glob
-import requests
 import pytz
 from datetime import datetime
 from watchdog.observers import Observer
@@ -9,6 +8,7 @@ from watchdog.events import FileSystemEventHandler
 from dotenv import load_dotenv
 from log_handlers import LogHandlers
 from log_router import handlers_for_path
+from slack_notifier import SlackNotifier
 from signal_handler import SignalHandler
 
 
@@ -23,35 +23,6 @@ class Config:
         self.ticket_price_registered_policy = os.getenv('TICKET_PRICE_REGISTERED_POLICY')
         self.ticket_price_policy = os.getenv('TICKET_PRICE_POLICY')
         self.slack_webhook_url = 'https://slack.com/api/chat.postMessage'
-
-
-class SlackNotifier:
-    def __init__(self, config):
-        self.config = config
-        
-    def _send_notification(self, channel: str, message: str):
-        payload = {
-            'channel': channel,
-            'text': message
-        }
-        headers = {
-            'Authorization': f'Bearer {self.config.slack_token}',
-            'Content-Type': 'application/json'
-        }
-        try:
-            response = requests.post(self.config.slack_webhook_url, json=payload, headers=headers, timeout=10)
-            print(response.text)
-        except Exception as e:
-            print(f"Slack 알림 전송 실패: {e}")
-        
-    def send_notification(self, message: str):
-        self._send_notification(self.config.slack_channel, message)
-        
-    def send_admin_notification(self, message: str):
-        self._send_notification(self.config.slack_admin_channel, message)
-        
-    def send_log_notification(self, message: str):
-        self._send_notification(self.config.slack_log_channel, message)
 
 
 class TimeUtils:

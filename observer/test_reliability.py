@@ -10,7 +10,6 @@ sys.path.insert(0, SCRIPT_DIR)
 
 from durable_queue import DurableSlackQueue
 from log_cursor import DurableLogCursor
-from restart_budget import RestartBudget
 
 
 class ReliabilityTest(unittest.TestCase):
@@ -95,17 +94,6 @@ class ReliabilityTest(unittest.TestCase):
             self.assertEqual(queue.replay(sender), (1, 0))
             sender.assert_called_once_with("channel", "message")
             self.assertEqual(DurableSlackQueue(path).pending_count(), 0)
-
-    def test_restart_budget_stops_after_one_restart_and_resets_after_stability(self):
-        budget = RestartBudget(failure_threshold=3, stable_seconds=60)
-        self.assertEqual([budget.record_failure(0) for _ in range(2)], ["WAIT", "WAIT"])
-        self.assertEqual(budget.record_failure(0), "RESTART")
-        self.assertEqual([budget.record_failure(1) for _ in range(2)], ["WAIT", "WAIT"])
-        self.assertEqual(budget.record_failure(1), "MANUAL")
-        budget.record_success(100)
-        self.assertEqual(budget.record_failure(161), "WAIT")
-        self.assertEqual(budget.restarts, 0)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import requests
@@ -11,11 +12,14 @@ load_dotenv()  # .env 파일 환경변수 불러옴
 
 SLACK_TOKEN = os.getenv('SLACK_TOKEN')
 SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
-SLACK_CHANNEL = os.getenv('SLACK_CHANNEL')
-SLACK_ADMIN_CHANNEL = os.getenv('SLACK_ADMIN_CHANNEL')
-ADMIN_ACCESS_KEY = os.getenv('ADMIN_ACCESS_KEY')
-SERVER_PORT = os.getenv('SERVER_PORT', '8080')
-API_HOST = f'http://127.0.0.1:{SERVER_PORT}'
+SLACK_CHANNEL_PROD = os.getenv('SLACK_CHANNEL_PROD')
+SLACK_CHANNEL_DEV = os.getenv('SLACK_CHANNEL_DEV')
+SLACK_CHANNEL_ADMIN = os.getenv('SLACK_CHANNEL_ADMIN')
+API_HOST_PROD = os.getenv('API_HOST_PROD')
+API_HOST_DEV = os.getenv('API_HOST_DEV')
+SECRET_KEY_PROD = os.getenv('SECRET_KEY_PROD')
+SECRET_KEY_DEV = os.getenv('SECRET_KEY_DEV')
+ADMIN_PASS_CODE = os.getenv('PASSCODE')
 
 # 최대 티켓 개수
 max_ticket = 10
@@ -32,10 +36,6 @@ def handle_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") != SLACK_CHANNEL:
-            respond("❌ 이 명령은 결제 알림 채널에서만 사용할 수 있습니다.")
-            return
-
         args = command['text'].split()
         user_name = command["user_name"]
 
@@ -71,10 +71,12 @@ def handle_command(ack, command, say, respond):
 
 
 def reply(verification_code, ticket, command):
+    api_url = API_HOST_PROD if command["channel_id"] == SLACK_CHANNEL_PROD else API_HOST_DEV
+    secret_key = SECRET_KEY_PROD if command["channel_id"] == SLACK_CHANNEL_PROD else SECRET_KEY_DEV
     return requests.post(
-        f'{API_HOST}/api/viewers',
+        f'{api_url}/api/viewers',
         json={
-            "secretKey": ADMIN_ACCESS_KEY,
+            "secretKey": secret_key,
             "verificationCode": verification_code,
             "ticket": ticket
         },
@@ -87,10 +89,6 @@ def handle_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
-            respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
-            return
-
         args = command['text'].split()
 
         if len(args) < 1:
@@ -114,10 +112,12 @@ def handle_command(ack, command, say, respond):
 
 
 def reply_add(profile_id, command):
+    api_url = API_HOST_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else API_HOST_DEV
+    secret_key = SECRET_KEY_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else SECRET_KEY_DEV
     return requests.post(
-        f'{API_HOST}/api/blacklists',
+        f'{api_url}/api/blacklists',
         json={
-            "secretKey": ADMIN_ACCESS_KEY,
+            "secretKey": secret_key,
             "profileId": profile_id
         },
         headers={'Content-Type': 'application/json'}
@@ -129,10 +129,6 @@ def handle_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
-            respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
-            return
-
         args = command['text'].split()
 
         if len(args) < 1:
@@ -157,10 +153,9 @@ def handle_command(ack, command, say, respond):
 
 
 def reply_delete(profile_id, command):
-    return requests.delete(
-        f'{API_HOST}/api/blacklists/{profile_id}',
-        params={"secretKey": ADMIN_ACCESS_KEY},
-    )
+    api_url = API_HOST_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else API_HOST_DEV
+    secret_key = SECRET_KEY_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else SECRET_KEY_DEV
+    return requests.delete(f'{api_url}/api/blacklists/{profile_id}?secretKey={secret_key}')
 
 
 @app.command("/report")
@@ -168,10 +163,6 @@ def handle_report_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
-            respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
-            return
-
         args = command['text'].split()
         if len(args) != 1 or not args[0].isdigit() or int(args[0]) <= 0:
             respond("❌ 사용법: /report [신고 ID]")
@@ -190,9 +181,11 @@ def handle_report_command(ack, command, say, respond):
 
 
 def reply_report(report_id, command):
+    api_url = API_HOST_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else API_HOST_DEV
+    secret_key = SECRET_KEY_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else SECRET_KEY_DEV
     return requests.post(
-        f'{API_HOST}/api/reports/{report_id}/approve',
-        json={"secretKey": ADMIN_ACCESS_KEY},
+        f'{api_url}/api/reports/{report_id}/approve',
+        json={"secretKey": secret_key},
         headers={'Content-Type': 'application/json'}
     )
 

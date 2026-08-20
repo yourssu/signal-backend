@@ -52,6 +52,7 @@ class SignalEventContractTest(unittest.TestCase):
             "IssueFailedTicketByDepositAmount",
             "IssueFailedTicketByUnMatchedVerification",
             "PayNotification",
+            "FalseContactReport",
         }
         actual = {prefix.rsplit(" - ", 1)[1] for prefix in self.handler.handlers}
         self.assertTrue(expected.issubset(actual))
@@ -92,6 +93,20 @@ class SignalEventContractTest(unittest.TestCase):
         self.assertIn("컴퓨터&AI\n학부", profile_message)
         self.assertIn("con&tact", profile_message)
         self.assertIn("nick&name\t", profile_message)
+
+    def test_false_contact_report_uses_admin_slack_contract(self):
+        payload = "FalseContactReport&7&123&@false%26contact%u000a&2026-08-20T12:34:56"
+        line = f"2026-08-20 00:00:00.000 [main] INFO com.yourssu.signal.infrastructure.logging.Notification - {payload}"
+
+        self.handler.handlers[self.handler.FALSE_CONTACT_REPORT_PREFIX](line)
+
+        message = self.notifier.messages[-1]
+        self.assertIn("<!channel> 🚨 허위 연락처 신고가 접수되었습니다. 🚨", message)
+        self.assertIn("신고 ID: 7", message)
+        self.assertIn("대상 profileId: 123", message)
+        self.assertIn("대상 연락처: @false&contact\n", message)
+        self.assertIn("시각: 2026-08-20T12:34:56", message)
+        self.assertIn("승인: /report 7", message)
 
 
 if __name__ == "__main__":

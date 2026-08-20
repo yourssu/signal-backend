@@ -158,6 +158,38 @@ def reply_delete(profile_id, command):
     return requests.delete(f'{api_url}/api/blacklists/{profile_id}?secretKey={secret_key}')
 
 
+@app.command("/report")
+def handle_report_command(ack, command, say, respond):
+    ack()
+
+    try:
+        args = command['text'].split()
+        if len(args) != 1 or not args[0].isdigit() or int(args[0]) <= 0:
+            respond("❌ 사용법: /report [신고 ID]")
+            return
+
+        report_id = args[0]
+        response = reply_report(report_id, command)
+        if response.status_code == 200:
+            say(f"✅ 신고 승인 성공! 신고 ID {report_id}의 블랙리스트 처리와 티켓 보상이 완료되었습니다.")
+        else:
+            respond(f"❌ 신고 승인 실패: {response.text}")
+    except Exception as e:
+        message = f"❌ 오류 발생: {str(e)}"
+        respond(message)
+        logger.error(f"{message}", exc_info=True)
+
+
+def reply_report(report_id, command):
+    api_url = API_HOST_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else API_HOST_DEV
+    secret_key = SECRET_KEY_PROD if command["channel_id"] == SLACK_CHANNEL_ADMIN else SECRET_KEY_DEV
+    return requests.post(
+        f'{api_url}/api/reports/{report_id}/approve',
+        json={"secretKey": secret_key},
+        headers={'Content-Type': 'application/json'}
+    )
+
+
 def start_app(port):
     """애플리케이션 시작"""
     try:

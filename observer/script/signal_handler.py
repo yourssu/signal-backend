@@ -20,6 +20,7 @@ class SignalHandler:
     FAILED_BY_UNMATCHED_VERIFICATION_PREFIX = f'{NOTIFICATION_PREFIX} IssueFailedTicketByUnMatchedVerification'
     PAY_NOTIFICATION_PREFIX = f'{NOTIFICATION_PREFIX} PayNotification'
     NO_FIRST_PURCHASED_TICKET_PREFIX = f'{NOTIFICATION_PREFIX} NoFirstPurchasedTicket'
+    FALSE_CONTACT_REPORT_PREFIX = f'{NOTIFICATION_PREFIX} FalseContactReport'
     
     def __init__(self, config, notifier):
         self.config = config
@@ -37,7 +38,8 @@ class SignalHandler:
             self.FAILED_BY_BANK_DEPOSIT_PREFIX: self.create_failed_issue_ticket_message_amount,
             self.FAILED_BY_UNMATCHED_VERIFICATION_PREFIX: self.create_failed_issue_ticket_message_verification,
             self.PAY_NOTIFICATION_PREFIX: self.create_pay_notification_message,
-            self.NO_FIRST_PURCHASED_TICKET_PREFIX: self.create_no_first_purchased_ticket_message
+            self.NO_FIRST_PURCHASED_TICKET_PREFIX: self.create_no_first_purchased_ticket_message,
+            self.FALSE_CONTACT_REPORT_PREFIX: self.create_false_contact_report_message
         }
 
     def _get_kst_now(self):
@@ -112,6 +114,17 @@ class SignalHandler:
     def _decode_create_profile_field(value):
         value = re.sub(r'%u([0-9a-fA-F]{4})', lambda match: chr(int(match.group(1), 16)), value)
         return value.replace('%26', '&').replace('%25', '%')
+
+    def create_false_contact_report_message(self, line):
+        report_id, profile_id, contact, created_time = line[line.find('&') + 1:].split('&', 3)
+        contact = self._decode_create_profile_field(contact)
+        message = f"""<!channel> 🚨 허위 연락처 신고가 접수되었습니다. 🚨
+신고 ID: {report_id}
+대상 profileId: {profile_id}
+대상 연락처: {contact}
+시각: {created_time}
+승인: /report {report_id}"""
+        self.notifier.send_admin_notification(message)
 
     def create_failed_profile_contact_message(self, line):
         """프로필 등록 실패 메시지"""

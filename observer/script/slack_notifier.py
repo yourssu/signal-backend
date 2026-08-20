@@ -54,7 +54,11 @@ class SlackNotifier:
         finally:
             self.replaying = False
         if completed:
-            message = f"[{self.config.environment.upper()}] SLACK QUEUE REPLAYED: completed={completed} remaining={remaining}"
+            message = (
+                f"🟢 [{self.config.environment.upper()}] Slack 알림 재전송 완료\n"
+                f"• 재전송 성공: {completed}건\n"
+                f"• 남은 대기: {remaining}건"
+            )
             print(message)
             self._send_notification(self.config.slack_log_channel, message)
 

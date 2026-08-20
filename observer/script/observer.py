@@ -42,6 +42,7 @@ class ObserverRuntime:
         self.started_at = time.time()
         self.heartbeat_alerted = False
         self.disk_alerted = False
+        self.log_io_alerted = False
         self.offset_alerted = set()
         self.cursors = [
             DurableLogCursor(os.path.join(log_root, "events", "notification-events.log"), os.path.join(self.state_root, "event-offset.json"), True),
@@ -59,7 +60,12 @@ class ObserverRuntime:
                 try:
                     handler(line)
                 except Exception as error:
-                    self.notifier.send_log_notification(f"[{self.config.environment}] ADMIN COMMAND FAILED: handler={type(error).__name__}")
+                    self.notifier.send_log_notification(
+                        f"🟠 [{self.config.environment}] Observer 이벤트 처리 실패\n"
+                        f"• 로그: {os.path.basename(path)}\n"
+                        f"• 오류 유형: {type(error).__name__}\n"
+                        "• 영향: 해당 이벤트 1건의 Slack 알림을 확인해야 합니다."
+                    )
                 return
 
     def poll(self):
@@ -68,7 +74,10 @@ class ObserverRuntime:
             processed += cursor.poll(lambda line, path=cursor.path: self.process_line(path, line))
             if cursor.corrupted_reason and cursor.path not in self.offset_alerted:
                 self.notifier.send_log_notification(
-                    f"[{self.config.environment}] OFFSET CORRUPTED: file={os.path.basename(cursor.path)} reason={cursor.corrupted_reason}"
+                    f"🟠 [{self.config.environment}] Observer 로그 읽기 위치 손상\n"
+                    f"• 파일: {os.path.basename(cursor.path)}\n"
+                    f"• 원인: {cursor.corrupted_reason}\n"
+                    "• 조치: 안전한 위치로 복구해 처리를 계속합니다."
                 )
                 self.offset_alerted.add(cursor.path)
         self._write_health(processed)
@@ -96,36 +105,78 @@ class ObserverRuntime:
     def run(self):
         backlog = self.backlog_bytes()
         self.notifier.send_log_notification(
-            f"[{self.config.environment}] OBSERVER STARTED: started_at={datetime.now(timezone.utc).isoformat()} "
-            f"start_offset={sum((cursor.state or {}).get('offset', 0) for cursor in self.cursors)} backlog_bytes={backlog}"
+            f"🟢 [{self.config.environment}] Observer 기동 완료\n"
+            f"• 시간: {datetime.now(timezone.utc).isoformat()}\n"
+            f"• 이어서 읽을 위치: {sum((cursor.state or {}).get('offset', 0) for cursor in self.cursors)} bytes\n"
+            f"• 미처리 로그: {backlog} bytes"
         )
         backlog_alerted = False
         while True:
             try:
                 self.poll()
+                if self.log_io_alerted:
+                    self.notifier.send_log_notification(
+                        f"🟢 [{self.config.environment}] Observer 로그 저장 복구\n"
+                        "• 상태: 처리 위치 저장과 로그 읽기가 다시 정상입니다."
+                    )
+                    self.log_io_alerted = False
             except OSError as error:
-                self.notifier.send_log_notification(
-                    f"[{self.config.environment}] LOG WRITE FAILED: error={type(error).__name__}"
-                )
+                if not self.log_io_alerted:
+                    self.notifier.send_log_notification(
+                        f"🔴 [{self.config.environment}] Observer 로그 처리 실패\n"
+                        f"• 오류 유형: {type(error).__name__}\n"
+                        "• 영향: 처리 위치를 저장하지 못해 알림이 지연될 수 있습니다.\n"
+                        "• 조치: 1초마다 자동 재시도하며, 복구 시 한 번만 알립니다."
+                    )
+                    self.log_io_alerted = True
                 time.sleep(1)
                 continue
             free_bytes = shutil.disk_usage(self.log_root).free
             if free_bytes < 1024 * 1024 * 1024 and not self.disk_alerted:
-                self.notifier.send_log_notification(f"[{self.config.environment}] DISK LOW: free_bytes={free_bytes}")
+                self.notifier.send_log_notification(
+                    f"🔴 [{self.config.environment}] 디스크 용량 부족\n"
+                    f"• 남은 용량: {free_bytes // (1024 * 1024)} MB\n"
+                    "• 영향: 로그 저장과 Observer 이벤트 처리가 멈출 수 있습니다.\n"
+                    "• 조치: EC2 디스크와 Docker 로그를 정리해주세요."
+                )
                 self.disk_alerted = True
-            elif free_bytes >= 1024 * 1024 * 1024:
+            elif free_bytes >= 1536 * 1024 * 1024 and self.disk_alerted:
+                self.notifier.send_log_notification(
+                    f"🟢 [{self.config.environment}] 디스크 용량 복구\n"
+                    f"• 남은 용량: {free_bytes // (1024 * 1024)} MB\n"
+                    "• 상태: 로그 저장을 정상 계속합니다."
+                )
                 self.disk_alerted = False
             heartbeat_reference = self.last_heartbeat or self.started_at
             if time.time() - heartbeat_reference > 180 and not self.heartbeat_alerted:
-                self.notifier.send_log_notification(f"[{self.config.environment}] HEARTBEAT MISSED: spring heartbeat older than 180s")
+                self.notifier.send_log_notification(
+                    f"🔴 [{self.config.environment}] Spring → Observer Heartbeat 중단\n"
+                    "• 기준: 180초 이상 신호 미수신\n"
+                    "• 의미: Spring, 로그 공유, Observer 중 하나에 문제가 있을 수 있습니다.\n"
+                    "• 조치: 감독 프로세스가 각 컨테이너 healthcheck를 확인합니다."
+                )
                 self.heartbeat_alerted = True
-            elif time.time() - heartbeat_reference <= 180:
+            elif time.time() - heartbeat_reference <= 180 and self.heartbeat_alerted:
+                self.notifier.send_log_notification(
+                    f"🟢 [{self.config.environment}] Spring → Observer Heartbeat 복구\n"
+                    "• 상태: 로그 이벤트 전달이 다시 정상입니다."
+                )
                 self.heartbeat_alerted = False
             backlog = self.backlog_bytes()
             if backlog > self.BACKLOG_BYTES and not backlog_alerted:
-                self.notifier.send_log_notification(f"[{self.config.environment}] EVENT BACKLOG: pending_bytes={backlog}")
+                self.notifier.send_log_notification(
+                    f"🟠 [{self.config.environment}] Observer 이벤트 처리 지연\n"
+                    f"• 미처리 용량: {backlog // (1024 * 1024)} MB\n"
+                    "• 기준: 10 MB 초과\n"
+                    "• 영향: Slack 알림이 늦게 도착할 수 있습니다."
+                )
                 backlog_alerted = True
-            elif backlog <= self.BACKLOG_BYTES:
+            elif backlog <= self.BACKLOG_BYTES and backlog_alerted:
+                self.notifier.send_log_notification(
+                    f"🟢 [{self.config.environment}] Observer 이벤트 적체 해소\n"
+                    f"• 남은 미처리 용량: {backlog} bytes\n"
+                    "• 상태: 정상 처리 속도로 복구됐습니다."
+                )
                 backlog_alerted = False
             time.sleep(1)
 

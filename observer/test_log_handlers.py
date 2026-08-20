@@ -18,21 +18,20 @@ class RecordingNotifier:
     def __init__(self):
         self.messages = []
 
-    def send_notification(self, message):
+    def send_log_notification(self, message):
         self.messages.append(message)
 
 
 class LogHandlersTest(unittest.TestCase):
-    def test_server_restart_formats_ticket_policies_like_legacy_observer(self):
+    def test_server_restart_is_sent_to_monitoring_channel(self):
         notifier = RecordingNotifier()
         handlers = LogHandlers(Config(), notifier)
 
         handlers.create_server_restart_message("ignored log header")
 
         self.assertEqual(len(notifier.messages), 1)
-        self.assertIn("test@2원/1장 small@3원/2장", notifier.messages[0])
-        self.assertIn("registered@1원/1장", notifier.messages[0])
-        self.assertNotIn("test@2n1.small@3n2", notifier.messages[0])
+        self.assertIn("🟢 [DEV] Spring API 기동 완료", notifier.messages[0])
+        self.assertIn("요청 수신 가능", notifier.messages[0])
 
 
 if __name__ == "__main__":

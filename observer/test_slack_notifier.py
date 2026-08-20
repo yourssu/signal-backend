@@ -75,7 +75,8 @@ class SlackNotifierTest(unittest.TestCase):
         sent = [call.kwargs["json"] for call in post.call_args_list]
         self.assertEqual(sent[1]["text"], "queued-message")
         self.assertEqual(sent[2]["channel"], "log-channel")
-        self.assertIn("[PROD] SLACK QUEUE REPLAYED: completed=1 remaining=0", sent[2]["text"])
+        self.assertIn("🟢 [PROD] Slack 알림 재전송 완료", sent[2]["text"])
+        self.assertIn("재전송 성공: 1건", sent[2]["text"])
 
 
 if __name__ == "__main__":

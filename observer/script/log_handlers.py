@@ -1,4 +1,3 @@
-from ticket_price_formatter import to_ticket_price_message
 import time
 from datetime import datetime, timezone
 
@@ -21,14 +20,12 @@ class LogHandlers:
     
     def create_server_restart_message(self, line):
         """서버 재시작 메시지 생성"""
-        ticket_policy_message = f"- 💰 현재 가격 정책: {to_ticket_price_message(self.config.ticket_price_policy)}"
-        ticket_registered_message = f"- 🌱 프로필 등록 완료 첫 구매 고객: {to_ticket_price_message(self.config.ticket_price_registered_policy)}"
         message = (
-            f"[{self.config.environment.upper()}] SPRING STARTED: "
-            f"started_at={datetime.now(timezone.utc).isoformat()}\n"
-            f"{ticket_policy_message}\n{ticket_registered_message}"
+            f"🟢 [{self.config.environment.upper()}] Spring API 기동 완료\n"
+            f"• 시간: {datetime.now(timezone.utc).isoformat()}\n"
+            "• 상태: 요청 수신 가능"
         )
-        self.notifier.send_notification(message)
+        self.notifier.send_log_notification(message)
 
     def create_internal_error_message(self, line):
         """내부 에러 메시지 생성"""
@@ -38,5 +35,9 @@ class LogHandlers:
         if now - self.last_error_alert.get(cause, 0) < 300:
             return
         self.last_error_alert[cause] = now
-        message = f"[{self.config.environment.upper()}] SPRING ERROR\n{detail}"
+        message = (
+            f"🔴 [{self.config.environment.upper()}] Spring API 내부 오류\n"
+            f"• 오류: {detail}\n"
+            "• 확인: 동일 오류는 5분간 중복 알림을 제한합니다."
+        )
         self.notifier.send_log_notification(message)

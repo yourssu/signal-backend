@@ -27,9 +27,14 @@ check_component() {
   container="${PROJECT_NAME}-${component}"
   budget="$STATE_DIR/${component}-restart-budget"
   healthy_count="$STATE_DIR/${component}-healthy-count"
+  recovery_pending="$STATE_DIR/${component}-recovery-pending"
   restarts=$(cat "$budget" 2>/dev/null || echo 0)
   healthy=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}unknown{{end}}' "$container" 2>/dev/null || echo missing)
   if [ "$healthy" = healthy ]; then
+    if [ -e "$recovery_pending" ]; then
+      alert "$component" "🟢 RECOVERED" "자동 재시작 후 healthcheck 정상"
+      unlink "$recovery_pending" 2>/dev/null || true
+    fi
     count=$(cat "$healthy_count" 2>/dev/null || echo 0)
     count=$((count + 1))
     echo "$count" > "$healthy_count"
@@ -42,13 +47,14 @@ check_component() {
   [ "$healthy" = starting ] && return
   echo 0 > "$healthy_count"
   if [ "$restarts" -eq 0 ]; then
-    alert "$component" UNHEALTHY "3 consecutive failures; automatic restart 1/1"
+    alert "$component" "🔴 UNHEALTHY" "healthcheck 3회 연속 실패; 자동 재시작 1/1 진행"
     echo 1 > "$budget"
+    touch "$recovery_pending"
     docker restart "$container" >/dev/null
   else
     marker="$STATE_DIR/${component}-manual-alerted"
     if [ ! -e "$marker" ]; then
-      alert "$component" "MANUAL ACTION REQUIRED" "automatic restart exhausted"
+      alert "$component" "🚨 MANUAL ACTION REQUIRED" "자동 재시작 후에도 비정상; EC2에서 docker logs ${container} 확인 필요"
       touch "$marker"
     fi
   fi

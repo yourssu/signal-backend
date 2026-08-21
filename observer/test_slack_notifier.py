@@ -4,6 +4,7 @@ import os
 import sys
 import types
 import unittest
+import tempfile
 from unittest.mock import Mock, patch
 
 SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
@@ -14,6 +15,7 @@ from slack_notifier import SlackNotifier
 
 
 class Config:
+    environment = "PROD"
     slack_token = "secret-token"
     slack_channel = "payment-channel"
     slack_admin_channel = "admin-channel"
@@ -22,6 +24,13 @@ class Config:
 
 
 class SlackNotifierTest(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        Config.slack_queue_path = os.path.join(self.directory.name, "queue.jsonl")
+
+    def tearDown(self):
+        self.directory.cleanup()
+
     @patch("slack_notifier.requests.post")
     def test_http_200_with_slack_error_retries_and_reports_final_failure_without_sensitive_data(self, post):
         response = Mock(status_code=200)
@@ -46,11 +55,30 @@ class SlackNotifierTest(unittest.TestCase):
         response.json.return_value = {"ok": True}
         post.return_value = response
 
-        result = SlackNotifier(Config()).send_admin_notification("profile-created")
+        notifier = SlackNotifier(Config())
+
+        result = notifier.send_admin_notification("profile-created")
 
         self.assertTrue(result)
         self.assertEqual(post.call_count, 1)
         self.assertEqual(post.call_args.kwargs["json"]["channel"], "admin-channel")
+
+    @patch("slack_notifier.requests.post")
+    def test_recovery_replays_durable_queue_and_reports_completed_count(self, post):
+        response = Mock(status_code=200)
+        response.json.return_value = {"ok": True}
+        post.return_value = response
+        notifier = SlackNotifier(Config())
+        notifier.queue.enqueue("payment-channel", "queued-message")
+
+        self.assertTrue(notifier.send_notification("recovery-probe"))
+
+        self.assertEqual(notifier.queue.pending_count(), 0)
+        sent = [call.kwargs["json"] for call in post.call_args_list]
+        self.assertEqual(sent[1]["text"], "queued-message")
+        self.assertEqual(sent[2]["channel"], "log-channel")
+        self.assertIn("🟢 [PROD] Slack 알림 재전송 완료", sent[2]["text"])
+        self.assertIn("재전송 성공: 1건", sent[2]["text"])
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Observer reliability 운영
 
-배포 스크립트는 같은 이미지에서 Spring(`COMPONENT=spring`)과 observer(`COMPONENT=observer`)를 별도 컨테이너로 실행한다. PROD에서는 기존 Slack 명령 라우터인 admin(`COMPONENT=admin`)도 독립 컨테이너로 실행한다. Docker healthcheck가 3회 연속 실패하면 systemd가 관리하는 `supervise.sh`가 해당 컨테이너만 한 번 재시작하고, 재차 unhealthy가 되면 자동 복구를 멈춘다. 5분(정상 healthcheck 10회) 동안 안정적으로 동작하면 restart budget이 초기화된다.
+배포 스크립트는 DEV와 PROD 각각에서 같은 이미지로 Spring(`COMPONENT=spring`), observer(`COMPONENT=observer`), admin(`COMPONENT=admin`)을 별도 컨테이너로 실행한다. 각 admin은 Docker 내부 네트워크로 같은 환경의 Spring만 호출한다. 운영 명령은 기존 `/t`, `/add`, `/delete`를 사용하고 DEV 검증은 `/dev t`, `/dev add`, `/dev delete`를 사용한다. Docker healthcheck가 3회 연속 실패하면 systemd가 관리하는 `supervise.sh`가 해당 컨테이너만 한 번 재시작하고, 재차 unhealthy가 되면 자동 복구를 멈춘다. 5분(정상 healthcheck 10회) 동안 안정적으로 동작하면 restart budget이 초기화된다.
 
 로그 볼륨의 `state/`에는 이벤트/app offset, Slack 실패 큐, 컴포넌트별 restart budget이 저장된다. 이 디렉터리를 삭제하면 이어읽기와 재시작 예산도 초기화되므로 장애 대응 중 임의 삭제하지 않는다. rotation archive는 재시작 후 inode를 찾아 남은 내용을 읽을 수 있도록 압축하지 않는다.
 

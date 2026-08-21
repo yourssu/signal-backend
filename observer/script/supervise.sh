@@ -60,8 +60,9 @@ check_component() {
   else
     marker="$STATE_DIR/${component}-manual-alerted"
     if [ ! -e "$marker" ]; then
-      alert "$component" "🚨 수동 조치 필요" "자동 재시작 후에도 비정상; EC2에서 docker logs --since 15m ${container} 확인 필요"
-      touch "$marker"
+      if alert "$component" "🚨 수동 조치 필요" "자동 재시작 후에도 비정상; EC2에서 docker logs --since 15m ${container} 확인 필요"; then
+        touch "$marker"
+      fi
     fi
   fi
 }
@@ -69,7 +70,7 @@ check_component() {
 while true; do
   check_component spring
   check_component observer
-  if [ "$ENVIRONMENT" = "prod" ]; then check_component admin; fi
+  check_component admin
   if [ "${SUPERVISOR_ONCE:-0}" = 1 ]; then break; fi
   sleep 30
 done

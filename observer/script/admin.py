@@ -11,16 +11,13 @@ load_dotenv()  # .env 파일 환경변수 불러옴
 
 SLACK_TOKEN = os.getenv('SLACK_TOKEN')
 SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
-SLACK_CHANNEL_PROD = os.getenv('SLACK_CHANNEL_PROD') or os.getenv('SLACK_CHANNEL')
-SLACK_CHANNEL_DEV = os.getenv('SLACK_CHANNEL_DEV')
-SLACK_CHANNEL_ADMIN = os.getenv('SLACK_CHANNEL_ADMIN') or os.getenv('SLACK_ADMIN_CHANNEL')
-API_HOST_PROD = os.getenv('API_HOST_PROD')
-API_HOST_DEV = os.getenv('API_HOST_DEV')
-SECRET_KEY_PROD = os.getenv('SECRET_KEY_PROD') or os.getenv('ADMIN_ACCESS_KEY')
-SECRET_KEY_DEV = os.getenv('SECRET_KEY_DEV')
+SLACK_CHANNEL = os.getenv('SLACK_CHANNEL')
+SLACK_ADMIN_CHANNEL = os.getenv('SLACK_ADMIN_CHANNEL')
+ADMIN_ACCESS_KEY = os.getenv('ADMIN_ACCESS_KEY')
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'dev').lower()
 SERVER_PORT = os.getenv('SERVER_PORT', '8080')
 PROJECT_NAME = os.getenv('PROJECT_NAME', 'signal-backend')
-API_HOST_PROD = API_HOST_PROD or f'http://{PROJECT_NAME}-spring:{SERVER_PORT}'
+API_HOST = f'http://{PROJECT_NAME}-spring:{SERVER_PORT}'
 
 # 최대 티켓 개수
 max_ticket = 10
@@ -37,8 +34,8 @@ def handle_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") not in (SLACK_CHANNEL_PROD, SLACK_CHANNEL_DEV):
-            respond("❌ 이 명령은 DEV/PROD 결제 알림 채널에서만 사용할 수 있습니다.")
+        if command.get("channel_id") != SLACK_CHANNEL:
+            respond("❌ 이 명령은 결제 알림 채널에서만 사용할 수 있습니다.")
             return
 
         args = command['text'].split()
@@ -55,7 +52,7 @@ def handle_command(ack, command, say, respond):
             respond(f"❌ 티켓 개수는 {max_ticket}개를 초과할 수 없습니다.")
             return
 
-        response = reply(verification_code, ticket, command)
+        response = reply(verification_code, ticket)
 
         # 응답 확인
         if response.status_code == 200:
@@ -75,14 +72,11 @@ def handle_command(ack, command, say, respond):
         logger.error(f"{message}", exc_info=True)
 
 
-def reply(verification_code, ticket, command):
-    is_prod = command["channel_id"] == SLACK_CHANNEL_PROD
-    api_host = API_HOST_PROD if is_prod else API_HOST_DEV
-    secret_key = SECRET_KEY_PROD if is_prod else SECRET_KEY_DEV
+def reply(verification_code, ticket):
     return requests.post(
-        f'{api_host}/api/viewers',
+        f'{API_HOST}/api/viewers',
         json={
-            "secretKey": secret_key,
+            "secretKey": ADMIN_ACCESS_KEY,
             "verificationCode": verification_code,
             "ticket": ticket
         },
@@ -95,7 +89,7 @@ def handle_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") != SLACK_CHANNEL_ADMIN:
+        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
             respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
             return
 
@@ -107,7 +101,7 @@ def handle_command(ack, command, say, respond):
 
         profile_id = args[0]
 
-        response = reply_add(profile_id, command)
+        response = reply_add(profile_id)
 
         # 응답 확인
         if response.status_code == 201:
@@ -121,11 +115,11 @@ def handle_command(ack, command, say, respond):
         logger.error(f"{message}", exc_info=True)
 
 
-def reply_add(profile_id, command):
+def reply_add(profile_id):
     return requests.post(
-        f'{API_HOST_PROD}/api/blacklists',
+        f'{API_HOST}/api/blacklists',
         json={
-            "secretKey": SECRET_KEY_PROD,
+            "secretKey": ADMIN_ACCESS_KEY,
             "profileId": profile_id
         },
         headers={'Content-Type': 'application/json'}
@@ -137,7 +131,7 @@ def handle_command(ack, command, say, respond):
     ack()
 
     try:
-        if command.get("channel_id") != SLACK_CHANNEL_ADMIN:
+        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
             respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
             return
 
@@ -149,7 +143,7 @@ def handle_command(ack, command, say, respond):
 
         profile_id = args[0]
 
-        response = reply_delete(profile_id, command)
+        response = reply_delete(profile_id)
 
         # 응답 확인
         if response.status_code == 204:
@@ -164,11 +158,71 @@ def handle_command(ack, command, say, respond):
 
 
 
-def reply_delete(profile_id, command):
+def reply_delete(profile_id):
     return requests.delete(
-        f'{API_HOST_PROD}/api/blacklists/{profile_id}',
-        params={"secretKey": SECRET_KEY_PROD},
+        f'{API_HOST}/api/blacklists/{profile_id}',
+        params={"secretKey": ADMIN_ACCESS_KEY},
     )
+
+
+@app.command("/dev")
+def handle_dev_command(ack, command, say, respond):
+    ack()
+
+    if ENVIRONMENT != "dev":
+        respond("❌ /dev 명령은 DEV 환경에서만 사용할 수 있습니다.")
+        return
+
+    args = command.get("text", "").split()
+    if not args:
+        respond("❌ 사용법: /dev t [인증번호] <개수> | /dev add [식별번호] | /dev delete [식별번호]")
+        return
+
+    subcommand = args[0].lower()
+    try:
+        if subcommand == "t":
+            if command.get("channel_id") != SLACK_CHANNEL:
+                respond("❌ 이 명령은 DEV 결제 알림 채널에서만 사용할 수 있습니다.")
+                return
+            if len(args) < 2:
+                respond("❌ 사용법: /dev t [인증번호] <티켓 개수>")
+                return
+            verification_code = args[1]
+            ticket = int(args[2]) if len(args) > 2 else default_ticket
+            if ticket > max_ticket:
+                respond(f"❌ 티켓 개수는 {max_ticket}개를 초과할 수 없습니다.")
+                return
+            response = reply(verification_code, ticket)
+            if response.status_code == 200:
+                respond(f"✅ DEV 인증 성공! 인증 번호 {verification_code}이 확인되었습니다.")
+                say(f"✅ @{command['user_name']} 님이 DEV 이용권 발급을 요청했습니다.")
+            else:
+                respond(f"❌ DEV 인증 실패: {response.text}")
+            return
+
+        if subcommand in ("add", "delete"):
+            if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
+                respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
+                return
+            if len(args) < 2:
+                respond(f"❌ 사용법: /dev {subcommand} [식별번호]")
+                return
+            profile_id = args[1]
+            response = reply_add(profile_id) if subcommand == "add" else reply_delete(profile_id)
+            expected_status = 201 if subcommand == "add" else 204
+            if response.status_code == expected_status:
+                action = "등록" if subcommand == "add" else "삭제"
+                say(f"✅ DEV 블랙리스트 {action} 성공! 식별 번호 {profile_id}")
+            else:
+                respond(f"❌ DEV 블랙리스트 처리 실패: {response.text}")
+            return
+
+        respond("❌ 지원하지 않는 DEV 명령입니다. 사용법: /dev t|add|delete ...")
+    except ValueError:
+        respond("❌ 티켓 개수는 숫자여야 합니다.")
+    except Exception as e:
+        respond(f"❌ 오류 발생: {str(e)}")
+        logger.error("DEV 명령 처리 중 오류 발생", exc_info=True)
 
 
 def start_app(port):

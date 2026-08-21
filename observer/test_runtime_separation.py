@@ -4,7 +4,7 @@ import unittest
 
 ROOT = os.path.dirname(__file__)
 class RuntimeSeparationTest(unittest.TestCase):
-    def test_docker_runs_spring_and_observer_per_environment_and_admin_only_in_prod(self):
+    def test_docker_runs_spring_observer_and_admin_per_environment(self):
         with open(os.path.join(ROOT, "..", "app", "Dockerfile"), encoding="utf-8") as file:
             dockerfile = file.read()
         with open(os.path.join(ROOT, "script", "docker-deploy.sh"), encoding="utf-8") as file:
@@ -17,7 +17,7 @@ class RuntimeSeparationTest(unittest.TestCase):
         self.assertIn('-e COMPONENT=spring', deploy_script)
         self.assertIn('-e COMPONENT=observer', deploy_script)
         self.assertIn('-e COMPONENT=admin', deploy_script)
-        self.assertIn('if [ "$ENVIRONMENT" = "prod" ]', deploy_script)
+        self.assertNotIn('if [ "$ENVIRONMENT" = "prod" ]', deploy_script)
         self.assertIn('docker network create "$NETWORK_NAME"', deploy_script)
         self.assertGreaterEqual(deploy_script.count('--network "$NETWORK_NAME"'), 3)
         self.assertIn('Restart=always', deploy_script)
@@ -48,7 +48,7 @@ class RuntimeSeparationTest(unittest.TestCase):
             with open(os.path.join(ROOT, "..", ".github", "workflows", workflow), encoding="utf-8") as file:
                 content = file.read()
                 for variable in ("SLACK_CHANNEL_DEV", "API_HOST_DEV", "SECRET_KEY_DEV"):
-                    self.assertIn(variable, content)
+                    self.assertNotIn(variable, content)
 
 
 if __name__ == "__main__":

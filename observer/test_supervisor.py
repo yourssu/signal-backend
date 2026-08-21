@@ -38,6 +38,36 @@ class SupervisorScenarioTest(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "observer-manual-alerted")))
             self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "admin-manual-alerted")))
 
+    def test_manual_alert_marker_is_created_only_after_slack_delivery_succeeds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bin_dir = os.path.join(directory, "bin")
+            os.makedirs(bin_dir)
+            env_file = os.path.join(directory, ".env")
+            with open(env_file, "w", encoding="utf-8") as file:
+                file.write("PROJECT_NAME=test\nENVIRONMENT=dev\nSLACK_TOKEN=test-token\nSLACK_LOG_CHANNEL=test-channel\n")
+            self._executable(bin_dir, "docker", '#!/bin/bash\nif [ "$1" = inspect ]; then echo unhealthy; else exit 0; fi\n')
+            self._executable(
+                bin_dir,
+                "curl",
+                '#!/bin/bash\ncount=$(cat "$CURL_COUNT" 2>/dev/null || echo 0)\ncount=$((count + 1))\necho "$count" > "$CURL_COUNT"\nif [ "$count" -le 3 ]; then echo \'{"ok":true}\'; elif [ "$count" -le 6 ]; then exit 1; else echo \'{"ok":true}\'; fi\n',
+            )
+            self._executable(bin_dir, "logger", "#!/bin/bash\nexit 0\n")
+            environment = {
+                **os.environ,
+                "PATH": bin_dir + os.pathsep + os.environ["PATH"],
+                "SUPERVISOR_ENV_FILE": env_file,
+                "SUPERVISOR_ONCE": "1",
+                "CURL_COUNT": os.path.join(directory, "curl-count"),
+            }
+
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            marker = os.path.join(directory, "logs", "state", "spring-manual-alerted")
+            self.assertFalse(os.path.exists(marker))
+
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            self.assertTrue(os.path.exists(marker))
+
     @staticmethod
     def _executable(directory, name, content):
         path = os.path.join(directory, name)

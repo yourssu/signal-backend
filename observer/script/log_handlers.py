@@ -35,7 +35,7 @@ class LogHandlers:
     def create_internal_error_message(self, line):
         """내부 에러 메시지 생성"""
         project_name = getattr(self.config, "project_name", "signal-backend")
-        detail = line.replace(self.INTERNAL_ERROR_LOG_PREFIX, '')
+        detail = line.split(self.INTERNAL_ERROR_LOG_PREFIX, 1)[1].strip()
         cause = detail.splitlines()[0][:200]
         now = time.monotonic()
         if now - self.last_error_alert.get(cause, 0) < 300:

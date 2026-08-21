@@ -17,6 +17,7 @@ class RuntimeSeparationTest(unittest.TestCase):
         self.assertIn('-e COMPONENT=spring', deploy_script)
         self.assertIn('-e COMPONENT=observer', deploy_script)
         self.assertIn('-e COMPONENT=admin', deploy_script)
+        self.assertTrue(deploy_script.startswith("#!/bin/bash\nset -euo pipefail\n"))
         self.assertNotIn('if [ "$ENVIRONMENT" = "prod" ]', deploy_script)
         self.assertIn('docker network create "$NETWORK_NAME"', deploy_script)
         self.assertGreaterEqual(deploy_script.count('--network "$NETWORK_NAME"'), 3)

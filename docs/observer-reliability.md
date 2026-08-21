@@ -6,9 +6,9 @@
 
 배포 후 다음을 확인한다.
 
-- `${PROJECT_NAME}-spring`, `${PROJECT_NAME}-observer`가 각각 `healthy`인지 확인한다.
-- `${PROJECT_NAME}-supervisor.service`가 `active (running)`인지 확인한다. systemd가 supervisor 종료와 EC2 재부팅 후 자동으로 다시 실행한다. EC2 자체 장애와 Slack 장애는 같은 서버가 알릴 수 없으므로 Slack과 독립된 외부 dead-man monitor가 별도로 필요하다.
+- `${PROJECT_NAME}-spring`, `${PROJECT_NAME}-observer`, `${PROJECT_NAME}-admin`이 각각 `healthy`인지 확인한다.
+- `${PROJECT_NAME}-supervisor.service`가 `active (running)`인지 확인한다. systemd가 supervisor 종료와 EC2 재부팅 후 자동으로 다시 실행한다. 이번 감시 범위는 EC2 내부 컴포넌트이며 외부 dead-man monitor는 사용하지 않는다.
 - observer 컨테이너만 중지해 observer만 한 번 재시작되고 Spring 컨테이너 ID/시작 시간이 바뀌지 않는지 확인한다. 다시 health 실패를 만들면 `MANUAL ACTION REQUIRED` 이후 반복 재시작하지 않는지 확인한다.
 - `logs/state/slack-queue.jsonl`에 실패 건이 남고 Slack 복구 후 0건이 되는지 확인한다.
 
-Admin은 PROD에서 한 개만 실행하며 PROD/DEV 결제 채널 ID에 따라 기존처럼 대상 API와 관리자 키를 선택한다. `/add`, `/delete`는 기존 관리자 채널에서 PROD API를 호출한다. Admin도 Spring, observer와 같은 3회 실패/1회 자동 재시작 정책을 적용한다.
+Admin은 DEV와 PROD에 각각 실행하며 Docker 내부 네트워크의 같은 환경 Spring만 호출한다. 기존 `/t`, `/add`, `/delete`의 Slack Request URL은 PROD로, `/dev`의 Request URL은 DEV로 연결한다. Admin도 Spring, observer와 같은 3회 실패/1회 자동 재시작 정책을 적용한다.

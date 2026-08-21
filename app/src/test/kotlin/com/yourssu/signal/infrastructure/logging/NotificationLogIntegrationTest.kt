@@ -16,6 +16,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.core.annotation.DoNotParallelize
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.string.shouldEndWith
 import org.slf4j.LoggerFactory
@@ -67,7 +68,7 @@ class NotificationLogIntegrationTest : DescribeSpec({
             rollingPolicy.maxHistory shouldBe 14
         }
 
-        it("이벤트 계약을 전용 파일에 정확히 한 번 기록하고 app 로그에는 기록하지 않는다") {
+        it("전체 이벤트 계약은 전용 파일에 기록하고 app 로그에는 민감정보 없는 진단 요약만 기록한다") {
             val verification = Verification(
                 verificationCode = VerificationCode(123),
                 uuid = Uuid("12345678-1234-1234-1234-123456789012"),
@@ -115,8 +116,14 @@ class NotificationLogIntegrationTest : DescribeSpec({
             eventLines.size shouldBe eventLines.distinct().size
 
             val applicationLog = logDirectory.resolve("app.log").readText()
-            applicationLog shouldNotContain "Notification"
+            applicationLog shouldContain "eventType=CREATE_PROFILE profileId=1 outcome=SUCCESS"
+            applicationLog shouldContain "eventType=ISSUE_TICKET userId=12345678 outcome=SUCCESS"
+            applicationLog shouldContain "eventType=BANK_DEPOSIT_TICKET outcome=FAILURE reason=AMOUNT_MISMATCH"
+            applicationLog shouldContain "eventType=PAYMENT_NOTIFICATION outcome=SUCCESS"
             applicationLog shouldNotContain "@plain&contact"
+            applicationLog shouldNotContain "테스트&닉네임"
+            applicationLog shouldNotContain "안녕하세요"
+            applicationLog shouldNotContain "Issued ticket&123"
             applicationLog shouldNotContain "deposit name"
             applicationLog shouldNotContain "payer"
             applicationLog shouldNotContain "secretKey"

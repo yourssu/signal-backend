@@ -49,7 +49,6 @@ class ObserverRuntime:
             DurableLogCursor(os.path.join(log_root, "events", "notification-events.log"), os.path.join(self.state_root, "event-offset.json"), True),
             DurableLogCursor(os.path.join(log_root, "app.log"), os.path.join(self.state_root, "app-offset.json"), True),
         ]
-        self.notifier.activity_callback = lambda: self._write_health(0)
 
     def process_line(self, path, line):
         if "SIGNAL_HEARTBEAT" in line:

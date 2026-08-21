@@ -26,7 +26,8 @@ class DockerDeployTest(unittest.TestCase):
                 "docker",
                 "#!/bin/bash\n"
                 "case \"$1\" in\n"
-                "  login|pull) exit 0 ;;\n"
+                "  login) cat >/dev/null; exit 0 ;;\n"
+                "  pull) exit 0 ;;\n"
                 "  ps) exit 0 ;;\n"
                 "  images) echo 'REPOSITORY TAG IMAGE ID CREATED AT'; exit 0 ;;\n"
                 "  network) exit 0 ;;\n"

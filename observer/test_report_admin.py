@@ -25,36 +25,38 @@ admin = importlib.import_module("admin")
 
 
 class ReportAdminTest(unittest.TestCase):
-    def test_reply_report_calls_approve_api_with_environment_secret(self):
-        command = {"channel_id": "admin-channel"}
+    def test_reply_report_calls_local_spring_with_local_secret(self):
         response = Mock(status_code=200)
-        with patch.object(admin, "SLACK_CHANNEL_ADMIN", "admin-channel"), \
-                patch.object(admin, "API_HOST_PROD", "https://prod.example"), \
-                patch.object(admin, "SECRET_KEY_PROD", "prod-secret"), \
+        with patch.object(admin, "API_HOST", "http://signal-backend-spring:9012"), \
+                patch.object(admin, "ADMIN_ACCESS_KEY", "local-secret"), \
                 patch.object(admin.requests, "post", return_value=response) as post:
-            actual = admin.reply_report("7", command)
+            actual = admin.reply_report("7")
 
         self.assertIs(response, actual)
         post.assert_called_once_with(
-            "https://prod.example/api/reports/7/approve",
-            json={"secretKey": "prod-secret"},
+            "http://signal-backend-spring:9012/api/reports/7/approve",
+            json={"secretKey": "local-secret"},
             headers={"Content-Type": "application/json"},
         )
 
     def test_report_command_approves_once_and_announces_success(self):
         ack, say, respond = Mock(), Mock(), Mock()
         command = {"text": "7", "channel_id": "admin-channel", "user_name": "admin"}
-        with patch.object(admin, "reply_report", return_value=Mock(status_code=200)) as reply:
+        with patch.object(admin, "ENVIRONMENT", "prod"), \
+                patch.object(admin, "SLACK_ADMIN_CHANNEL", "admin-channel"), \
+                patch.object(admin, "reply_report", return_value=Mock(status_code=200)) as reply:
             admin.handle_report_command(ack, command, say, respond)
 
         ack.assert_called_once()
-        reply.assert_called_once_with("7", command)
+        reply.assert_called_once_with("7")
         say.assert_called_once()
         self.assertIn("신고 ID 7", say.call_args.args[0])
 
     def test_report_command_rejects_invalid_usage_without_api_call(self):
         ack, say, respond = Mock(), Mock(), Mock()
-        with patch.object(admin, "reply_report") as reply:
+        with patch.object(admin, "ENVIRONMENT", "prod"), \
+                patch.object(admin, "SLACK_ADMIN_CHANNEL", "admin-channel"), \
+                patch.object(admin, "reply_report") as reply:
             admin.handle_report_command(ack, {"text": "", "channel_id": "admin-channel"}, say, respond)
 
         reply.assert_not_called()

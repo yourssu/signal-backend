@@ -68,7 +68,7 @@ class SignalEventContractTest(unittest.TestCase):
         ]
 
         for payload, expected_message in cases:
-            line = f"2026-08-20 00:00:00.000 [main] INFO com.yourssu.signal.infrastructure.logging.Notification - {payload}"
+            line = f"2026-08-20 00:00:00.000 [main] [traceId=request-123] INFO com.yourssu.signal.infrastructure.logging.Notification - {payload}"
             prefix = next(prefix for prefix in self.handler.handlers if prefix in line)
             self.handler.handlers[prefix](line)
             self.assertIn(expected_message, self.notifier.messages[-1])
@@ -84,7 +84,7 @@ class SignalEventContractTest(unittest.TestCase):
         ]
 
         for payload, expected_message in cases:
-            line = f"2026-08-20 00:00:00.000 [main] INFO com.yourssu.signal.infrastructure.logging.Notification - {payload}"
+            line = f"2026-08-20 00:00:00.000 [main] [traceId=request-123] INFO com.yourssu.signal.infrastructure.logging.Notification - {payload}"
             prefix = next(prefix for prefix in self.handler.handlers if prefix in line)
             self.handler.handlers[prefix](line)
             self.assertTrue(any(expected_message in message for message in self.notifier.messages))

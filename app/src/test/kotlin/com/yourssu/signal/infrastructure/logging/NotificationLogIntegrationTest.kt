@@ -16,6 +16,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.core.annotation.DoNotParallelize
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.string.shouldEndWith
 import org.slf4j.LoggerFactory
@@ -52,14 +53,14 @@ class NotificationLogIntegrationTest : DescribeSpec({
     }
 
     describe("Notification 전용 이벤트 로그") {
-        it("전용 파일을 100MB 단위로 회전하고 14일 보관한다") {
+        it("전용 파일을 이어읽을 수 있는 형태로 100MB 단위 회전하고 14일 보관한다") {
             val context = LoggerFactory.getILoggerFactory() as LoggerContext
             val logger = context.getLogger("com.yourssu.signal.infrastructure.logging.Notification")
             val appender = logger.getAppender("NOTIFICATION_EVENT_FILE") as RollingFileAppender<ILoggingEvent>
             val rollingPolicy = appender.rollingPolicy as SizeAndTimeBasedRollingPolicy<ILoggingEvent>
 
             appender.file shouldEndWith "events/notification-events.log"
-            rollingPolicy.fileNamePattern shouldEndWith "events/archive/%d{yyyy-MM-dd}.%i.log.gz"
+            rollingPolicy.fileNamePattern shouldEndWith "events/archive/%d{yyyy-MM-dd}.%i.log"
             val maxFileSize = SizeAndTimeBasedRollingPolicy::class.java.getDeclaredField("maxFileSize").run {
                 isAccessible = true
                 get(rollingPolicy) as FileSize
@@ -68,7 +69,7 @@ class NotificationLogIntegrationTest : DescribeSpec({
             rollingPolicy.maxHistory shouldBe 14
         }
 
-        it("이벤트 계약을 전용 파일에 정확히 한 번 기록하고 app 로그에는 기록하지 않는다") {
+        it("전체 이벤트 계약은 전용 파일에 기록하고 app 로그에는 민감정보 없는 진단 요약만 기록한다") {
             val verification = Verification(
                 verificationCode = VerificationCode(123),
                 uuid = Uuid("12345678-1234-1234-1234-123456789012"),
@@ -118,8 +119,14 @@ class NotificationLogIntegrationTest : DescribeSpec({
             eventLines.size shouldBe eventLines.distinct().size
 
             val applicationLog = logDirectory.resolve("app.log").readText()
-            applicationLog shouldNotContain "Notification"
+            applicationLog shouldContain "eventType=CREATE_PROFILE profileId=1 outcome=SUCCESS"
+            applicationLog shouldContain "eventType=ISSUE_TICKET userId=12345678 outcome=SUCCESS"
+            applicationLog shouldContain "eventType=BANK_DEPOSIT_TICKET outcome=FAILURE reason=AMOUNT_MISMATCH"
+            applicationLog shouldContain "eventType=PAYMENT_NOTIFICATION outcome=SUCCESS"
             applicationLog shouldNotContain "@plain&contact"
+            applicationLog shouldNotContain "테스트&닉네임"
+            applicationLog shouldNotContain "안녕하세요"
+            applicationLog shouldNotContain "Issued ticket&123"
             applicationLog shouldNotContain "deposit name"
             applicationLog shouldNotContain "payer"
             applicationLog shouldNotContain "secretKey"

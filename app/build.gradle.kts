@@ -46,6 +46,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-logging:$springBootVersion")
     implementation("org.springframework.boot:spring-boot-starter-security:$springBootVersion")
+    implementation("org.springframework.boot:spring-boot-starter-actuator:$springBootVersion")
 
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign:$feignVersion")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer:$feignVersion")
@@ -110,4 +111,3 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-

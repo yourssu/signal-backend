@@ -148,6 +148,7 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
           SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
           SLACK_ADMIN_CHANNEL: ${{ vars.SLACK_ADMIN_CHANNEL }}
           SLACK_LOG_CHANNEL: ${{ vars.SLACK_LOG_CHANNEL }}
@@ -203,6 +204,7 @@ jobs:
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env
           echo "ENVIRONMENT=$ENVIRONMENT" >> .env
           echo "SLACK_TOKEN=$SLACK_TOKEN" >> .env
+          echo "SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET" >> .env
           echo "SLACK_CHANNEL=$SLACK_CHANNEL" >> .env
           echo "SLACK_ADMIN_CHANNEL=$SLACK_ADMIN_CHANNEL" >> .env
           echo "SLACK_LOG_CHANNEL=$SLACK_LOG_CHANNEL" >> .env
@@ -228,10 +230,10 @@ jobs:
           
           # Deploy environment file and docker script to host machine
           scp -i yourssu.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
-          scp -i yourssu.pem observer/script/docker-deploy.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
+          scp -i yourssu.pem observer/script/docker-deploy.sh observer/script/supervise.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
           
           # Make the script executable
-          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh"
+          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh /home/ubuntu/$PROJECT_NAME-api/supervise.sh"
           
           # Execute the deployment script
           ssh -i yourssu.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \

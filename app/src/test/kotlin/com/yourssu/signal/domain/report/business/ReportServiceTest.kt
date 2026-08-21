@@ -63,11 +63,11 @@ class ReportServiceTest : DescribeSpec({
     }
 
     describe("신고 생성") {
-        context("연락처를 구매하지 않았으면") {
+        context("티켓을 보유했어도 신고 대상 연락처를 열람하지 않았으면") {
             it("신고를 저장하지 않는다") {
                 val uuid = Uuid("reporter")
                 whenever(profileReader.getById(2)).thenReturn(profile(uuid = Uuid("target")))
-                whenever(viewerReader.get(uuid)).thenReturn(Viewer(3, uuid, 0, updatedTime = null))
+                whenever(viewerReader.get(uuid)).thenReturn(Viewer(3, uuid, 10, updatedTime = null))
                 whenever(purchasedProfileReader.exists(2, 3)).thenReturn(false)
                 shouldThrow<ReportNotEligibleException> { service.create(uuid.value, 2) }
                 verify(reportWriter, never()).save(any())

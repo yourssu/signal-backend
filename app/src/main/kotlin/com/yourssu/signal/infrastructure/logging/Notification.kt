@@ -3,19 +3,26 @@ package com.yourssu.signal.infrastructure.logging
 import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.verification.implement.Verification
 import com.yourssu.signal.infrastructure.sms.SMSMessage
+import java.time.LocalDateTime
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger("com.yourssu.signal.infrastructure.logging.Notification")
 private val diagnosticLogger = KotlinLogging.logger("com.yourssu.signal.infrastructure.logging.BusinessEvent")
 
 object Notification {
+    fun notifyFalseContactReport(reportId: Long, profileId: Long, contact: String, createdTime: LocalDateTime) {
+        logger.info {
+            "FalseContactReport&$reportId&$profileId&${escapeEventField(contact)}&$createdTime"
+        }
+    }
+
     fun notifyCreatedProfile(profile: Profile) {
         logger.info {
             "CreateProfile&${profile.id}" +
-                    "&${escapeCreateProfileField(profile.department)}" +
-                    "&${escapeCreateProfileField(profile.contact)}" +
-                    "&${escapeCreateProfileField(profile.nickname)}" +
-                    "&${escapeCreateProfileField(profile.introSentences.joinToString(","))}"
+                    "&${escapeEventField(profile.department)}" +
+                    "&${escapeEventField(profile.contact)}" +
+                    "&${escapeEventField(profile.nickname)}" +
+                    "&${escapeEventField(profile.introSentences.joinToString(","))}"
         }
         diagnosticLogger.info { "eventType=CREATE_PROFILE profileId=${profile.id} outcome=SUCCESS" }
     }
@@ -70,7 +77,7 @@ object Notification {
         return sanitizedMessage.filter { it.isISOControl().not() }
     }
 
-    private fun escapeCreateProfileField(value: String): String = buildString {
+    private fun escapeEventField(value: String): String = buildString {
         value.forEach { character ->
             append(
                 when {

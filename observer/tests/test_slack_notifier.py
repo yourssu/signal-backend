@@ -7,7 +7,7 @@ import unittest
 import tempfile
 from unittest.mock import Mock, patch
 
-SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
+SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "..", "script")
 sys.path.insert(0, SCRIPT_DIR)
 sys.modules.setdefault("requests", types.SimpleNamespace(post=None))
 

@@ -175,7 +175,7 @@ def handle_dev_command(ack, command, say, respond):
 
     args = command.get("text", "").split()
     if not args:
-        respond("❌ 사용법: /dev t [인증번호] <개수> | /dev add [식별번호] | /dev delete [식별번호]")
+        respond("❌ 사용법: /dev t [인증번호] <개수> | /dev add|delete [식별번호] | /dev report [신고 ID]")
         return
 
     subcommand = args[0].lower()
@@ -217,12 +217,63 @@ def handle_dev_command(ack, command, say, respond):
                 respond(f"❌ DEV 블랙리스트 처리 실패: {response.text}")
             return
 
-        respond("❌ 지원하지 않는 DEV 명령입니다. 사용법: /dev t|add|delete ...")
+        if subcommand == "report":
+            if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
+                respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
+                return
+            if len(args) != 2 or not args[1].isdigit() or int(args[1]) <= 0:
+                respond("❌ 사용법: /dev report [신고 ID]")
+                return
+            report_id = args[1]
+            response = reply_report(report_id)
+            if response.status_code == 200:
+                say(f"✅ DEV 신고 승인 성공! 신고 ID {report_id}의 블랙리스트 처리와 티켓 보상이 완료되었습니다.")
+            else:
+                respond(f"❌ DEV 신고 승인 실패: {response.text}")
+            return
+
+        respond("❌ 지원하지 않는 DEV 명령입니다. 사용법: /dev t|add|delete|report ...")
     except ValueError:
         respond("❌ 티켓 개수는 숫자여야 합니다.")
     except Exception as e:
         respond(f"❌ 오류 발생: {str(e)}")
         logger.error("DEV 명령 처리 중 오류 발생", exc_info=True)
+
+
+@app.command("/report")
+def handle_report_command(ack, command, say, respond):
+    ack()
+
+    try:
+        if ENVIRONMENT != "prod":
+            respond("❌ /report 명령은 PROD 환경에서만 사용할 수 있습니다.")
+            return
+        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
+            respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
+            return
+        args = command['text'].split()
+        if len(args) != 1 or not args[0].isdigit() or int(args[0]) <= 0:
+            respond("❌ 사용법: /report [신고 ID]")
+            return
+
+        report_id = args[0]
+        response = reply_report(report_id)
+        if response.status_code == 200:
+            say(f"✅ 신고 승인 성공! 신고 ID {report_id}의 블랙리스트 처리와 티켓 보상이 완료되었습니다.")
+        else:
+            respond(f"❌ 신고 승인 실패: {response.text}")
+    except Exception as e:
+        message = f"❌ 오류 발생: {str(e)}"
+        respond(message)
+        logger.error(f"{message}", exc_info=True)
+
+
+def reply_report(report_id):
+    return requests.post(
+        f'{API_HOST}/api/reports/{report_id}/approve',
+        json={"secretKey": ADMIN_ACCESS_KEY},
+        headers={'Content-Type': 'application/json'}
+    )
 
 
 def start_app(port):

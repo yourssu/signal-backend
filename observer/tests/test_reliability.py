@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import Mock
 
-SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
+SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "..", "script")
 sys.path.insert(0, SCRIPT_DIR)
 
 from durable_queue import DurableSlackQueue

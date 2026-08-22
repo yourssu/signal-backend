@@ -4,7 +4,7 @@ import types
 import unittest
 from datetime import timezone
 
-SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "script")
+SCRIPT_DIR = os.path.join(os.path.dirname(__file__), "..", "script")
 sys.path.insert(0, SCRIPT_DIR)
 sys.modules.setdefault("pytz", types.SimpleNamespace(timezone=lambda _: timezone.utc, utc=timezone.utc))
 class PolicyClient:

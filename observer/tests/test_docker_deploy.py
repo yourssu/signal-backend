@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 
-SCRIPT = os.path.join(os.path.dirname(__file__), "script", "docker-deploy.sh")
+SCRIPT = os.path.join(os.path.dirname(__file__), "..", "script", "docker-deploy.sh")
 
 
 class DockerDeployTest(unittest.TestCase):

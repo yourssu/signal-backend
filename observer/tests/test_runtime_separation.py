@@ -2,7 +2,7 @@ import os
 import unittest
 
 
-ROOT = os.path.dirname(__file__)
+ROOT = os.path.join(os.path.dirname(__file__), "..")
 class RuntimeSeparationTest(unittest.TestCase):
     def test_docker_runs_spring_observer_and_admin_per_environment(self):
         with open(os.path.join(ROOT, "..", "app", "Dockerfile"), encoding="utf-8") as file:

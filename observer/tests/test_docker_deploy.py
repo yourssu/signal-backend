@@ -35,7 +35,11 @@ class DockerDeployTest(unittest.TestCase):
             self._executable(bin_directory, "aws", "#!/bin/bash\necho token\n")
             self._executable(bin_directory, "flock", "#!/bin/bash\nexit 0\n")
             self._executable(bin_directory, "sudo", "#!/bin/bash\nexit 0\n")
-            self._executable(bin_directory, "curl", "#!/bin/bash\necho '{\"ok\":true}'\n")
+            self._executable(
+                bin_directory,
+                "curl",
+                "#!/bin/bash\nprintf '%s\\n' \"$*\" >> \"$CURL_LOG\"\necho '{\"ok\":true}'\n",
+            )
             self._executable(bin_directory, "logger", "#!/bin/bash\nexit 0\n")
             self._executable(
                 bin_directory,
@@ -50,10 +54,12 @@ class DockerDeployTest(unittest.TestCase):
                 "exit 0\n",
             )
             docker_log = os.path.join(directory, "docker.log")
+            curl_log = os.path.join(directory, "curl.log")
             environment = {
                 **os.environ,
                 "PATH": bin_directory + os.pathsep + os.environ["PATH"],
                 "DOCKER_LOG": docker_log,
+                "CURL_LOG": curl_log,
                 "DEPLOY_HEALTH_TIMEOUT": "0",
             }
 
@@ -72,6 +78,10 @@ class DockerDeployTest(unittest.TestCase):
             self.assertIn("sha256:new", docker_calls)
             self.assertIn("sha256:old", docker_calls)
             self.assertIn("previous image restored", result.stderr)
+            with open(curl_log, encoding="utf-8") as file:
+                slack_payload = file.read()
+            self.assertNotIn(r"\\n", slack_payload)
+            self.assertIn(r"\n```", slack_payload)
 
     @staticmethod
     def _executable(directory, name, content):

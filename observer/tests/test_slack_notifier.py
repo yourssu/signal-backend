@@ -80,6 +80,23 @@ class SlackNotifierTest(unittest.TestCase):
         self.assertIn("🟢 [PROD] Slack 알림 재전송 완료", sent[2]["text"])
         self.assertIn("재전송 성공: 1건", sent[2]["text"])
 
+    @patch("slack_notifier.requests.post")
+    def test_incident_recovery_is_sent_to_original_thread(self, post):
+        response = Mock(status_code=200)
+        response.json.side_effect = [
+            {"ok": True, "ts": "100.200"},
+            {"ok": True, "ts": "100.201"},
+        ]
+        post.return_value = response
+        notifier = SlackNotifier(Config())
+
+        thread_ts = notifier.start_log_incident("backlog detected")
+        result = notifier.reply_log_incident("backlog recovered", thread_ts)
+
+        self.assertEqual(thread_ts, "100.200")
+        self.assertTrue(result)
+        self.assertEqual(post.call_args_list[1].kwargs["json"]["thread_ts"], "100.200")
+
 
 if __name__ == "__main__":
     unittest.main()

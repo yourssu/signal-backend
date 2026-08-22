@@ -59,10 +59,14 @@ class SignalHandler:
             self._decode_create_profile_field(value)
             for value in (department, contact, nickname, introSentences)
         )
+        contact_display = (
+            f"https://www.instagram.com/{contact[1:]}"
+            if contact.startswith('@') else contact
+        )
         message = f"""🩷 *프로필 등록 완료* 🩷
     -  💖 *식별 번호*: {id}
     -  🏢 *학과*: {department}
-    -  📞 *연락처*: https://www.instagram.com/{contact.replace('@', '')}
+    -  📞 *연락처*: {contact_display}
     -  👤 *닉네임*: {nickname}
     -  📝 *자기소개*: {introSentences}
     """
@@ -118,28 +122,44 @@ class SignalHandler:
     def create_false_contact_report_message(self, line):
         report_id, profile_id, contact, created_time = line[line.find('&') + 1:].split('&', 3)
         contact = self._decode_create_profile_field(contact)
-        message = f"""<!channel> 🚨 허위 연락처 신고가 접수되었습니다. 🚨
-신고 ID: {report_id}
-대상 profileId: {profile_id}
-대상 연락처: {contact}
-시각: {created_time}
-승인: /report {report_id}"""
+        environment = self.config.environment.upper()
+        command = f"/dev report {report_id}" if environment == "DEV" else f"/report {report_id}"
+        message = f"""📣 *허위 연락처 신고 접수 - {environment} SERVER* 📣
+    -  🆔 *신고 ID*: {report_id}
+    -  👤 *대상 프로필 ID*: {profile_id}
+    -  📞 *대상 연락처*: {contact}
+    -  ⏰ *접수 시각*: {created_time} KST
+
+    *승인*: `{command}`"""
         self.notifier.send_admin_notification(message)
 
     def create_failed_profile_contact_message(self, line):
         """프로필 등록 실패 메시지"""
-        contact_policy = line[line.find('&') + 1:].strip()
+        fields = line[line.find('&') + 1:].strip().split('&')
+        if len(fields) == 1:
+            detail = f"    - ⚔️ 중복 연락처 제한 기준: {fields[0]} 개"
+        else:
+            contact, existing_ids, attempted_count, contact_limit = fields
+            detail = f"""    - 📞 연락처: {self._decode_create_profile_field(contact)}
+    - 👥 기존 프로필 ID: {existing_ids}"""
         message = f"""🚨🚨 같은 연락처 등록 실패 - {self.config.environment.upper()} SERVER 🚨🚨
-    - ⚔️ 중복 연락처 제한 기준: {contact_policy} 개
+{detail}
     """
         self._append_or_create_file("/app/logs/createProfiles.txt", message)
         self.notifier.send_admin_notification(message)
 
     def create_contact_exceeds_warning_message(self, line):
         """연락처 중복 경고 메시지"""
-        contact_policy = line[line.find('&') + 1:].strip()
-        message = f"""🚨 같은 연락처 등록 경고 - {self.config.environment.upper()} SERVER 🚨
-    - ⚔️ 중복 연락처 경고 기준: {contact_policy} 개
+        fields = line[line.find('&') + 1:].strip().split('&')
+        if len(fields) == 1:
+            detail = f"    - ⚔️ 중복 연락처 경고 기준: {fields[0]} 개"
+        else:
+            contact, new_profile_id, existing_ids, current_count, contact_limit = fields
+            detail = f"""    - 📞 연락처: {self._decode_create_profile_field(contact)}
+    - 🆕 신규 프로필 ID: {new_profile_id}
+    - 👥 기존 프로필 ID: {existing_ids}"""
+        message = f"""⚠️ 같은 연락처 등록 경고 - {self.config.environment.upper()} SERVER ⚠️
+{detail}
     """
         self._append_or_create_file("/app/logs/createProfiles.txt", message)
         self.notifier.send_admin_notification(message)

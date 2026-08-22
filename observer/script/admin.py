@@ -165,6 +165,19 @@ def reply_delete(profile_id):
     )
 
 
+def report_approval_message(environment, report_id, response):
+    try:
+        profile_id = response.json().get("result", {}).get("reportedProfileId", "확인 불가")
+    except (ValueError, AttributeError):
+        profile_id = "확인 불가"
+    prefix = "DEV " if environment == "dev" else ""
+    return f"""✅ *{prefix}신고 승인 성공* ✅
+    -  🆔 *신고 ID*: {report_id}
+    -  👤 *대상 프로필 ID*: {profile_id}
+    -  🔒 *처리 결과*: 관리자 블랙리스트 등록
+    -  🎁 *신고자 보상*: 티켓 1장"""
+
+
 @app.command("/dev")
 def handle_dev_command(ack, command, say, respond):
     ack()
@@ -227,7 +240,7 @@ def handle_dev_command(ack, command, say, respond):
             report_id = args[1]
             response = reply_report(report_id)
             if response.status_code == 200:
-                say(f"✅ DEV 신고 승인 성공! 신고 ID {report_id}의 블랙리스트 처리와 티켓 보상이 완료되었습니다.")
+                say(report_approval_message("dev", report_id, response))
             else:
                 respond(f"❌ DEV 신고 승인 실패: {response.text}")
             return
@@ -259,7 +272,7 @@ def handle_report_command(ack, command, say, respond):
         report_id = args[0]
         response = reply_report(report_id)
         if response.status_code == 200:
-            say(f"✅ 신고 승인 성공! 신고 ID {report_id}의 블랙리스트 처리와 티켓 보상이 완료되었습니다.")
+            say(report_approval_message("prod", report_id, response))
         else:
             respond(f"❌ 신고 승인 실패: {response.text}")
     except Exception as e:

@@ -44,13 +44,19 @@ class ReportAdminTest(unittest.TestCase):
         command = {"text": "7", "channel_id": "admin-channel", "user_name": "admin"}
         with patch.object(admin, "ENVIRONMENT", "prod"), \
                 patch.object(admin, "SLACK_ADMIN_CHANNEL", "admin-channel"), \
-                patch.object(admin, "reply_report", return_value=Mock(status_code=200)) as reply:
+                patch.object(
+                    admin,
+                    "reply_report",
+                    return_value=Mock(status_code=200, json=Mock(return_value={"result": {"reportedProfileId": 46}})),
+                ) as reply:
             admin.handle_report_command(ack, command, say, respond)
 
         ack.assert_called_once()
         reply.assert_called_once_with("7")
         say.assert_called_once()
-        self.assertIn("신고 ID 7", say.call_args.args[0])
+        self.assertIn("*신고 ID*: 7", say.call_args.args[0])
+        self.assertIn("*대상 프로필 ID*: 46", say.call_args.args[0])
+        self.assertNotIn("REPORT_REWARD", say.call_args.args[0])
 
     def test_report_command_rejects_invalid_usage_without_api_call(self):
         ack, say, respond = Mock(), Mock(), Mock()

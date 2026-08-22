@@ -13,6 +13,13 @@ INCIDENT_STARTED="$STATE_DIR/runtime-incident-started"
 RESTART_ATTEMPTED="$STATE_DIR/runtime-restart-attempted"
 MANUAL_ALERTED="$STATE_DIR/runtime-manual-alerted"
 RESOURCE_INTERVAL_COUNT="${RESOURCE_INTERVAL_COUNT:-10}"
+MEMORY_ALERT_INTERVAL_COUNT="${MEMORY_ALERT_INTERVAL_COUNT:-10}"
+MEMORY_RECOVERY_INTERVAL_COUNT="${MEMORY_RECOVERY_INTERVAL_COUNT:-10}"
+MEMORY_AVAILABLE_THRESHOLD_KB="${MEMORY_AVAILABLE_THRESHOLD_KB:-102400}"
+MEMORY_PSI_FULL_THRESHOLD="${MEMORY_PSI_FULL_THRESHOLD:-1.00}"
+MEMINFO_FILE="${MEMINFO_FILE:-/proc/meminfo}"
+MEMORY_PRESSURE_FILE="${MEMORY_PRESSURE_FILE:-/proc/pressure/memory}"
+VMSTAT_FILE="${VMSTAT_FILE:-/proc/vmstat}"
 mkdir -p "$STATE_DIR"
 
 slack_post() {
@@ -167,7 +174,132 @@ check_runtime() {
 }
 
 resource_value_kb() {
-  awk -v key="$1" '$1 == key ":" {print $2}' /proc/meminfo 2>/dev/null
+  awk -v key="$1" '$1 == key ":" {print $2}' "$MEMINFO_FILE" 2>/dev/null
+}
+
+memory_psi_full_avg60() {
+  awk '$1 == "full" {for (i=2; i<=NF; i++) if ($i ~ /^avg60=/) {sub(/^avg60=/, "", $i); print $i}}' \
+    "$MEMORY_PRESSURE_FILE" 2>/dev/null
+}
+
+kernel_oom_count() {
+  awk '$1 == "oom_kill" {print $2}' "$VMSTAT_FILE" 2>/dev/null
+}
+
+top_memory_containers() {
+  docker stats --no-stream --format '{{.MemPerc}}\t{{.Name}}\t{{.MemUsage}}' 2>/dev/null |
+    sort -rn | head -3 | awk -F '\t' '{printf "%s%s %s (%s)", separator, $2, $3, $1; separator=", "}'
+}
+
+check_oom() {
+  current=$(kernel_oom_count)
+  [ -z "$current" ] && return
+  counter="$STATE_DIR/resource-memory-oom-count"
+  previous=$(cat "$counter" 2>/dev/null || true)
+  printf '%s' "$current" > "$counter"
+  [ -z "$previous" ] && return
+  [ "$current" -le "$previous" ] && return
+
+  targets=""
+  for component in spring observer admin; do
+    oom_killed=$(docker inspect --format '{{.State.OOMKilled}}' "${PROJECT_NAME}-${component}" 2>/dev/null || true)
+    [ "$oom_killed" = true ] && targets="${targets}${targets:+, }${PROJECT_NAME}-${component}"
+  done
+  [ -z "$targets" ] && targets="커널 OOM 발생 (대상은 journal/docker inspect 확인)"
+  slack_post "🔴 [${ENVIRONMENT_LABEL}] EC2 OOM 발생
+\`\`\`
+발생 시각  $(date '+%Y-%m-%d %H:%M:%S %Z')
+대상       ${targets}
+증가 횟수  $((current - previous))회
+자동 조치  메모리 감시에서는 재시작하지 않음
+확인       journalctl -k --since '15 min ago' | grep -i oom
+\`\`\`" >/dev/null || true
+  touch "$STATE_DIR/resource-memory-oom-occurred"
+}
+
+check_memory_pressure() {
+  available_kb=$(resource_value_kb MemAvailable)
+  psi=$(memory_psi_full_avg60)
+  available_kb=${available_kb:-0}
+  psi=${psi:-0}
+  if [ "$available_kb" -gt 0 ] && [ "$available_kb" -lt "$MEMORY_AVAILABLE_THRESHOLD_KB" ]; then
+    logger -t signal-supervisor "low memory available_kb=$available_kb psi_full_avg60=$psi" 2>/dev/null || true
+  fi
+  breached=0
+  if [ "$available_kb" -gt 0 ] && [ "$available_kb" -lt "$MEMORY_AVAILABLE_THRESHOLD_KB" ] &&
+      awk -v value="$psi" -v threshold="$MEMORY_PSI_FULL_THRESHOLD" 'BEGIN {exit !(value >= threshold)}'; then
+    breached=1
+  fi
+
+  count_file="$STATE_DIR/resource-memory-count"
+  recovery_file="$STATE_DIR/resource-memory-recovery-count"
+  alerted="$STATE_DIR/resource-memory-alerted"
+  started="$STATE_DIR/resource-memory-started"
+  minimum="$STATE_DIR/resource-memory-minimum-kb"
+  maximum_psi="$STATE_DIR/resource-memory-maximum-psi"
+
+  if [ "$breached" -eq 1 ]; then
+    echo 0 > "$recovery_file"
+    count=$(cat "$count_file" 2>/dev/null || echo 0)
+    count=$((count + 1))
+    echo "$count" > "$count_file"
+    [ -e "$started" ] || date +%s > "$started"
+    old_min=$(cat "$minimum" 2>/dev/null || echo "$available_kb")
+    [ "$available_kb" -lt "$old_min" ] && old_min=$available_kb
+    echo "$old_min" > "$minimum"
+    old_max=$(cat "$maximum_psi" 2>/dev/null || echo "$psi")
+    if awk -v current="$psi" -v old="$old_max" 'BEGIN {exit !(current > old)}'; then old_max=$psi; fi
+    echo "$old_max" > "$maximum_psi"
+
+    if [ "$count" -ge "$MEMORY_ALERT_INTERVAL_COUNT" ] && [ ! -e "$alerted" ]; then
+      containers=$(top_memory_containers)
+      [ -z "$containers" ] && containers="확인 불가"
+      [ -e "$STATE_DIR/resource-memory-oom-occurred" ] && warning_oom_status="발생" || warning_oom_status="발생 없음"
+      if slack_post "🟠 [${ENVIRONMENT_LABEL}] EC2 메모리 압력 지속
+\`\`\`
+감지 시각  $(date '+%Y-%m-%d %H:%M:%S %Z')
+지속 시간  $((MEMORY_ALERT_INTERVAL_COUNT * 30))초
+가용 메모리 $((available_kb / 1024)) MiB
+PSI full    ${psi}% (avg60)
+OOM        ${warning_oom_status}
+상위 사용   ${containers}
+자동 조치   없음
+\`\`\`" >/dev/null; then
+        touch "$alerted"
+      fi
+    fi
+    return
+  fi
+
+  if [ ! -e "$alerted" ]; then
+    echo 0 > "$count_file"
+    echo 0 > "$recovery_file"
+    unlink "$started" "$minimum" "$maximum_psi" "$STATE_DIR/resource-memory-oom-occurred" 2>/dev/null || true
+    return
+  fi
+
+  recovery_count=$(cat "$recovery_file" 2>/dev/null || echo 0)
+  recovery_count=$((recovery_count + 1))
+  echo "$recovery_count" > "$recovery_file"
+  [ "$recovery_count" -lt "$MEMORY_RECOVERY_INTERVAL_COUNT" ] && return
+
+  started_at=$(cat "$started" 2>/dev/null || date +%s)
+  minimum_kb=$(cat "$minimum" 2>/dev/null || echo 0)
+  max_psi=$(cat "$maximum_psi" 2>/dev/null || echo 0)
+  [ -e "$STATE_DIR/resource-memory-oom-occurred" ] && oom_status="발생" || oom_status="발생 없음"
+  if slack_post "🟢 [${ENVIRONMENT_LABEL}] EC2 메모리 압력 해소
+\`\`\`
+복구 시각  $(date '+%Y-%m-%d %H:%M:%S %Z')
+장애 시간  $(( $(date +%s) - started_at ))초
+최저 가용   $((minimum_kb / 1024)) MiB
+최대 PSI    ${max_psi}% (avg60)
+OOM        ${oom_status}
+복구 기준   $((MEMORY_RECOVERY_INTERVAL_COUNT * 30))초 연속 정상
+\`\`\`" >/dev/null; then
+    unlink "$alerted" "$started" "$minimum" "$maximum_psi" "$STATE_DIR/resource-memory-oom-occurred" 2>/dev/null || true
+    echo 0 > "$count_file"
+    echo 0 > "$recovery_file"
+  fi
 }
 
 check_resource_threshold() {
@@ -196,19 +328,8 @@ check_resource_threshold() {
 }
 
 check_resources() {
-  available_kb=$(resource_value_kb MemAvailable)
-  swap_total_kb=$(resource_value_kb SwapTotal)
-  swap_free_kb=$(resource_value_kb SwapFree)
-  available_kb=${available_kb:-0}
-  swap_total_kb=${swap_total_kb:-0}
-  swap_free_kb=${swap_free_kb:-0}
-  swap_used_kb=$((swap_total_kb - swap_free_kb))
-  memory_breached=0
-  if [ "$available_kb" -gt 0 ] && [ "$available_kb" -lt 204800 ] && [ "$swap_used_kb" -gt $((swap_total_kb / 2)) ]; then
-    memory_breached=1
-  fi
-  check_resource_threshold memory "$memory_breached" "EC2 메모리 부족" \
-    "가용 메모리 $((available_kb / 1024)) MiB\nSwap 사용   $((swap_used_kb / 1024)) MiB"
+  check_oom
+  check_memory_pressure
 
   disk_values=$(df -Pk "$(pwd)" 2>/dev/null | awk 'NR==2 {print $4, $5}')
   disk_available_kb=$(printf '%s' "$disk_values" | awk '{print $1}')

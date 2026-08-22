@@ -32,9 +32,40 @@ object Notification {
         diagnosticLogger.info { "eventType=CONTACT_LIMIT_WARNING outcome=SUCCESS" }
     }
 
+    fun notifyContactExceedsLimitWarning(
+        contact: String,
+        newProfileId: Long,
+        existingProfileIds: List<Long>,
+        currentCount: Int,
+        contactLimitPolicy: Int,
+    ) {
+        logger.info {
+            "ContactExceedsLimitWarning&${escapeEventField(contact)}&$newProfileId" +
+                "&${existingProfileIds.joinToString(",")}&$currentCount&$contactLimitPolicy"
+        }
+        diagnosticLogger.info {
+            "eventType=CONTACT_LIMIT_WARNING profileId=$newProfileId currentCount=$currentCount outcome=SUCCESS"
+        }
+    }
+
     fun notifyFailedProfileContactExceedsLimit(contactLimitPolicy: Int) {
         logger.info { "FailedProfileContactExceedsLimit&${contactLimitPolicy + 1}" }
         diagnosticLogger.info { "eventType=CREATE_PROFILE outcome=FAILURE reason=CONTACT_LIMIT" }
+    }
+
+    fun notifyFailedProfileContactExceedsLimit(
+        contact: String,
+        existingProfileIds: List<Long>,
+        attemptedCount: Int,
+        contactLimitPolicy: Int,
+    ) {
+        logger.info {
+            "FailedProfileContactExceedsLimit&${escapeEventField(contact)}" +
+                "&${existingProfileIds.joinToString(",")}&$attemptedCount&$contactLimitPolicy"
+        }
+        diagnosticLogger.info {
+            "eventType=CREATE_PROFILE currentCount=$attemptedCount outcome=FAILURE reason=CONTACT_LIMIT"
+        }
     }
 
     fun notifyTicketIssued(verification: Verification, ticket: Int, availableTicket: Int) {

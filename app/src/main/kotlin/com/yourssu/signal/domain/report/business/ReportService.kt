@@ -56,7 +56,7 @@ class ReportService(
                 )
             }
         })
-        return ReportResponse(report.id!!, report.status)
+        return ReportResponse(report.id!!, report.status, report.reportedProfileId)
     }
 
     @Transactional
@@ -77,7 +77,7 @@ class ReportService(
         )
         reportWriter.approve(reportId)
         addAdminBlacklist(report.reportedProfileId)
-        return ReportResponse(reportId, ReportStatus.APPROVED)
+        return ReportResponse(reportId, ReportStatus.APPROVED, report.reportedProfileId)
     }
 
     private fun addAdminBlacklist(profileId: Long) {
@@ -89,4 +89,4 @@ class ReportService(
     }
 }
 
-data class ReportResponse(val reportId: Long, val status: ReportStatus)
+data class ReportResponse(val reportId: Long, val status: ReportStatus, val reportedProfileId: Long)

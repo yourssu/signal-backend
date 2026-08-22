@@ -47,9 +47,10 @@ class ProfileService(
         val profile = command.toDomain()
         val existingProfiles = profileReader.findByContact(profile.contact)
         handleDuplicateContact(existingProfiles)
-        notifyDuplicateContact(profile.contact, existingProfiles.size)
+        notifyFailedDuplicateContact(profile.contact, existingProfiles)
         ProfileValidator.checkContactLimit(existingProfiles.size, policy.contactLimit)
         val createdProfile = profileWriter.createProfile(profile)
+        notifyDuplicateContactWarning(profile.contact, createdProfile.id!!, existingProfiles)
         profileNotifier.notifyCreatedProfile(createdProfile.copy(profile.introSentences))
         if (policy.whitelist) {
             blacklistWriter.save(Blacklist(profileId = createdProfile.id!!, createdByAdmin = true))
@@ -70,20 +71,32 @@ class ProfileService(
         }
     }
 
-    private fun notifyDuplicateContact(contact: String, contactCount: Int) {
+    private fun notifyFailedDuplicateContact(contact: String, existingProfiles: List<Profile>) {
         val contactLimit = policy.contactLimit
-        if (contactLimit != 0 && contactCount >= contactLimit) {
+        if (contactLimit != 0 && existingProfiles.size >= contactLimit) {
             if (contactNotificationDeduplicator.shouldNotify(contact, ContactNotificationType.FAILURE)) {
-                profileNotifier.notifyFailedProfileContactExceedsLimit(contactLimit)
+                profileNotifier.notifyDetailedFailedProfileContactExceedsLimit(
+                    contact,
+                    existingProfiles.mapNotNull { it.id },
+                    existingProfiles.size + 1,
+                    contactLimit,
+                )
             }
-            return
         }
+    }
 
+    private fun notifyDuplicateContactWarning(contact: String, newProfileId: Long, existingProfiles: List<Profile>) {
         val warningThreshold = policy.contactLimitWarning
-        if (warningThreshold != 0 && contactCount >= warningThreshold &&
+        if (warningThreshold != 0 && existingProfiles.size >= warningThreshold &&
             contactNotificationDeduplicator.shouldNotify(contact, ContactNotificationType.WARNING)
         ) {
-            profileNotifier.notifyContactExceedsLimitWarning(warningThreshold)
+            profileNotifier.notifyDetailedContactExceedsLimitWarning(
+                contact,
+                newProfileId,
+                existingProfiles.mapNotNull { it.id },
+                existingProfiles.size + 1,
+                policy.contactLimit,
+            )
         }
     }
 

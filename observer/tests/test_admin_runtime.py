@@ -75,7 +75,7 @@ class AdminRuntimeTest(unittest.TestCase):
 
     def test_dev_report_command_calls_local_approve_api(self):
         ack, say, respond = Mock(), Mock(), Mock()
-        response = Mock(status_code=200)
+        response = Mock(status_code=200, json=Mock(return_value={"result": {"reportedProfileId": 46}}))
         with patch.object(admin, "ENVIRONMENT", "dev"), \
                 patch.object(admin, "SLACK_ADMIN_CHANNEL", "admin-channel"), \
                 patch.object(admin, "reply_report", return_value=response) as reply_report:
@@ -88,6 +88,7 @@ class AdminRuntimeTest(unittest.TestCase):
 
         reply_report.assert_called_once_with("7")
         self.assertIn("DEV 신고 승인 성공", say.call_args.args[0])
+        self.assertIn("대상 프로필 ID*: 46", say.call_args.args[0])
 
 
 if __name__ == "__main__":

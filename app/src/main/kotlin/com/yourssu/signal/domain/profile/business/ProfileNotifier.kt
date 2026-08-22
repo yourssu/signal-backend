@@ -11,6 +11,25 @@ class ProfileNotifier {
     fun notifyContactExceedsLimitWarning(contactLimitPolicy: Int) =
         Notification.notifyContactExceedsLimitWarning(contactLimitPolicy)
 
+    fun notifyDetailedContactExceedsLimitWarning(
+        contact: String,
+        newProfileId: Long,
+        existingProfileIds: List<Long>,
+        currentCount: Int,
+        contactLimitPolicy: Int,
+    ) = Notification.notifyContactExceedsLimitWarning(
+        contact, newProfileId, existingProfileIds, currentCount, contactLimitPolicy
+    )
+
     fun notifyFailedProfileContactExceedsLimit(contactLimitPolicy: Int) =
         Notification.notifyFailedProfileContactExceedsLimit(contactLimitPolicy)
+
+    fun notifyDetailedFailedProfileContactExceedsLimit(
+        contact: String,
+        existingProfileIds: List<Long>,
+        attemptedCount: Int,
+        contactLimitPolicy: Int,
+    ) = Notification.notifyFailedProfileContactExceedsLimit(
+        contact, existingProfileIds, attemptedCount, contactLimitPolicy
+    )
 }

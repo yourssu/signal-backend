@@ -29,7 +29,7 @@ if ! flock -n 9; then
 fi
 
 slack_post() {
-  text=$1
+  text=$(printf '%b' "$1")
   [ -n "${SLACK_TOKEN:-}" ] || return 0
   [ -n "${SLACK_LOG_CHANNEL:-}" ] || return 0
   response=$(curl -fsS --max-time 10 \

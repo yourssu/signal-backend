@@ -16,7 +16,7 @@ RESOURCE_INTERVAL_COUNT="${RESOURCE_INTERVAL_COUNT:-10}"
 mkdir -p "$STATE_DIR"
 
 slack_post() {
-  text=$1
+  text=$(printf '%b' "$1")
   thread_ts=${2:-}
   payload=$(python3 -c 'import json,sys; p={"channel":sys.argv[1],"text":sys.argv[2]}; ts=sys.argv[3]; p.update({"thread_ts":ts}) if ts else None; print(json.dumps(p))' \
     "$SLACK_LOG_CHANNEL" "$text" "$thread_ts")

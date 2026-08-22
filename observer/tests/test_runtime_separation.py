@@ -28,7 +28,7 @@ class RuntimeSeparationTest(unittest.TestCase):
         self.assertIn("EXPOSE 3005", dockerfile)
         self.assertIn("-p 127.0.0.1:3005:3005", deploy_script)
         self.assertIn("slack-bolt", requirements)
-        self.assertIn("-v $(pwd)/logs:/app/logs", deploy_script)
+        self.assertIn('-v "$(pwd)/logs:/app/logs"', deploy_script)
 
     def test_deployment_keeps_existing_shared_channel_contract(self):
         paths = [

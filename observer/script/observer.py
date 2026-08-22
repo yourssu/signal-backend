@@ -1,7 +1,6 @@
 import json
 import os
 import time
-import shutil
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -30,6 +29,7 @@ class Config:
 
 class ObserverRuntime:
     BACKLOG_BYTES = 10 * 1024 * 1024
+    BACKLOG_DURATION_SECONDS = 300
 
     def __init__(self, log_root="/app/logs", config=None):
         self.log_root = log_root
@@ -42,13 +42,26 @@ class ObserverRuntime:
         self.last_heartbeat = None
         self.started_at = time.time()
         self.heartbeat_alerted = False
-        self.disk_alerted = False
         self.log_io_alerted = False
         self.offset_alerted = set()
+        self.incident_threads = {}
         self.cursors = [
             DurableLogCursor(os.path.join(log_root, "events", "notification-events.log"), os.path.join(self.state_root, "event-offset.json"), True),
             DurableLogCursor(os.path.join(log_root, "app.log"), os.path.join(self.state_root, "app-offset.json"), True),
         ]
+
+    def start_incident(self, key, message):
+        sender = getattr(self.notifier, "start_log_incident", None)
+        thread_ts = sender(message) if sender else None
+        self.incident_threads[key] = thread_ts
+
+    def resolve_incident(self, key, message):
+        thread_ts = self.incident_threads.pop(key, None)
+        sender = getattr(self.notifier, "reply_log_incident", None)
+        if sender and thread_ts:
+            sender(message, thread_ts)
+        else:
+            self.notifier.send_log_notification(message)
 
     def process_line(self, path, line):
         if "SIGNAL_HEARTBEAT" in line:
@@ -84,6 +97,8 @@ class ObserverRuntime:
                 )
                 self.offset_alerted.add(cursor.path)
         self._write_health(processed)
+        if processed:
+            self.last_processed_at = self.observed_at()
         return processed
 
     def _write_health(self, processed):
@@ -109,28 +124,22 @@ class ObserverRuntime:
         return datetime.now().astimezone().isoformat(timespec="seconds")
 
     def run(self):
-        backlog = self.backlog_bytes()
-        self.notifier.send_log_notification(
-            f"🟢 [{self.config.environment}] Observer 기동 완료\n"
-            "```\n"
-            f"• 시간: {self.observed_at()}\n"
-            f"• 컨테이너: {self.config.project_name}-observer\n"
-            f"• 이어서 읽을 위치: {sum((cursor.state or {}).get('offset', 0) for cursor in self.cursors)} bytes\n"
-            f"• 미처리 로그: {backlog} bytes\n```"
-        )
         backlog_alerted = False
+        backlog_started_at = None
+        maximum_backlog = 0
+        self.last_processed_at = None
         while True:
             try:
                 self.poll()
                 if self.log_io_alerted:
-                    self.notifier.send_log_notification(
+                    self.resolve_incident("log-io",
                         f"🟢 [{self.config.environment}] Observer 로그 저장 복구\n"
                         "```\n• 상태: 처리 위치 저장과 로그 읽기가 다시 정상입니다.\n```"
                     )
                     self.log_io_alerted = False
             except OSError as error:
                 if not self.log_io_alerted:
-                    self.notifier.send_log_notification(
+                    self.start_incident("log-io",
                         f"🔴 [{self.config.environment}] Observer 로그 처리 실패\n"
                         "```\n"
                         f"• 발생 시간: {self.observed_at()}\n"
@@ -142,30 +151,9 @@ class ObserverRuntime:
                     self.log_io_alerted = True
                 time.sleep(1)
                 continue
-            free_bytes = shutil.disk_usage(self.log_root).free
-            if free_bytes < 1024 * 1024 * 1024 and not self.disk_alerted:
-                self.notifier.send_log_notification(
-                    f"🔴 [{self.config.environment}] 디스크 용량 부족\n"
-                    "```\n"
-                    f"• 발생 시간: {self.observed_at()}\n"
-                    f"• 경로: /app/logs\n"
-                    f"• 남은 용량: {free_bytes // (1024 * 1024)} MB\n"
-                    "• 영향: 로그 저장과 Observer 이벤트 처리가 멈출 수 있습니다.\n"
-                    "• 조치: EC2 디스크와 Docker 로그를 정리해주세요.\n```"
-                )
-                self.disk_alerted = True
-            elif free_bytes >= 1536 * 1024 * 1024 and self.disk_alerted:
-                self.notifier.send_log_notification(
-                    f"🟢 [{self.config.environment}] 디스크 용량 복구\n"
-                    "```\n"
-                    f"• 복구 시간: {self.observed_at()}\n"
-                    f"• 남은 용량: {free_bytes // (1024 * 1024)} MB\n"
-                    "• 상태: 로그 저장을 정상 계속합니다.\n```"
-                )
-                self.disk_alerted = False
             heartbeat_reference = self.last_heartbeat or self.started_at
             if time.time() - heartbeat_reference > 180 and not self.heartbeat_alerted:
-                self.notifier.send_log_notification(
+                self.start_incident("heartbeat",
                     f"🔴 [{self.config.environment}] Spring → Observer Heartbeat 중단\n"
                     "```\n"
                     f"• 발생 시간: {self.observed_at()}\n"
@@ -176,7 +164,7 @@ class ObserverRuntime:
                 )
                 self.heartbeat_alerted = True
             elif time.time() - heartbeat_reference <= 180 and self.heartbeat_alerted:
-                self.notifier.send_log_notification(
+                self.resolve_incident("heartbeat",
                     f"🟢 [{self.config.environment}] Spring → Observer Heartbeat 복구\n"
                     "```\n"
                     f"• 복구 시간: {self.observed_at()}\n"
@@ -184,26 +172,36 @@ class ObserverRuntime:
                 )
                 self.heartbeat_alerted = False
             backlog = self.backlog_bytes()
-            if backlog > self.BACKLOG_BYTES and not backlog_alerted:
-                self.notifier.send_log_notification(
+            if backlog > self.BACKLOG_BYTES:
+                backlog_started_at = backlog_started_at or time.time()
+                maximum_backlog = max(maximum_backlog, backlog)
+            else:
+                backlog_started_at = None
+            if (
+                backlog_started_at is not None
+                and time.time() - backlog_started_at >= self.BACKLOG_DURATION_SECONDS
+                and not backlog_alerted
+            ):
+                self.start_incident("backlog",
                     f"🟠 [{self.config.environment}] Observer 이벤트 처리 지연\n"
                     "```\n"
-                    f"• 발생 시간: {self.observed_at()}\n"
-                    "• 로그: logs/events/notification-events.log, logs/app.log\n"
-                    f"• 미처리 용량: {backlog // (1024 * 1024)} MB\n"
-                    "• 기준: 10 MB 초과\n"
-                    "• 영향: Slack 알림이 늦게 도착할 수 있습니다.\n```"
+                    f"감지 시각   {self.observed_at()}\n"
+                    f"지속 시간   {self.BACKLOG_DURATION_SECONDS}초 이상\n"
+                    f"미처리량    {backlog // (1024 * 1024)} MB\n"
+                    f"마지막 처리 {self.last_processed_at or '기록 없음'}\n"
+                    "영향        Slack 알림 지연 가능\n```"
                 )
                 backlog_alerted = True
             elif backlog <= self.BACKLOG_BYTES and backlog_alerted:
-                self.notifier.send_log_notification(
+                self.resolve_incident("backlog",
                     f"🟢 [{self.config.environment}] Observer 이벤트 적체 해소\n"
                     "```\n"
-                    f"• 복구 시간: {self.observed_at()}\n"
-                    f"• 남은 미처리 용량: {backlog} bytes\n"
-                    "• 상태: 정상 처리 속도로 복구됐습니다.\n```"
+                    f"복구 시각   {self.observed_at()}\n"
+                    f"최대 적체량 {maximum_backlog // (1024 * 1024)} MB\n"
+                    f"남은 미처리 {backlog} bytes\n```"
                 )
                 backlog_alerted = False
+                maximum_backlog = 0
             time.sleep(1)
 
 

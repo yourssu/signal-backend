@@ -13,22 +13,28 @@ class SlackNotifier:
         queue_path = getattr(config, 'slack_queue_path', 'logs/state/slack-queue.jsonl')
         self.queue = DurableSlackQueue(queue_path)
         self.replaying = False
+        self.last_message_ts = None
 
-    def _send_notification(self, channel: str, message: str, queue_on_failure=True):
+    def _send_notification(self, channel: str, message: str, queue_on_failure=True, thread_ts=None):
         payload = {
             'channel': channel,
             'text': message,
         }
+        if thread_ts:
+            payload['thread_ts'] = thread_ts
         headers = {
             'Authorization': f'Bearer {self.config.slack_token}',
             'Content-Type': 'application/json',
         }
 
         for attempt in range(1, self.MAX_ATTEMPTS + 1):
+            self.last_message_ts = None
             failure = self._request(payload, headers)
             if failure is None:
+                sent_ts = self.last_message_ts
                 if not self.replaying:
                     self._replay_queue()
+                self.last_message_ts = sent_ts
                 return True
 
             if attempt == self.MAX_ATTEMPTS:
@@ -76,6 +82,7 @@ class SlackNotifier:
 
             body = response.json()
             if body.get('ok') is True:
+                self.last_message_ts = body.get('ts')
                 return None
             return self._safe_error_code(body.get('error'))
         except Exception as error:
@@ -95,3 +102,15 @@ class SlackNotifier:
 
     def send_log_notification(self, message: str):
         return self._send_notification(self.config.slack_log_channel, message)
+
+    def start_log_incident(self, message: str):
+        if self._send_notification(self.config.slack_log_channel, message):
+            return self.last_message_ts
+        return None
+
+    def reply_log_incident(self, message: str, thread_ts):
+        return self._send_notification(
+            self.config.slack_log_channel,
+            message,
+            thread_ts=thread_ts,
+        )

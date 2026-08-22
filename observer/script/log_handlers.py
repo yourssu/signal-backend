@@ -10,27 +10,12 @@ class LogHandlers:
         self.last_error_alert = {}
         
         # 로그 패턴 정의
-        self.SERVER_RESTART = 'INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port'
         self.INTERNAL_ERROR_LOG_PREFIX = 'ERROR com.yourssu.signal.handler.InternalServerErrorControllerAdvice -'
         
         # 핸들러 매핑 (로그 전용)
         self.handlers = {
-            self.SERVER_RESTART: self.create_server_restart_message,
             self.INTERNAL_ERROR_LOG_PREFIX: self.create_internal_error_message,
         }
-    
-    def create_server_restart_message(self, line):
-        """서버 재시작 메시지 생성"""
-        project_name = getattr(self.config, "project_name", "signal-backend")
-        message = (
-            f"🟢 [{self.config.environment.upper()}] Spring API 기동 완료\n"
-            "```\n"
-            f"• 시간: {datetime.now().astimezone().isoformat(timespec='seconds')}\n"
-            f"• 컨테이너: {project_name}-spring\n"
-            "• 상태: 요청 수신 가능\n"
-            "```"
-        )
-        self.notifier.send_log_notification(message)
 
     def create_internal_error_message(self, line):
         """내부 에러 메시지 생성"""

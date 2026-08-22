@@ -17,7 +17,7 @@ class SupervisorScenarioTest(unittest.TestCase):
             with open(env_file, "w", encoding="utf-8") as file:
                 file.write("PROJECT_NAME=test\nENVIRONMENT=prod\nSLACK_TOKEN=test-token\nSLACK_LOG_CHANNEL=test-channel\n")
             self._executable(bin_dir, "docker", '#!/bin/bash\nif [ "$1" = inspect ]; then echo unhealthy; else echo "$@" >> "$RESTART_LOG"; fi\n')
-            self._executable(bin_dir, "curl", '#!/bin/bash\necho \'{"ok":true}\'\n')
+            self._executable(bin_dir, "curl", '#!/bin/bash\necho \'{"ok":true,"ts":"123.456"}\'\n')
             self._executable(bin_dir, "logger", "#!/bin/bash\nexit 0\n")
             restart_log = os.path.join(directory, "restarts")
             environment = {
@@ -34,9 +34,7 @@ class SupervisorScenarioTest(unittest.TestCase):
             with open(restart_log, encoding="utf-8") as file:
                 restarts = file.read().splitlines()
             self.assertEqual(restarts, ["restart test-spring", "restart test-observer", "restart test-admin"])
-            self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "spring-manual-alerted")))
-            self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "observer-manual-alerted")))
-            self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "admin-manual-alerted")))
+            self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "runtime-manual-alerted")))
 
     def test_manual_alert_marker_is_created_only_after_slack_delivery_succeeds(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -49,7 +47,7 @@ class SupervisorScenarioTest(unittest.TestCase):
             self._executable(
                 bin_dir,
                 "curl",
-                '#!/bin/bash\ncount=$(cat "$CURL_COUNT" 2>/dev/null || echo 0)\ncount=$((count + 1))\necho "$count" > "$CURL_COUNT"\nif [ "$count" -le 3 ]; then echo \'{"ok":true}\'; elif [ "$count" -le 6 ]; then exit 1; else echo \'{"ok":true}\'; fi\n',
+                '#!/bin/bash\ncount=$(cat "$CURL_COUNT" 2>/dev/null || echo 0)\ncount=$((count + 1))\necho "$count" > "$CURL_COUNT"\nif [ "$count" -eq 1 ] || [ "$count" -ge 3 ]; then echo \'{"ok":true,"ts":"123.456"}\'; else exit 1; fi\n',
             )
             self._executable(bin_dir, "logger", "#!/bin/bash\nexit 0\n")
             environment = {
@@ -62,7 +60,7 @@ class SupervisorScenarioTest(unittest.TestCase):
 
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
-            marker = os.path.join(directory, "logs", "state", "spring-manual-alerted")
+            marker = os.path.join(directory, "logs", "state", "runtime-manual-alerted")
             self.assertFalse(os.path.exists(marker))
 
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)

@@ -24,15 +24,14 @@ class RecordingNotifier:
 
 
 class LogHandlersTest(unittest.TestCase):
-    def test_server_restart_is_sent_to_monitoring_channel(self):
+    def test_server_restart_is_not_sent_separately_from_deployment_result(self):
         notifier = RecordingNotifier()
         handlers = LogHandlers(Config(), notifier)
 
-        handlers.create_server_restart_message("ignored log header")
+        restart_prefix = "INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port"
 
-        self.assertEqual(len(notifier.messages), 1)
-        self.assertIn("🟢 [DEV] Spring API 기동 완료", notifier.messages[0])
-        self.assertIn("요청 수신 가능", notifier.messages[0])
+        self.assertNotIn(restart_prefix, handlers.handlers)
+        self.assertEqual(notifier.messages, [])
 
     def test_same_internal_error_is_deduplicated_without_timestamp_or_trace_id(self):
         notifier = RecordingNotifier()

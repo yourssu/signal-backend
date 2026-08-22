@@ -101,12 +101,42 @@ class SignalEventContractTest(unittest.TestCase):
         self.handler.handlers[self.handler.FALSE_CONTACT_REPORT_PREFIX](line)
 
         message = self.notifier.messages[-1]
-        self.assertIn("<!channel> 🚨 허위 연락처 신고가 접수되었습니다. 🚨", message)
-        self.assertIn("신고 ID: 7", message)
-        self.assertIn("대상 profileId: 123", message)
-        self.assertIn("대상 연락처: @false&contact\n", message)
-        self.assertIn("시각: 2026-08-20T12:34:56", message)
-        self.assertIn("승인: /report 7", message)
+        self.assertIn("📣 *허위 연락처 신고 접수 - TEST SERVER* 📣", message)
+        self.assertNotIn("<!channel>", message)
+        self.assertIn("*신고 ID*: 7", message)
+        self.assertIn("*대상 프로필 ID*: 123", message)
+        self.assertIn("*대상 연락처*: @false&contact\n", message)
+        self.assertIn("*접수 시각*: 2026-08-20T12:34:56 KST", message)
+        self.assertIn("*승인*: `/report 7`", message)
+
+    def test_dev_report_uses_dev_approval_command(self):
+        self.handler.config.environment = "dev"
+        payload = "FalseContactReport&7&123&01012345678&2026-08-20T12:34:56"
+
+        self.handler.create_false_contact_report_message(payload)
+
+        self.assertNotIn("<!channel>", self.notifier.messages[-1])
+        self.assertIn("`/dev report 7`", self.notifier.messages[-1])
+
+    def test_phone_contact_is_not_rendered_as_instagram_url(self):
+        payload = "CreateProfile&1&컴퓨터학부&01012345678&닉네임&소개"
+
+        self.handler.create_profile_message(payload)
+
+        self.assertIn("*연락처*: 01012345678", self.notifier.messages[0])
+        self.assertNotIn("instagram.com/01012345678", self.notifier.messages[0])
+
+    def test_enriched_duplicate_event_contains_operational_context(self):
+        self.handler.create_contact_exceeds_warning_message(
+            "ContactExceedsLimitWarning&01012345678&267&11,46&3&3"
+        )
+
+        message = self.notifier.messages[-1]
+        self.assertIn("연락처: 01012345678", message)
+        self.assertIn("신규 프로필 ID: 267", message)
+        self.assertIn("기존 프로필 ID: 11,46", message)
+        self.assertNotIn("현재 등록 수", message)
+        self.assertNotIn("기존 프로필 처리", message)
 
 
 if __name__ == "__main__":

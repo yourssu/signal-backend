@@ -140,7 +140,9 @@ class ProfileServiceTest : DescribeSpec({
                         it.profileId shouldBe 1L
                         it.createdByAdmin shouldBe true
                     })
-                    verify(profileNotifier).notifyContactExceedsLimitWarning(1)
+                    verify(profileNotifier).notifyDetailedContactExceedsLimitWarning(
+                        "@duplicate_contact", 2L, listOf(1L), 2, 5
+                    )
                 }
 
                 it("기존 관리자 blacklist 여부와 무관하게 dedup 결과에 따라 경고한다") {
@@ -152,7 +154,9 @@ class ProfileServiceTest : DescribeSpec({
 
                     profileService.createProfile(command)
 
-                    verify(profileNotifier).notifyContactExceedsLimitWarning(1)
+                    verify(profileNotifier).notifyDetailedContactExceedsLimitWarning(
+                        "@duplicate_contact", 2L, listOf(1L), 2, 5
+                    )
                     verify(blacklistWriter, never()).save(any())
                     verify(blacklistWriter, never()).updateToAdminBlacklist(any())
                 }
@@ -167,7 +171,9 @@ class ProfileServiceTest : DescribeSpec({
                     profileService.createProfile(command)
 
                     verify(blacklistWriter).updateToAdminBlacklist(1L)
-                    verify(profileNotifier).notifyContactExceedsLimitWarning(1)
+                    verify(profileNotifier).notifyDetailedContactExceedsLimitWarning(
+                        "@duplicate_contact", 2L, listOf(1L), 2, 5
+                    )
                 }
 
                 it("경고 임계값 미만이면 관리자 차단만 하고 경고하지 않는다") {
@@ -196,7 +202,9 @@ class ProfileServiceTest : DescribeSpec({
 
                     repeat(3) { profileService.createProfile(command) }
 
-                    verify(profileNotifier, times(1)).notifyContactExceedsLimitWarning(2)
+                    verify(profileNotifier, times(1)).notifyDetailedContactExceedsLimitWarning(
+                        "@duplicate_contact", 2L, listOf(1L, 2L), 3, 5
+                    )
                     verify(profileNotifier, never()).notifyFailedProfileContactExceedsLimit(any())
                 }
 
@@ -219,7 +227,9 @@ class ProfileServiceTest : DescribeSpec({
 
                     verify(blacklistWriter).save(check { it.profileId shouldBe 2L })
                     verify(profileNotifier, never()).notifyContactExceedsLimitWarning(any())
-                    verify(profileNotifier, times(1)).notifyFailedProfileContactExceedsLimit(2)
+                    verify(profileNotifier, times(1)).notifyDetailedFailedProfileContactExceedsLimit(
+                        "@duplicate_contact", listOf(1L, 2L), 3, 2
+                    )
                     verify(profileWriter, never()).createProfile(any())
                 }
 
@@ -238,7 +248,9 @@ class ProfileServiceTest : DescribeSpec({
 
                     repeat(3) { profileService.createProfile(command) }
 
-                    verify(profileNotifier, times(1)).notifyContactExceedsLimitWarning(1)
+                    verify(profileNotifier, times(1)).notifyDetailedContactExceedsLimitWarning(
+                        "@duplicate_contact", 2L, listOf(1L), 2, 5
+                    )
                     verify(blacklistWriter).save(check { it.profileId shouldBe 1L })
                     verify(blacklistWriter).save(check { it.profileId shouldBe 2L })
                 }

@@ -50,6 +50,8 @@ observer/.idea/
 Thumbs.db
 
 /.claude
+/.codex
+/.agents/local/
 /signal-api-2025-2
 /signal-api-2025-1
 /ref

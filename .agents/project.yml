@@ -1,0 +1,25 @@
+project: signal-backend
+base_branch: main
+issue_repository: yourssu/signal-backend
+
+verification:
+  kotlin:
+    paths: [app/]
+    command: cd app && ./gradlew test
+  python:
+    paths: [observer/]
+    command: python3 -m unittest discover -s observer/tests -p 'test_*.py'
+  shell:
+    extensions: [.sh]
+    command: bash -n
+  api:
+    paths: [app/src/main/kotlin/com/yourssu/signal/api/]
+    requires: application startup and real HTTP request/response evidence
+  browser:
+    paths: []
+    requires: Chrome DevTools MCP for diagnosis; Playwright CLI for committed regression tests
+
+review:
+  small: self_diff
+  medium: independent_code_review
+  large: [independent_code_review, security_operations_review]

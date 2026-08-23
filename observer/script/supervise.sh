@@ -48,7 +48,7 @@ incident_thread() {
 }
 
 clear_runtime_incident() {
-  unlink "$ACTIVE_INCIDENT" "$INCIDENT_TS" "$INCIDENT_STARTED" "$RESTART_ATTEMPTED" "$MANUAL_ALERTED" 2>/dev/null || true
+  rm -f "$ACTIVE_INCIDENT" "$INCIDENT_TS" "$INCIDENT_STARTED" "$RESTART_ATTEMPTED" "$MANUAL_ALERTED"
 }
 
 start_incident() {

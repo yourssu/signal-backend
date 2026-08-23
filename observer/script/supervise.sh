@@ -10,10 +10,20 @@ STATE_DIR="$(pwd)/logs/state"
 ACTIVE_INCIDENT="$STATE_DIR/runtime-active-incident"
 INCIDENT_TS="$STATE_DIR/runtime-incident-ts"
 INCIDENT_STARTED="$STATE_DIR/runtime-incident-started"
+INCIDENT_ID="$STATE_DIR/runtime-incident-id"
 RESTART_ATTEMPTED="$STATE_DIR/runtime-restart-attempted"
+RESTART_PERFORMED="$STATE_DIR/runtime-restart-performed"
 MANUAL_ALERTED="$STATE_DIR/runtime-manual-alerted"
+RUNTIME_FAILURE_COUNT_FILE="$STATE_DIR/runtime-failure-count"
+RUNTIME_RECOVERY_COUNT_FILE="$STATE_DIR/runtime-recovery-count"
+RUNTIME_POST_RESTART_COUNT_FILE="$STATE_DIR/runtime-post-restart-count"
+RUNTIME_FAILURE_INTERVAL_COUNT="${RUNTIME_FAILURE_INTERVAL_COUNT:-3}"
+RUNTIME_RECOVERY_INTERVAL_COUNT="${RUNTIME_RECOVERY_INTERVAL_COUNT:-3}"
+RUNTIME_MANUAL_ALERT_INTERVAL_COUNT="${RUNTIME_MANUAL_ALERT_INTERVAL_COUNT:-6}"
 RESOURCE_INTERVAL_COUNT="${RESOURCE_INTERVAL_COUNT:-10}"
-MEMORY_ALERT_INTERVAL_COUNT="${MEMORY_ALERT_INTERVAL_COUNT:-10}"
+if [ -z "${MEMORY_ALERT_INTERVAL_COUNT:-}" ]; then
+  [ "$(printf '%s' "$ENVIRONMENT" | tr '[:upper:]' '[:lower:]')" = dev ] && MEMORY_ALERT_INTERVAL_COUNT=20 || MEMORY_ALERT_INTERVAL_COUNT=10
+fi
 MEMORY_RECOVERY_INTERVAL_COUNT="${MEMORY_RECOVERY_INTERVAL_COUNT:-10}"
 MEMORY_AVAILABLE_THRESHOLD_KB="${MEMORY_AVAILABLE_THRESHOLD_KB:-102400}"
 MEMORY_PSI_FULL_THRESHOLD="${MEMORY_PSI_FULL_THRESHOLD:-1.00}"
@@ -43,12 +53,26 @@ status_of() {
     "${PROJECT_NAME}-$1" 2>/dev/null || echo missing
 }
 
+display_status() {
+  case "$1" in
+    healthy) printf '%s' "정상 (healthy)" ;;
+    unhealthy) printf '%s' "비정상 (unhealthy)" ;;
+    starting) printf '%s' "시작 중 (starting)" ;;
+    running) printf '%s' "실행 중 (running)" ;;
+    exited) printf '%s' "종료됨 (exited)" ;;
+    missing) printf '%s' "컨테이너 없음 (missing)" ;;
+    *) printf '알 수 없음 (%s)' "$1" ;;
+  esac
+}
+
 incident_thread() {
   cat "$INCIDENT_TS" 2>/dev/null || true
 }
 
 clear_runtime_incident() {
-  unlink "$ACTIVE_INCIDENT" "$INCIDENT_TS" "$INCIDENT_STARTED" "$RESTART_ATTEMPTED" "$MANUAL_ALERTED" 2>/dev/null || true
+  rm -f "$ACTIVE_INCIDENT" "$INCIDENT_TS" "$INCIDENT_STARTED" "$INCIDENT_ID" \
+    "$RESTART_ATTEMPTED" "$RESTART_PERFORMED" "$MANUAL_ALERTED" \
+    "$RUNTIME_FAILURE_COUNT_FILE" "$RUNTIME_RECOVERY_COUNT_FILE" "$RUNTIME_POST_RESTART_COUNT_FILE"
 }
 
 start_incident() {
@@ -82,9 +106,10 @@ start_incident() {
   text="${title}
 \`\`\`
 발생 시각  ${occurred_at}
-Spring     ${spring_status}
-Observer   ${observer_status}
-Admin      ${admin_status}
+확인 결과  상태 확인 ${RUNTIME_FAILURE_INTERVAL_COUNT}회 연속 실패
+Spring     $(display_status "$spring_status")
+Observer   $(display_status "$observer_status")
+Admin      $(display_status "$admin_status")
 영향       ${impact}
 자동 조치  ${automatic_action}
 사건 ID    ${incident_id}
@@ -92,12 +117,17 @@ Admin      ${admin_status}
   ts=$(slack_post "$text" || true)
   printf '%s' "$key" > "$ACTIVE_INCIDENT"
   printf '%s' "$started_at" > "$INCIDENT_STARTED"
+  printf '%s' "$incident_id" > "$INCIDENT_ID"
   [ -n "$ts" ] && printf '%s' "$ts" > "$INCIDENT_TS"
 }
 
 recover_incident() {
+  spring_status=$1
+  observer_status=$2
+  admin_status=$3
   key=$(cat "$ACTIVE_INCIDENT")
   started_at=$(cat "$INCIDENT_STARTED" 2>/dev/null || date +%s)
+  incident_id=$(cat "$INCIDENT_ID" 2>/dev/null || echo 확인불가)
   duration=$(( $(date +%s) - started_at ))
   case "$key" in
     stack) key_label="Signal 전체 서비스" ;;
@@ -105,11 +135,17 @@ recover_incident() {
     observer) key_label="Observer" ;;
     admin) key_label="Admin" ;;
   esac
+  [ -e "$RESTART_PERFORMED" ] && recovery_action="자동 재시작 1회" || recovery_action="자연 복구"
   text="🟢 [${ENVIRONMENT_LABEL}] ${key_label} 복구 완료
 \`\`\`
 복구 시각  $(date '+%Y-%m-%d %H:%M:%S %Z')
 장애 시간  ${duration}초
-조치       컨테이너 재시작 후 healthcheck 정상
+복구 확인  상태 확인 ${RUNTIME_RECOVERY_INTERVAL_COUNT}회 연속 정상
+Spring     $(display_status "$spring_status")
+Observer   $(display_status "$observer_status")
+Admin      $(display_status "$admin_status")
+실제 조치  ${recovery_action}
+사건 ID    ${incident_id}
 \`\`\`"
   slack_post "$text" "$(incident_thread)" >/dev/null || true
   clear_runtime_incident
@@ -122,10 +158,13 @@ manual_alert() {
   text="${mention}🚨 [${ENVIRONMENT_LABEL}] 자동 복구 실패 · 수동 조치 필요
 \`\`\`
 확인 시각  $(date '+%Y-%m-%d %H:%M:%S %Z')
-Spring     $1
-Observer   $2
-Admin      $3
+자동 조치  컨테이너 재시작 1회 수행
+대기 시간  $((RUNTIME_MANUAL_ALERT_INTERVAL_COUNT * 30))초
+Spring     $(display_status "$1")
+Observer   $(display_status "$2")
+Admin      $(display_status "$3")
 필요 조치  EC2에서 docker ps 및 docker logs --since 15m 확인
+사건 ID    $(cat "$INCIDENT_ID" 2>/dev/null || echo 확인불가)
 \`\`\`"
   if slack_post "$text" "$(incident_thread)" >/dev/null; then
     touch "$MANUAL_ALERTED"
@@ -149,27 +188,48 @@ check_runtime() {
   done
 
   if [ "$bad_count" -eq 0 ]; then
-    [ "$starting_count" -gt 0 ] && return
+    echo 0 > "$RUNTIME_FAILURE_COUNT_FILE"
+    if [ "$starting_count" -gt 0 ]; then
+      echo 0 > "$RUNTIME_RECOVERY_COUNT_FILE"
+      return
+    fi
     if [ -e "$ACTIVE_INCIDENT" ]; then
-      recover_incident
+      recovery_count=$(cat "$RUNTIME_RECOVERY_COUNT_FILE" 2>/dev/null || echo 0)
+      recovery_count=$((recovery_count + 1))
+      echo "$recovery_count" > "$RUNTIME_RECOVERY_COUNT_FILE"
+      [ "$recovery_count" -lt "$RUNTIME_RECOVERY_INTERVAL_COUNT" ] && return
+      recover_incident "$spring_status" "$observer_status" "$admin_status"
     fi
     return
   fi
 
+  echo 0 > "$RUNTIME_RECOVERY_COUNT_FILE"
   [ "$bad_count" -ge 2 ] && key=stack || key=$(printf '%s' "$bad_components" | awk '{print $1}')
   if [ ! -e "$ACTIVE_INCIDENT" ]; then
+    failure_count=$(cat "$RUNTIME_FAILURE_COUNT_FILE" 2>/dev/null || echo 0)
+    failure_count=$((failure_count + 1))
+    echo "$failure_count" > "$RUNTIME_FAILURE_COUNT_FILE"
+    [ "$failure_count" -lt "$RUNTIME_FAILURE_INTERVAL_COUNT" ] && return
     start_incident "$key" "$spring_status" "$observer_status" "$admin_status"
+    echo 0 > "$RUNTIME_FAILURE_COUNT_FILE"
   fi
 
   if [ ! -e "$RESTART_ATTEMPTED" ]; then
     touch "$RESTART_ATTEMPTED"
+    restarted=0
     for component in $bad_components; do
       status=$(status_of "$component")
       [ "$status" = missing ] && continue
-      docker restart "${PROJECT_NAME}-${component}" >/dev/null 2>&1 || true
+      if docker restart "${PROJECT_NAME}-${component}" >/dev/null 2>&1; then restarted=1; fi
     done
+    [ "$restarted" -eq 1 ] && touch "$RESTART_PERFORMED"
+    echo 0 > "$RUNTIME_POST_RESTART_COUNT_FILE"
     return
   fi
+  post_restart_count=$(cat "$RUNTIME_POST_RESTART_COUNT_FILE" 2>/dev/null || echo 0)
+  post_restart_count=$((post_restart_count + 1))
+  echo "$post_restart_count" > "$RUNTIME_POST_RESTART_COUNT_FILE"
+  [ "$post_restart_count" -lt "$RUNTIME_MANUAL_ALERT_INTERVAL_COUNT" ] && return
   manual_alert "$spring_status" "$observer_status" "$admin_status"
 }
 
@@ -274,7 +334,7 @@ OOM        ${warning_oom_status}
   if [ ! -e "$alerted" ]; then
     echo 0 > "$count_file"
     echo 0 > "$recovery_file"
-    unlink "$started" "$minimum" "$maximum_psi" "$STATE_DIR/resource-memory-oom-occurred" 2>/dev/null || true
+    rm -f "$started" "$minimum" "$maximum_psi" "$STATE_DIR/resource-memory-oom-occurred"
     return
   fi
 
@@ -296,7 +356,7 @@ OOM        ${warning_oom_status}
 OOM        ${oom_status}
 복구 기준   $((MEMORY_RECOVERY_INTERVAL_COUNT * 30))초 연속 정상
 \`\`\`" >/dev/null; then
-    unlink "$alerted" "$started" "$minimum" "$maximum_psi" "$STATE_DIR/resource-memory-oom-occurred" 2>/dev/null || true
+    rm -f "$alerted" "$started" "$minimum" "$maximum_psi" "$STATE_DIR/resource-memory-oom-occurred"
     echo 0 > "$count_file"
     echo 0 > "$recovery_file"
   fi

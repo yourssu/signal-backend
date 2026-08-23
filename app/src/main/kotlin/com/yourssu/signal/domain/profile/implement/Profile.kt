@@ -2,6 +2,7 @@ package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateBirthYear
+import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateDepartment
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateIntroSentences
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateMbti
 import com.yourssu.signal.domain.profile.implement.ProfileValidator.validateNickname
@@ -21,6 +22,7 @@ class Profile(
     val egenTeto: EgenTeto? = null,
 ) {
     init {
+        validateDepartment(department)
         validateNickname(nickname)
         validateIntroSentences(introSentences)
         validateBirthYear(birthYear)

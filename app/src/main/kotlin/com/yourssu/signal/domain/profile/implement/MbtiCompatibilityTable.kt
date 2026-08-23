@@ -25,4 +25,6 @@ object MbtiCompatibilityTable {
         table[my]?.contains(target) == true
 
     fun isValid(mbti: String): Boolean = table.containsKey(mbti)
+
+    fun validTypes(): Set<String> = table.keys
 }

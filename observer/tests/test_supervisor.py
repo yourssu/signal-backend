@@ -62,11 +62,13 @@ class SupervisorScenarioTest(unittest.TestCase):
             self._write_memory_state(meminfo, pressure, 200_000, "0.00")
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
 
             with open(slack_log, encoding="utf-8") as file:
                 alerts = file.read()
             self.assertEqual(alerts.count("EC2 메모리 압력 지속"), 1)
             self.assertEqual(alerts.count("EC2 메모리 압력 해소"), 1)
+            self.assertFalse(os.path.exists(os.path.join(directory, "logs", "state", "resource-memory-alerted")))
 
     def test_restart_once_then_requires_manual_action(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -89,11 +91,70 @@ class SupervisorScenarioTest(unittest.TestCase):
 
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
             subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            self.assertFalse(os.path.exists(restart_log))
+
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
 
             with open(restart_log, encoding="utf-8") as file:
                 restarts = file.read().splitlines()
             self.assertEqual(restarts, ["restart test-spring", "restart test-observer", "restart test-admin"])
+
+            for _ in range(5):
+                subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            self.assertFalse(os.path.exists(os.path.join(directory, "logs", "state", "runtime-manual-alerted")))
+
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
             self.assertTrue(os.path.exists(os.path.join(directory, "logs", "state", "runtime-manual-alerted")))
+
+    def test_recovery_requires_three_healthy_checks_and_is_sent_once(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bin_dir = os.path.join(directory, "bin")
+            os.makedirs(bin_dir)
+            env_file = os.path.join(directory, ".env")
+            status_file = os.path.join(directory, "status")
+            slack_log = os.path.join(directory, "slack-payloads")
+            with open(env_file, "w", encoding="utf-8") as file:
+                file.write("PROJECT_NAME=test\nENVIRONMENT=dev\nSLACK_TOKEN=test-token\nSLACK_LOG_CHANNEL=test-channel\n")
+            with open(status_file, "w", encoding="utf-8") as file:
+                file.write("unhealthy")
+            self._executable(
+                bin_dir,
+                "docker",
+                '#!/bin/bash\nif [ "$1" = inspect ]; then cat "$STATUS_FILE"; else exit 0; fi\n',
+            )
+            self._executable(
+                bin_dir,
+                "curl",
+                '#!/bin/bash\nwhile [ "$#" -gt 0 ]; do\n  if [ "$1" = --data ]; then\n    shift\n'
+                '    python3 -c \'import json,sys; print(json.loads(sys.argv[1])["text"])\' "$1" >> "$SLACK_PAYLOAD_LOG"\n'
+                '    break\n  fi\n  shift\ndone\necho \'{"ok":true,"ts":"123.456"}\'\n',
+            )
+            self._executable(bin_dir, "logger", "#!/bin/bash\nexit 0\n")
+            environment = {
+                **os.environ,
+                "PATH": bin_dir + os.pathsep + os.environ["PATH"],
+                "SUPERVISOR_ENV_FILE": env_file,
+                "SUPERVISOR_ONCE": "1",
+                "STATUS_FILE": status_file,
+                "SLACK_PAYLOAD_LOG": slack_log,
+            }
+
+            for _ in range(3):
+                subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            with open(status_file, "w", encoding="utf-8") as file:
+                file.write("healthy")
+
+            for _ in range(2):
+                subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            with open(slack_log, encoding="utf-8") as file:
+                self.assertNotIn("복구 완료", file.read())
+
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            with open(slack_log, encoding="utf-8") as file:
+                alerts = file.read()
+            self.assertEqual(alerts.count("복구 완료"), 1)
+            self.assertIn("정상 (healthy)", alerts)
 
     def test_manual_alert_marker_is_created_only_after_slack_delivery_succeeds(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -117,8 +178,10 @@ class SupervisorScenarioTest(unittest.TestCase):
                 "CURL_COUNT": os.path.join(directory, "curl-count"),
             }
 
-            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
-            subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            for _ in range(3):
+                subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
+            for _ in range(6):
+                subprocess.run(["bash", SCRIPT], cwd=directory, env=environment, check=True)
             marker = os.path.join(directory, "logs", "state", "runtime-manual-alerted")
             self.assertFalse(os.path.exists(marker))
 

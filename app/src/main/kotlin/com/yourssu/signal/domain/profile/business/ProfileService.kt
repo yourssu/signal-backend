@@ -106,6 +106,7 @@ class ProfileService(
     }
 
     fun updateProfile(command: ProfileUpdateCommand): MyProfileResponse {
+        ProfileValidator.validateContact(command.contact)
         validateBannedWords(command.nickname, command.introSentences)
 
         val profile = profileReader.getByUuid(Uuid(command.uuid))

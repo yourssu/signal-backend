@@ -1,0 +1,21 @@
+version: 1
+source_of_truth: .agents
+issue_repository: yourssu/signal-backend
+merge_policy: user_only
+local_adapters:
+  - .claude
+  - .codex
+specs:
+  path: .agents/local/specs
+  medium: [spec.md, plan.md]
+  large: [spec.md, plan.md, tasks.md]
+verification:
+  config: .agents/project.yml
+  entrypoint: .agents/hooks/verify-before-pr.sh
+  secret_scan: .agents/hooks/scan-secrets.sh
+guard:
+  entrypoint: .agents/hooks/guard-command.sh
+  adapter_installer: .agents/hooks/install-local-adapters.py
+delivery:
+  set_issue: .agents/hooks/set-issue.sh
+  create_pr: .agents/hooks/create-pr.sh

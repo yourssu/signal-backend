@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.Gender
 import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.Profile
+import com.yourssu.signal.domain.profile.implement.ProfileValidator
 
 class ProfileCreatedCommand(
     val uuid: String,
@@ -24,12 +25,16 @@ class ProfileCreatedCommand(
     }
 
     fun toDomain(): Profile {
+        val parsedGender = Gender.of(gender)
+        val parsedAnimal = Animal.of(animal)
+        ProfileValidator.validateAnimal(parsedGender, parsedAnimal)
+        ProfileValidator.validateContact(contact)
         return Profile(
             uuid = Uuid(uuid),
-            gender = Gender.of(gender),
+            gender = parsedGender,
             department = department,
             birthYear = birthYear,
-            animal = Animal.of(animal),
+            animal = parsedAnimal,
             contact = contact,
             mbti = mbti,
             nickname = nickname,

@@ -2,17 +2,12 @@ package com.yourssu.signal.domain.profile.support
 
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
+import com.yourssu.signal.domain.profile.implement.ProfileValidationPolicy
 import org.springframework.stereotype.Component
 
 @Component
 class ContactFormatValidator : ConstraintValidator<ContactFormat, String> {
-    private val phoneRegex = Regex("^010\\d{8}$")
-    private val instagramRegex = Regex("^@[a-zA-Z0-9._]{1,30}$")
-
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        if (value == null) {
-            return false
-        }
-        return phoneRegex.matches(value) || instagramRegex.matches(value)
+        return value != null && ProfileValidationPolicy.isValidContact(value)
     }
 }

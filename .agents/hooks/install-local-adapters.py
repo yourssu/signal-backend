@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import hashlib
 import os
 import shutil
 from pathlib import Path
@@ -15,12 +14,6 @@ def load_json(path: Path) -> dict:
 
 LEGACY_MARKERS = ("CLAUDE_PROJECT_DIR/app", "커밋 전 gradlew test 실행", "./gradlew test")
 MANAGED_MARKER = "managed-by: signal-agents-adapter"
-LEGACY_ADAPTER_SENTENCE = "이 스킬을 실행하기 전에 프로젝트 루트의 `.agents/skills/"
-LEGACY_SKILL_HASHES = {
-    "a98ce401633d0e809e555531b5856cae1259c4ac53d8697801de1bf93abf6985",
-    "84ed9f86b4ae813b73f7b8ce981ae204fec2d15af26a6686287e47ddfe646b55",
-    "8a5045a796c5e54d9e0441fb6fc72fd5dbedb86aeb11c8a3c824bd515c78b417",
-}
 
 
 def install_hook(path: Path) -> None:
@@ -84,16 +77,15 @@ def install_skill_adapters(project_root: Path) -> None:
         claude_skill = claude_adapter / "SKILL.md"
         codex_skill = codex_adapter / "SKILL.md"
 
-        def managed_or_legacy(path: Path) -> bool:
+        def managed(path: Path) -> bool:
             if not path.is_file():
                 return False
             content = path.read_text(encoding="utf-8")
-            digest = hashlib.sha256(content.encode()).hexdigest()
-            return MANAGED_MARKER in content or LEGACY_ADAPTER_SENTENCE in content or digest in LEGACY_SKILL_HASHES
+            return MANAGED_MARKER in content
 
-        if codex_adapter.exists() and managed_or_legacy(codex_skill):
+        if codex_adapter.exists() and managed(codex_skill):
             shutil.rmtree(codex_adapter)
-        if claude_adapter.exists() and not managed_or_legacy(claude_skill):
+        if claude_adapter.exists() and not managed(claude_skill):
             print(f"[harness] 기존 Claude 스킬 보존: {claude_skill}")
             continue
         shutil.rmtree(claude_adapter, ignore_errors=True)

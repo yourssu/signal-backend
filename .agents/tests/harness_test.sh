@@ -73,11 +73,81 @@ if (cd "$secret_repo" && SECRET_SCAN_BASE_REF=HEAD~1 bash "$secret_scan") >/dev/
   exit 1
 fi
 
-verify_output="$(VERIFY_DRY_RUN=1 HARNESS_BASE_REF=origin/main bash "$verify")"
+git -C "$secret_repo" reset -q --hard HEAD~1
+printf '%s=%s\n' 'JWT_SECRET' 'abcdefghijklmnopqrstuvwxyz123456' > "$secret_repo/generic-secret.txt"
+git -C "$secret_repo" add generic-secret.txt
+if (cd "$secret_repo" && bash "$secret_scan") >/dev/null 2>&1; then
+  printf 'expected named generic secret to be blocked\n' >&2
+  exit 1
+fi
+
+git -C "$secret_repo" reset -q --hard HEAD
+printf '"%s": "%s"\n' 'JWT_SECRET' 'abcdefghijklmnopqrstuvwxyz123456' > "$secret_repo/json-secret.txt"
+git -C "$secret_repo" add json-secret.txt
+if (cd "$secret_repo" && bash "$secret_scan") >/dev/null 2>&1; then
+  printf 'expected JSON secret to be blocked\n' >&2
+  exit 1
+fi
+
+git -C "$secret_repo" reset -q --hard HEAD
+printf '%s=%s\n' 'DB_PASSWORD' 'abc!def@ghi#jklmnopqrst' > "$secret_repo/special-secret.txt"
+git -C "$secret_repo" add special-secret.txt
+if (cd "$secret_repo" && bash "$secret_scan") >/dev/null 2>&1; then
+  printf 'expected special-character secret to be blocked\n' >&2
+  exit 1
+fi
+
+git -C "$secret_repo" reset -q --hard HEAD
+{
+  printf '%s=%s\n' 'JWT_SECRET' 'your-jwt-secret-minimum-256-bits-long-string-here'
+  printf '%s=%s\n' 'DB_PASSWORD' 'test-password-for-in-memory-database'
+  printf '%s=%s\n' 'API_TOKEN' '${API_TOKEN}'
+} > "$secret_repo/placeholders.txt"
+git -C "$secret_repo" add placeholders.txt
+if ! (cd "$secret_repo" && bash "$secret_scan") >/dev/null 2>&1; then
+  printf 'expected placeholders to be allowed\n' >&2
+  exit 1
+fi
+
+verify_output="$(VERIFY_DRY_RUN=1 HARNESS_CHANGED_FILES='.agents/tests/harness_test.sh' bash "$verify")"
 printf '%s\n' "$verify_output" | grep -q '하네스 테스트'
 printf '%s\n' "$verify_output" | grep -q 'Shell 문법'
 
 adapter_root="$(mktemp -d)"
+mkdir -p "$adapter_root/.agents" "$adapter_root/.claude" "$adapter_root/.codex"
+cp -R "$repo_root/.agents/skills" "$adapter_root/.agents/skills"
+cat > "$adapter_root/.claude/settings.json" <<'JSON'
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CMD=$(jq -r '.tool_input.command // \\\"\\\"'); if echo \\\"$CMD\\\" | grep -q 'git commit'; then echo '[hook] 커밋 전 gradlew test 실행...' >&2; cd \\\"$CLAUDE_PROJECT_DIR/app\\\" && ./gradlew test; fi",
+            "timeout": 600
+          }
+        ]
+      },
+      {
+        "matcher": "CustomTool",
+        "hooks": [{"type": "command", "command": "printf custom", "timeout": 3}]
+      },
+      {
+        "matcher": "UserHook",
+        "hooks": [{"type": "command", "command": "printf '$CLAUDE_PROJECT_DIR/app'", "timeout": 3}]
+      }
+    ]
+  }
+}
+JSON
+cp "$adapter_root/.claude/settings.json" "$adapter_root/.codex/hooks.json"
+mkdir -p "$adapter_root/.claude/skills/implement" "$adapter_root/.codex/skills/implement"
+printf '%s\n' 'user-owned-skill' > "$adapter_root/.claude/skills/implement/SKILL.md"
+printf '%s\n' 'user-owned-skill' > "$adapter_root/.codex/skills/implement/SKILL.md"
+printf '%s\n' 'keep-me' > "$adapter_root/.claude/skills/implement/notes.txt"
+HARNESS_PROJECT_ROOT="$adapter_root" python3 "$repo_root/.agents/hooks/install-local-adapters.py" >/dev/null
 HARNESS_PROJECT_ROOT="$adapter_root" python3 "$repo_root/.agents/hooks/install-local-adapters.py" >/dev/null
 python3 - "$adapter_root" <<'PY'
 import json
@@ -87,9 +157,22 @@ from pathlib import Path
 root = Path(sys.argv[1])
 for relative in (Path('.claude/settings.json'), Path('.codex/hooks.json')):
     data = json.loads((root / relative).read_text())
-    command = data['hooks']['PreToolUse'][0]['hooks'][0]['command']
-    assert '.agents/hooks/guard-command.sh' in command
-    assert '/Users/' not in command
+    commands = [hook['command'] for entry in data['hooks']['PreToolUse'] for hook in entry['hooks']]
+    assert sum('.agents/hooks/guard-command.sh' in command for command in commands) == 1
+    assert all('커밋 전 gradlew test 실행' not in command for command in commands)
+    assert all("grep -q 'git commit'" not in command for command in commands)
+    assert 'printf custom' in commands
+    assert "printf '$CLAUDE_PROJECT_DIR/app'" in commands
+
+claude_skills = root / '.claude' / 'skills'
+for name in ('issue', 'plan', 'pr', 'review', 'specify', 'verify'):
+    adapter = (claude_skills / name / 'SKILL.md').read_text()
+    assert f'.agents/skills/{name}/SKILL.md' in adapter
+    assert 'managed-by: signal-agents-adapter' in adapter
+
+assert (claude_skills / 'implement' / 'SKILL.md').read_text() == 'user-owned-skill\n'
+assert (claude_skills / 'implement' / 'notes.txt').read_text() == 'keep-me\n'
+assert (root / '.codex' / 'skills' / 'implement' / 'SKILL.md').read_text() == 'user-owned-skill\n'
 PY
 
 printf 'harness tests passed\n'

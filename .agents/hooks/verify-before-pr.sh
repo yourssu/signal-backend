@@ -9,14 +9,18 @@ if ! git rev-parse --verify "$base_ref" >/dev/null 2>&1; then
   base_ref="main"
 fi
 
-changed_file_list="$(
-  {
-    git diff --name-only "$base_ref"...HEAD
-    git diff --name-only
-    git diff --name-only --cached
-    git ls-files --others --exclude-standard
-  } | awk 'NF' | sort -u
-)"
+if [[ -n "${HARNESS_CHANGED_FILES:-}" ]]; then
+  changed_file_list="$(printf '%s\n' "$HARNESS_CHANGED_FILES" | awk 'NF' | sort -u)"
+else
+  changed_file_list="$(
+    {
+      git diff --name-only "$base_ref"...HEAD
+      git diff --name-only
+      git diff --name-only --cached
+      git ls-files --others --exclude-standard
+    } | awk 'NF' | sort -u
+  )"
+fi
 
 if [[ -z "$changed_file_list" ]]; then
   printf '[verify] 변경 파일 없음\n'

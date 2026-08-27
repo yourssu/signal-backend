@@ -28,20 +28,20 @@ import org.mockito.kotlin.whenever
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest
 @ActiveProfiles("test")
-class ViewerTicketIssuanceTransactionTest {
+class ViewerTicketIssuanceIntegrationTest {
     @Autowired lateinit var service: ViewerService
     @Autowired lateinit var viewerRepository: ViewerRepository
     @Autowired lateinit var verificationRepository: VerificationRepository
     @Autowired lateinit var depositManager: DepositManager
-    @MockBean lateinit var adminAccessChecker: AdminAccessChecker
-    @MockBean lateinit var orderHistoryWriter: OrderHistoryWriter
-    @SpyBean lateinit var verificationWriter: VerificationWriter
+    @MockitoBean lateinit var adminAccessChecker: AdminAccessChecker
+    @MockitoBean lateinit var orderHistoryWriter: OrderHistoryWriter
+    @MockitoSpyBean lateinit var verificationWriter: VerificationWriter
 
     @Test
     fun `후속 저장 실패 뒤 같은 인증번호로 재시도해도 티켓은 한 번만 지급된다`() {

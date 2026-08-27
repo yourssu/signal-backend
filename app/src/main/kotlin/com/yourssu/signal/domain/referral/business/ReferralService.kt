@@ -21,8 +21,6 @@ import com.yourssu.signal.domain.viewer.implement.Viewer
 import com.yourssu.signal.infrastructure.logging.Notification
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import org.springframework.transaction.support.TransactionSynchronization
-import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Service
 class ReferralService(
@@ -76,23 +74,11 @@ class ReferralService(
             ticket = REFERRAL_BONUS_AMOUNT,
         )
         createReferralBonusOrderHistory(referrer.uuid)
-        afterCommit {
-            Notification.notifyTicketIssued(
-                verification,
-                REFERRAL_BONUS_AMOUNT,
-                updatedReferrer.ticket - updatedReferrer.usedTicket
-            )
-        }
-    }
-
-    private fun afterCommit(action: () -> Unit) {
-        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            action()
-            return
-        }
-        TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
-            override fun afterCommit() = action()
-        })
+        Notification.notifyTicketIssued(
+            verification,
+            REFERRAL_BONUS_AMOUNT,
+            updatedReferrer.ticket - updatedReferrer.usedTicket
+        )
     }
 
     private fun createReferralBonusOrderHistory(uuid: Uuid) {

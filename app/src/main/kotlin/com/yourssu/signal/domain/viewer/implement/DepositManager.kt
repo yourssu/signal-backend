@@ -9,6 +9,8 @@ import com.yourssu.signal.infrastructure.logging.Notification
 import com.yourssu.signal.infrastructure.sms.SMSMessage
 import com.yourssu.signal.infrastructure.sms.SMSParser
 import org.springframework.stereotype.Component
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -28,8 +30,20 @@ class DepositManager(
         val smsMessage = smsRecord[message] ?: throw NotFoundDepositNameException()
         val ticket = ticketPricePolicy.calculateTicketQuantity(smsMessage.depositAmount, verificationCode)
         validateAmount(ticket, smsMessage)
-        smsRecord.remove(message)
+        removeAfterCommit(message, smsMessage)
         return ticket
+    }
+
+    private fun removeAfterCommit(message: String, smsMessage: SMSMessage) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            smsRecord.remove(message, smsMessage)
+            return
+        }
+        TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
+            override fun afterCommit() {
+                smsRecord.remove(message, smsMessage)
+            }
+        })
     }
 
     private fun toCodeAndTicket(message: SMSMessage): DepositResult {

@@ -20,6 +20,9 @@ import com.yourssu.signal.domain.viewer.business.exception.TicketIssuedFailedExc
 import com.yourssu.signal.domain.viewer.implement.*
 import com.yourssu.signal.infrastructure.logging.Notification
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Service
 class ViewerService(
@@ -41,6 +44,7 @@ class ViewerService(
         return VerificationResponse.from(code)
     }
 
+    @Transactional
     fun issueTicketForAdmin(command: TicketIssuedCommand): ViewerResponse {
         val response = issueTicket(command)
         val referralCode = referralOrderReader.findByViewerUuid(response.uuid)
@@ -53,6 +57,7 @@ class ViewerService(
         return response
     }
 
+    @Transactional
     fun issueTicket(command: ProcessDepositSmsCommand): ViewerResponse {
         adminAccessChecker.validateAdminAccess(command.secretKey)
         val depositResult = depositManager.processDepositSms(type = command.type, message = command.message)
@@ -81,7 +86,9 @@ class ViewerService(
             ticket = command.ticket,
         )
         verificationWriter.remove(verification.uuid)
-        Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
+        afterCommit {
+            Notification.notifyTicketIssued(verification, command.ticket, viewer.ticket - viewer.usedTicket)
+        }
         referralService.processReferralBonus(viewer, command.ticket, verification)
         return ViewerResponse.from(viewer)
     }
@@ -117,6 +124,7 @@ class ViewerService(
         return viewers.map { ViewerResponse.from(it) }
     }
 
+    @Transactional
     fun issueTicketByDepositName(command: NotificationDepositCommand): ViewerResponse {
         validateUnMatchedDeposit(command)
         val verification = verificationReader.findByCode(command.toCode())
@@ -126,8 +134,20 @@ class ViewerService(
             ticket = ticket,
         )
         verificationWriter.remove(verification.uuid)
-        Notification.notifyRetryTicketIssued(command.message, verification, ticket, viewer.ticket - viewer.usedTicket)
+        afterCommit {
+            Notification.notifyRetryTicketIssued(command.message, verification, ticket, viewer.ticket - viewer.usedTicket)
+        }
         return ViewerResponse.from(viewer)
+    }
+
+    private fun afterCommit(action: () -> Unit) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            action()
+            return
+        }
+        TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
+            override fun afterCommit() = action()
+        })
     }
 
     private fun validateUnMatchedDeposit(command: NotificationDepositCommand) {

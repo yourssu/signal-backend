@@ -75,6 +75,14 @@ jobs:
         run: |
           ./gradlew clean build --build-cache --parallel --daemon
 
+      - name: Test observer
+        run: python3 -m unittest discover -s observer/tests -p 'test_*.py'
+
+      - name: Validate observer deployment scripts
+        run: |
+          bash -n observer/script/docker-deploy.sh
+          bash -n observer/script/supervise.sh
+
       # Docker 베이스 이미지 캐시
       - name: Cache Docker layers
         uses: actions/cache@v4

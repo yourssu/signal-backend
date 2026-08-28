@@ -16,7 +16,7 @@ object ProfileValidationPolicy {
     const val PHONE_PATTERN = "^010[2-9]\\d{7}$"
     const val INSTAGRAM_PATTERN = "^@[a-zA-Z0-9._]{1,30}$"
 
-    val maleAnimals = setOf(Animal.BEAR, Animal.DEER, Animal.DINOSAUR, Animal.DOG, Animal.CAT, Animal.HAMSTER)
+    val maleAnimals = setOf(Animal.BEAR, Animal.DEER, Animal.DINOSAUR, Animal.DOG, Animal.CAT, Animal.WOLF)
     val femaleAnimals = setOf(Animal.FOX, Animal.RABBIT, Animal.TURTLE, Animal.DOG, Animal.CAT, Animal.HAMSTER)
 
     fun maximumBirthYear(): Int = LocalDate.now().year

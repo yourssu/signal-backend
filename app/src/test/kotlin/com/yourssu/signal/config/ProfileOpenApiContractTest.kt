@@ -41,7 +41,7 @@ class ProfileOpenApiContractTest {
 
         created.path("properties").path("gender").path("enum").map { it.asText() }
             .shouldContainExactlyInAnyOrder("MALE", "FEMALE")
-        created.path("properties").path("animal").path("enum").size() shouldBe 9
+        created.path("properties").path("animal").path("enum").size() shouldBe 10
         created.path("properties").path("mbti").path("enum").size() shouldBe 16
         created.path("properties").path("egenTeto").path("enum").map { it.asText() }
             .shouldContainExactlyInAnyOrder("EGEN", "TETO", "NOT_SELECTED")
@@ -62,10 +62,26 @@ class ProfileOpenApiContractTest {
                 properties.path("animal").path("enum").map { it.asText() }
         }
         animalsByGender.getValue("MALE").shouldContainExactlyInAnyOrder(
-            "BEAR", "DEER", "DINOSAUR", "DOG", "CAT", "HAMSTER"
+            "BEAR", "DEER", "DINOSAUR", "DOG", "CAT", "WOLF"
         )
         animalsByGender.getValue("FEMALE").shouldContainExactlyInAnyOrder(
             "FOX", "RABBIT", "TURTLE", "DOG", "CAT", "HAMSTER"
         )
+    }
+
+    @Test
+    fun `api-docs는 연예인 조회 조건과 오류 응답을 제공한다`() {
+        val response = mockMvc.get("/api-docs").andExpect { status { isOk() } }.andReturn().response.contentAsString
+        val operation = objectMapper.readTree(response)
+            .path("paths").path("/api/profiles/celebrities").path("get")
+        val parameters = operation.path("parameters").associateBy { it.path("name").asText() }
+
+        parameters.getValue("gender").path("schema").path("enum").map { it.asText() }
+            .shouldContainExactlyInAnyOrder("MALE", "FEMALE")
+        parameters.getValue("animal").path("schema").path("enum").map { it.asText() }
+            .shouldContainExactlyInAnyOrder(
+                "BEAR", "DEER", "DINOSAUR", "DOG", "CAT", "WOLF", "FOX", "RABBIT", "TURTLE", "HAMSTER"
+            )
+        operation.path("responses").has("400") shouldBe true
     }
 }

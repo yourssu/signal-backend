@@ -6,6 +6,7 @@ import com.yourssu.signal.api.dto.ProfilesFoundRequest
 import com.yourssu.signal.api.dto.ProfileUpdateRequest
 import com.yourssu.signal.api.dto.TicketConsumedRequest
 import com.yourssu.signal.config.resolver.UserUuid
+import com.yourssu.signal.config.security.annotation.PublicApi
 import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.profile.business.ProfilesCountResponse
@@ -21,6 +22,9 @@ import com.yourssu.signal.domain.profile.business.dto.ProfileResponse
 import com.yourssu.signal.api.dto.RandomProfileRequest
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse as OpenApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -119,6 +123,38 @@ class ProfileController(
         @PathVariable gender: String
     ): ResponseEntity<Response<ProfilesCountResponse>> {
         val response = profileService.countByGender(gender)
+        return ResponseEntity.ok(Response(result = response))
+    }
+
+    @Operation(
+        summary = "동물상별 닮은꼴 연예인 조회",
+        description = "성별과 동물상에 해당하는 닮은꼴 연예인 전체 목록을 조회합니다. 성별에 허용되지 않는 동물상 조합은 400을 반환합니다."
+    )
+    @ApiResponses(
+        value = [
+            OpenApiResponse(responseCode = "200", description = "조회 성공"),
+            OpenApiResponse(responseCode = "400", description = "존재하지 않는 값 또는 성별에 허용되지 않는 동물상 조합"),
+        ]
+    )
+    @GetMapping("/celebrities")
+    @PublicApi
+    fun getCelebrities(
+        @Parameter(
+            description = "성별, 대소문자 구분 없음",
+            required = true,
+            schema = Schema(allowableValues = ["MALE", "FEMALE"]),
+        )
+        @RequestParam gender: String,
+        @Parameter(
+            description = "동물상, 대소문자 구분 없음",
+            required = true,
+            schema = Schema(
+                allowableValues = ["BEAR", "DEER", "DINOSAUR", "DOG", "CAT", "WOLF", "FOX", "RABBIT", "TURTLE", "HAMSTER"]
+            ),
+        )
+        @RequestParam animal: String,
+    ): ResponseEntity<Response<List<String>>> {
+        val response = profileService.getCelebrities(gender, animal)
         return ResponseEntity.ok(Response(result = response))
     }
 

@@ -141,16 +141,31 @@ class CompatibilityMatcherTest : DescribeSpec({
         }
 
         context("동물상 궁합 검증") {
-            it("HAMSTER(여)+HAMSTER(남)은 매칭된다") {
+            it("HAMSTER(여)+WOLF(남)은 매칭된다") {
                 val f = female("ENFP", Animal.HAMSTER, 2001)
-                val m = male("INFJ", Animal.HAMSTER, 2001)
+                val m = male("INFJ", Animal.WOLF, 2001)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
+                AnimalCompatibilityTable.isCompatible(f, m) shouldBe true
+                AnimalCompatibilityTable.isCompatible(m, f) shouldBe true
             }
 
-            it("TURTLE(여)+HAMSTER(남)은 매칭된다") {
+            it("TURTLE(여)+WOLF(남)은 매칭된다") {
                 val f = female("ENFP", Animal.TURTLE, 2001)
-                val m = male("INFJ", Animal.HAMSTER, 2001)
+                val m = male("INFJ", Animal.WOLF, 2001)
                 CompatibilityMatcher.match(f, m) shouldBe PERFECT
+                AnimalCompatibilityTable.isCompatible(f, m) shouldBe true
+                AnimalCompatibilityTable.isCompatible(m, f) shouldBe true
+            }
+
+            it("기존 남자 HAMSTER 조합은 매칭되지 않는다") {
+                val hamster = male("INFJ", Animal.HAMSTER, 2001)
+                val femaleHamster = female("ENFP", Animal.HAMSTER, 2001)
+                val turtle = female("ENFP", Animal.TURTLE, 2001)
+
+                AnimalCompatibilityTable.isCompatible(hamster, femaleHamster) shouldBe false
+                AnimalCompatibilityTable.isCompatible(femaleHamster, hamster) shouldBe false
+                AnimalCompatibilityTable.isCompatible(hamster, turtle) shouldBe false
+                AnimalCompatibilityTable.isCompatible(turtle, hamster) shouldBe false
             }
 
             it("RABBIT(여)+DEER(남)은 매칭된다") {

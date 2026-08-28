@@ -3,7 +3,7 @@ package com.yourssu.signal.domain.profile.implement
 import com.yourssu.signal.domain.profile.implement.exception.AnimalNotFoundException
 
 enum class Animal {
-    CAT, DOG, HAMSTER, BEAR, DINOSAUR, RABBIT, DEER, TURTLE, FOX;
+    CAT, DOG, HAMSTER, BEAR, DINOSAUR, RABBIT, DEER, TURTLE, FOX, WOLF;
 
     companion object {
         fun of(value: String): Animal {

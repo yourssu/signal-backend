@@ -31,26 +31,26 @@ class ProfileValidationPolicyTest : DescribeSpec({
 
     describe("성별별 동물상 검증") {
         context("남성 동물상 목록을 검증하면") {
-            it("BEAR는 허용하고 FOX는 거부한다") {
-                shouldNotThrowAny { ProfileValidator.validateAnimal(Gender.MALE, Animal.BEAR) }
+            it("WOLF는 허용하고 HAMSTER는 거부한다") {
+                shouldNotThrowAny { ProfileValidator.validateAnimal(Gender.MALE, Animal.WOLF) }
                 shouldThrow<AnimalGenderMismatchException> {
-                    ProfileValidator.validateAnimal(Gender.MALE, Animal.FOX)
+                    ProfileValidator.validateAnimal(Gender.MALE, Animal.HAMSTER)
                 }
             }
         }
 
         context("여성 동물상 목록을 검증하면") {
-            it("FOX는 허용하고 BEAR는 거부한다") {
-                shouldNotThrowAny { ProfileValidator.validateAnimal(Gender.FEMALE, Animal.FOX) }
+            it("HAMSTER는 허용하고 WOLF는 거부한다") {
+                shouldNotThrowAny { ProfileValidator.validateAnimal(Gender.FEMALE, Animal.HAMSTER) }
                 shouldThrow<AnimalGenderMismatchException> {
-                    ProfileValidator.validateAnimal(Gender.FEMALE, Animal.BEAR)
+                    ProfileValidator.validateAnimal(Gender.FEMALE, Animal.WOLF)
                 }
             }
         }
 
         context("공통 동물상이면") {
             it("남녀 모두 허용한다") {
-                listOf(Animal.DOG, Animal.CAT, Animal.HAMSTER).forEach { animal ->
+                listOf(Animal.DOG, Animal.CAT).forEach { animal ->
                     shouldNotThrowAny { ProfileValidator.validateAnimal(Gender.MALE, animal) }
                     shouldNotThrowAny { ProfileValidator.validateAnimal(Gender.FEMALE, animal) }
                 }

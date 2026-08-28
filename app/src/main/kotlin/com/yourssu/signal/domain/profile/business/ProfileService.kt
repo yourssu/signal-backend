@@ -173,6 +173,10 @@ class ProfileService(
         return ProfilesCountResponse.of(count)
     }
 
+    fun getCelebrities(gender: String, animal: String): List<String> {
+        return CelebrityTable.get(Gender.of(gender), Animal.of(animal))
+    }
+
     fun getProfile(command: ProfileFoundCommand): ProfileContactResponse {
         val viewer = viewerReader.get(command.toUuid())
         val targetProfile = profileReader.getById(command.profileId)

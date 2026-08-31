@@ -12,6 +12,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.method.annotation.HandlerMethodValidationException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
@@ -83,6 +84,20 @@ class ControllerAdvice {
                 ErrorResponse(
                     status = HttpStatus.BAD_REQUEST.value(),
                     message = errorMessage
+                )
+            )
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException::class)
+    fun handleMethodValidationException(
+        e: HandlerMethodValidationException
+    ): ResponseEntity<ErrorResponse> {
+        logger.error { e }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(
+                ErrorResponse(
+                    status = HttpStatus.BAD_REQUEST.value(),
+                    message = e.message
                 )
             )
     }
@@ -174,41 +189,48 @@ class ControllerAdvice {
 
 abstract class Error(
     val status: HttpStatus,
-    override val message: String
+    override val message: String,
+    val code: String? = null,
 ) : Exception()
 
 open class InternalServerError(
     status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-    message: String = "알 수 없는 에러가 발생했습니다."
-) : Error(status, message) {
+    message: String = "알 수 없는 에러가 발생했습니다.",
+    code: String? = null,
+) : Error(status, message, code) {
 }
 
 open class BadRequestException(
     status: HttpStatus = HttpStatus.BAD_REQUEST,
     message: String = "잘못된 요청입니다.",
-) : Error(status, message) {
+    code: String? = null,
+) : Error(status, message, code) {
 }
 
 open class NotFoundException(
     status: HttpStatus = HttpStatus.NOT_FOUND,
     message: String = "존재하지 않는 리소스입니다.",
-) : Error(status, message) {
+    code: String? = null,
+) : Error(status, message, code) {
 }
 
 open class UnauthorizedException(
     status: HttpStatus = HttpStatus.UNAUTHORIZED,
     message: String = "인증되지 않은 사용자입니다.",
-) : Error(status, message) {
+    code: String? = null,
+) : Error(status, message, code) {
 }
 
 open class ForbiddenException(
     status: HttpStatus = HttpStatus.FORBIDDEN,
     message: String = "권한이 없습니다.",
-) : Error(status, message) {
+    code: String? = null,
+) : Error(status, message, code) {
 }
 
 open class ConflictException(
     status: HttpStatus = HttpStatus.CONFLICT,
     message: String = "이미 존재하는 리소스입니다.",
-) : Error(status, message) {
+    code: String? = null,
+) : Error(status, message, code) {
 }

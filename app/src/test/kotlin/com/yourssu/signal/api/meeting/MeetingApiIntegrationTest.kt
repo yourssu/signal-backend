@@ -1,0 +1,267 @@
+package com.yourssu.signal.api.meeting
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.meeting.storage.MeetingMatchJpaRepository
+import com.yourssu.signal.domain.meeting.storage.MeetingMemberJpaRepository
+import com.yourssu.signal.domain.meeting.storage.MeetingRoomJpaRepository
+import com.yourssu.signal.domain.profile.implement.Animal
+import com.yourssu.signal.domain.profile.implement.Gender
+import com.yourssu.signal.domain.profile.implement.Profile
+import com.yourssu.signal.domain.profile.implement.ProfileRepository
+import org.hamcrest.Matchers.hasSize
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
+import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+class MeetingApiIntegrationTest {
+    @Autowired lateinit var mockMvc: MockMvc
+    @Autowired lateinit var objectMapper: ObjectMapper
+    @Autowired lateinit var profileRepository: ProfileRepository
+    @Autowired lateinit var meetingRoomJpaRepository: MeetingRoomJpaRepository
+    @Autowired lateinit var meetingMemberJpaRepository: MeetingMemberJpaRepository
+    @Autowired lateinit var meetingMatchJpaRepository: MeetingMatchJpaRepository
+
+    @BeforeEach
+    fun cleanMeetingData() {
+        meetingMatchJpaRepository.deleteAll()
+        meetingMemberJpaRepository.deleteAll()
+        meetingRoomJpaRepository.deleteAll()
+    }
+
+    @Test
+    fun `실제 JWT로 프로필 없는 신청자가 방 생성은 거절되고 매칭과 양측 결과 조회는 성공한다`() {
+        val creator = register()
+        val applicant = register()
+        profileRepository.save(profile(creator.uuid, "@jwt_creator"))
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("PROFILE_REQUIRED") }
+        }
+
+        val createdBody = mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_1")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("OPEN") }
+            jsonPath("$.result.expiresAt") { value(org.hamcrest.Matchers.endsWith("+09:00")) }
+        }.andReturn().response.contentAsString
+        val roomId = objectMapper.readTree(createdBody).path("result").path("id").asLong()
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.slots", hasSize<Any>(10))
+            jsonPath("$.result.slots[0].order") { doesNotExist() }
+            jsonPath("$.result.slots[0].xRatio") { doesNotExist() }
+            jsonPath("$.result.slots[0].yRatio") { doesNotExist() }
+        }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@jwt_applicant")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+            jsonPath("$.result.counterpartContact") { value("@jwt_creator") }
+        }
+
+        mockMvc.get("/api/meetings/rooms/$roomId/result") {
+            bearer(creator.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.counterpartContact") { value("@jwt_applicant") }
+        }
+        mockMvc.get("/api/meetings/rooms/$roomId/result") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.counterpartContact") { value("@jwt_creator") }
+        }
+    }
+
+    @Test
+    fun `미팅 API는 토큰 없이는 접근할 수 없다`() {
+        mockMvc.get("/api/meetings/board").andExpect { status { isUnauthorized() } }
+    }
+
+    @Test
+    fun `동일 슬롯 동시 생성의 패자는 SLOT_ALREADY_OCCUPIED를 응답받는다`() {
+        val first = register()
+        val second = register()
+        profileRepository.save(profile(first.uuid, "@jwt_slot_race_first"))
+        profileRepository.save(profile(second.uuid, "@jwt_slot_race_second"))
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+
+        try {
+            val responses = listOf(first, second).associateWith { user ->
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms") {
+                        bearer(user.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = roomCreateBody("SLOT_10")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                }
+            }
+            check(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            val results = responses.mapValues { it.value.get(10, TimeUnit.SECONDS) }
+
+            check(results.values.count { it.status == 201 } == 1)
+            val (loser, conflict) = results.entries.single { it.value.status != 201 }
+            check(conflict.status == 409)
+            check(objectMapper.readTree(conflict.body).path("code").asText() == "SLOT_ALREADY_OCCUPIED")
+
+            mockMvc.post("/api/meetings/rooms") {
+                bearer(loser.accessToken)
+                contentType = MediaType.APPLICATION_JSON
+                content = roomCreateBody("SLOT_9")
+            }.andExpect { status { isCreated() } }
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `매칭 요청 검증 실패는 400을 응답한다`() {
+        val creator = register()
+        val applicant = register()
+        profileRepository.save(profile(creator.uuid, "@jwt_validation_creator"))
+        val createdBody = mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_9")
+        }.andExpect { status { isCreated() } }
+            .andReturn().response.contentAsString
+        val roomId = objectMapper.readTree(createdBody).path("result").path("id").asLong()
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("invalid contact")
+        }.andExpect { status { isBadRequest() } }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+                {
+                  "representative":{"gender":"FEMALE","birthYear":2000,"department":"글로벌미디어학부"},
+                  "contact":"010-1234-5678",
+                  "companions":[]
+                }
+            """.trimIndent()
+        }.andExpect { status { isBadRequest() } }
+    }
+
+    @Test
+    fun `도메인 검증에 실패한 방 생성은 일일 생성 기회를 소비하지 않는다`() {
+        val creator = register()
+        profileRepository.save(profile(creator.uuid, "@jwt_rollback_creator"))
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+                {
+                  "slot":"SLOT_7",
+                  "partySize":3,
+                  "invitation":"인원 불일치",
+                  "companions":[{"gender":"MALE","birthYear":2001,"department":"경영학부"}]
+                }
+            """.trimIndent()
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.code") { value("INVALID_COMPANION_COUNT") }
+        }
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_8")
+        }.andExpect { status { isCreated() } }
+    }
+
+    @Test
+    fun `양수가 아닌 방 ID는 400을 응답한다`() {
+        val user = register()
+
+        mockMvc.get("/api/meetings/rooms/0") {
+            bearer(user.accessToken)
+        }.andExpect { status { isBadRequest() } }
+    }
+
+    private fun register(): RegisteredUser {
+        val body = mockMvc.post("/api/auth/register")
+            .andExpect { status { isCreated() } }
+            .andReturn().response.contentAsString
+        val result = objectMapper.readTree(body).path("result")
+        val jwt = result.path("accessToken").asText()
+        val parts = jwt.split('.')
+        val payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
+        return RegisteredUser(objectMapper.readTree(payload).path("sub").asText(), jwt)
+    }
+
+    private fun profile(uuid: String, contact: String) = Profile(
+        uuid = Uuid(uuid),
+        gender = Gender.MALE,
+        department = "컴퓨터학부",
+        birthYear = 2000,
+        animal = Animal.DOG,
+        contact = contact,
+        mbti = "ENFP",
+        nickname = "방장-${uuid.take(6)}",
+        introSentences = emptyList(),
+        school = "숭실대학교",
+    )
+
+    private fun roomCreateBody(slot: String) = """
+        {
+          "slot":"$slot",
+          "partySize":2,
+          "invitation":"같이 놀아요",
+          "companions":[{"gender":"MALE","birthYear":2001,"department":"경영학부"}]
+        }
+    """.trimIndent()
+
+    private fun matchBody(contact: String) = """
+        {
+          "representative":{"gender":"FEMALE","birthYear":2000,"department":"글로벌미디어학부"},
+          "contact":"$contact",
+          "companions":[{"gender":"FEMALE","birthYear":2001,"department":"경영학부"}]
+        }
+    """.trimIndent()
+
+    private fun org.springframework.test.web.servlet.MockHttpServletRequestDsl.bearer(token: String) {
+        header("Authorization", "Bearer $token")
+    }
+
+    data class RegisteredUser(val uuid: String, val accessToken: String)
+    data class ApiResult(val status: Int, val body: String)
+}

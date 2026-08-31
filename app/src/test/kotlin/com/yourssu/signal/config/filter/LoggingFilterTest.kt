@@ -121,10 +121,10 @@ class LoggingFilterTest : DescribeSpec({
         }
 
         context("연락처와 운영 시크릿을 포함한 요청이면") {
-            it("contact, token, secretKey 값을 app 로그에서 마스킹한다") {
+            it("contact, counterpartContact, token, secretKey 값을 app 로그에서 마스킹한다") {
                 val request = MockHttpServletRequest("POST", "/api/profiles").apply {
                     setContent(
-                        """{"contact":"@plain_contact","token":"plain-token","secretKey":"plain-secret","nickname":"signal"}"""
+                        """{"contact":"@plain_contact","counterpartContact":"@matched_contact","token":"test-plain-token","secretKey":"test-plain-secret","nickname":"signal"}"""
                             .toByteArray(),
                     )
                 }
@@ -133,12 +133,14 @@ class LoggingFilterTest : DescribeSpec({
 
                 val detailLog = appender.list.first().formattedMessage
                 detailLog shouldContain "\"contact\":\"***\""
+                detailLog shouldContain "\"counterpartContact\":\"***\""
                 detailLog shouldContain "\"token\":\"***\""
                 detailLog shouldContain "\"secretKey\":\"***\""
                 detailLog shouldContain "\"nickname\":\"signal\""
                 detailLog shouldNotContain "@plain_contact"
-                detailLog shouldNotContain "plain-token"
-                detailLog shouldNotContain "plain-secret"
+                detailLog shouldNotContain "@matched_contact"
+                detailLog shouldNotContain "test-plain-token"
+                detailLog shouldNotContain "test-plain-secret"
             }
 
             it("경로 변수 secretKey를 app 로그에서 마스킹한다") {
@@ -155,7 +157,7 @@ class LoggingFilterTest : DescribeSpec({
 
             it("JSON으로 파싱할 수 없는 payload는 원문을 app 로그에 남기지 않는다") {
                 val request = MockHttpServletRequest("POST", "/api/profiles").apply {
-                    setContent("contact=@plain_contact&token=plain-token&secretKey=plain-secret".toByteArray())
+                    setContent("contact=@plain_contact&token=test-plain-token&secretKey=test-plain-secret".toByteArray())
                 }
 
                 execute(request = request, responseBody = "{}")
@@ -163,8 +165,8 @@ class LoggingFilterTest : DescribeSpec({
                 val detailLog = appender.list.first().formattedMessage
                 detailLog shouldContain "\"Redacted\":true"
                 detailLog shouldNotContain "@plain_contact"
-                detailLog shouldNotContain "plain-token"
-                detailLog shouldNotContain "plain-secret"
+                detailLog shouldNotContain "test-plain-token"
+                detailLog shouldNotContain "test-plain-secret"
             }
         }
 

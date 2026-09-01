@@ -18,6 +18,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:sql/migrations/issue-177-meeting.sql
+      continue-on-error: false
 
 domain:
   permission:

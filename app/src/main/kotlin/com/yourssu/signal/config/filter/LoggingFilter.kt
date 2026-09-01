@@ -85,7 +85,7 @@ class LoggingFilter(
     private fun redactSensitiveFields(node: JsonNode, redactAuthCode: Boolean) {
         when {
             node.isObject -> (node as ObjectNode).fields().forEachRemaining { (name, value) ->
-                if (name.lowercase() in SENSITIVE_PAYLOAD_FIELDS || redactAuthCode && name.equals("code", ignoreCase = true)) {
+                if (isSensitivePayloadField(name) || redactAuthCode && name.equals("code", ignoreCase = true)) {
                     node.put(name, "***")
                 } else {
                     redactSensitiveFields(value, redactAuthCode)
@@ -93,6 +93,11 @@ class LoggingFilter(
             }
             node.isArray -> node.forEach { redactSensitiveFields(it, redactAuthCode) }
         }
+    }
+
+    private fun isSensitivePayloadField(name: String): Boolean {
+        val normalized = name.lowercase()
+        return normalized.endsWith("contact") || normalized in SENSITIVE_PAYLOAD_FIELDS
     }
 
     private fun String.escapeJson(): String = buildString(length) {
@@ -123,7 +128,6 @@ class LoggingFilter(
             "accesstoken",
             "refreshtoken",
             "token",
-            "contact",
             "secretkey",
             "authorization",
             "cookie",

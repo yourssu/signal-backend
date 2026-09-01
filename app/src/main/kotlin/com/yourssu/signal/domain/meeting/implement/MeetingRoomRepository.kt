@@ -12,4 +12,5 @@ interface MeetingRoomRepository {
     fun findAllOpen(now: LocalDateTime): List<MeetingRoom>
     fun existsByCreatorUuidAndCreationDate(creatorUuid: Uuid, creationDate: LocalDate): Boolean
     fun expireDueRooms(now: LocalDateTime): Int
+    fun expireDueRoomInSlot(slot: MeetingSlot, now: LocalDateTime): Int
 }

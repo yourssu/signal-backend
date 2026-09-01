@@ -81,6 +81,20 @@ class MeetingRoomRepositoryImplTest {
         assertEquals(listOf(MeetingSlot.SLOT_6), repository.findAllOpen(now).map { it.slot })
     }
 
+    @Test
+    fun `선택한 슬롯의 만료 방만 상태를 변경하고 슬롯을 반환한다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val due = repository.save(room("expired-slot-creator", MeetingSlot.SLOT_3, now.minusHours(2)))
+        val otherDue = repository.save(room("other-expired-creator", MeetingSlot.SLOT_4, now.minusHours(2)))
+
+        assertEquals(1, repository.expireDueRoomInSlot(MeetingSlot.SLOT_3, now))
+
+        assertEquals(MeetingRoomStatus.EXPIRED, repository.findById(due.id!!)!!.status)
+        assertNull(repository.findById(due.id!!)!!.activeSlot)
+        assertEquals(MeetingRoomStatus.OPEN, repository.findById(otherDue.id!!)!!.status)
+        assertEquals(MeetingSlot.SLOT_4, repository.findById(otherDue.id!!)!!.activeSlot)
+    }
+
     private fun room(creator: String, slot: MeetingSlot, createdAt: LocalDateTime) = MeetingRoom(
         slot = slot,
         activeSlot = slot,

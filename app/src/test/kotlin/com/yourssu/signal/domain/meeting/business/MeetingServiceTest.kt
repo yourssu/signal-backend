@@ -23,7 +23,7 @@ class MeetingServiceTest : DescribeSpec({
     val matchRepository = mock<MeetingMatchRepository>()
     val profileReader = mock<ProfileReader>()
     val expirationManager = mock<MeetingExpirationManager>()
-    val clock = Clock.fixed(Instant.parse("2026-08-31T03:00:00Z"), ZoneId.of("Asia/Seoul"))
+    val clock = AdjustableClock(Instant.parse("2026-08-31T03:00:00Z"), ZoneId.of("Asia/Seoul"))
     val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, expirationManager, clock)
     val uuid = Uuid("creator")
 
@@ -55,18 +55,25 @@ class MeetingServiceTest : DescribeSpec({
 
     beforeEach {
         reset(roomRepository, memberRepository, matchRepository, profileReader, expirationManager)
+        clock.set(Instant.parse("2026-08-31T03:00:00Z"))
     }
 
     describe("보드 조회") {
         it("프로필이 없으면 10개 슬롯과 PROFILE_REQUIRED 생성 불가 사유를 반환한다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(false)
             whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            doAnswer {
+                clock.advanceSeconds(2)
+                null
+            }.whenever(expirationManager).expireDueRooms(any())
 
             val result = service.getBoard(uuid.value)
 
             result.slots shouldHaveSize 10
             result.creationEligibility.canCreate shouldBe false
             result.creationEligibility.reason shouldBe MeetingService.PROFILE_REQUIRED
+            verify(expirationManager).expireDueRooms(LocalDateTime.of(2026, 8, 31, 12, 0))
+            verify(roomRepository).findAllOpen(LocalDateTime.of(2026, 8, 31, 12, 0, 2))
         }
     }
 
@@ -95,6 +102,8 @@ class MeetingServiceTest : DescribeSpec({
             val members = argumentCaptor<List<MeetingMember>>()
             verify(memberRepository).saveAll(members.capture())
             members.firstValue.map { it.userUuid } shouldBe listOf(uuid, null)
+            verify(roomRepository).expireDueRoomInSlot(eq(MeetingSlot.SLOT_1), any())
+            verify(expirationManager, never()).expireDueRooms(any())
         }
 
         it("프로필이 없으면 저장하지 않는다") {
@@ -113,12 +122,37 @@ class MeetingServiceTest : DescribeSpec({
         it("생성자와 신청자에게 각각 상대 연락처만 공개한다") {
             val room = room(status = MeetingRoomStatus.MATCHED)
             val match = MeetingMatch(1L, 1L, Uuid("applicant"), "@creator", "@applicant", LocalDateTime.now(clock))
-            whenever(roomRepository.findById(1L)).thenReturn(room)
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room)
             whenever(matchRepository.findByRoomId(1L)).thenReturn(match)
 
             service.getResult("creator", 1L).counterpartContact shouldBe "@applicant"
             service.getResult("applicant", 1L).counterpartContact shouldBe "@creator"
             shouldThrow<MeetingResultForbiddenException> { service.getResult("third-party", 1L) }
+            verify(expirationManager, never()).expireDueRooms(any())
+        }
+
+        it("열린 방은 잠근 뒤 최신 시각으로 만료시킨다") {
+            val expiredRoom = room().copy(expiresAt = LocalDateTime.of(2026, 8, 31, 11, 59, 59))
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(expiredRoom)
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument(0) }
+
+            shouldThrow<RoomExpiredException> { service.getResult("creator", 1L) }
+
+            verify(roomRepository).findByIdForUpdate(1L)
+            verify(roomRepository).save(check { it.status shouldBe MeetingRoomStatus.EXPIRED })
+            verify(matchRepository, never()).findByRoomId(any())
+        }
+    }
+
+    describe("방 상세") {
+        it("방과 멤버를 같은 잠금 경계에서 조회한다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+
+            service.getRoom("viewer", 1L)
+
+            verify(roomRepository).findByIdForUpdate(1L)
+            verify(roomRepository, never()).findById(1L)
         }
     }
 
@@ -139,5 +173,65 @@ class MeetingServiceTest : DescribeSpec({
             }
             verify(matchRepository, never()).save(any())
         }
+
+        it("잠금 대기 중 만료되면 EXPIRED로 전환하고 신청을 거절한다") {
+            val expiringRoom = room().copy(expiresAt = LocalDateTime.of(2026, 8, 31, 13, 0))
+            clock.set(Instant.parse("2026-08-31T03:59:59Z"))
+            whenever(roomRepository.findByIdForUpdate(1L)).thenAnswer {
+                clock.advanceSeconds(2)
+                expiringRoom
+            }
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument(0) }
+
+            shouldThrow<RoomExpiredException> {
+                service.match(
+                    MeetingMatchCommand(
+                        uuid = "applicant",
+                        roomId = 1L,
+                        representative = MeetingMemberCommand(Gender.FEMALE, 2000, "컴퓨터학부"),
+                        contact = "@applicant",
+                        companions = listOf(MeetingMemberCommand(Gender.FEMALE, 2001, "경영학부")),
+                    )
+                )
+            }
+
+            verify(roomRepository).save(check { it.status shouldBe MeetingRoomStatus.EXPIRED })
+            verify(matchRepository, never()).save(any())
+        }
+    }
+
+    describe("방 취소") {
+        it("잠금 대기 중 만료되면 EXPIRED로 전환하고 취소를 거절한다") {
+            val expiringRoom = room().copy(expiresAt = LocalDateTime.of(2026, 8, 31, 13, 0))
+            clock.set(Instant.parse("2026-08-31T03:59:59Z"))
+            whenever(roomRepository.findByIdForUpdate(1L)).thenAnswer {
+                clock.advanceSeconds(2)
+                expiringRoom
+            }
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument(0) }
+
+            shouldThrow<RoomExpiredException> { service.cancel(uuid.value, 1L) }
+
+            verify(roomRepository).save(check { it.status shouldBe MeetingRoomStatus.EXPIRED })
+        }
     }
 })
+
+private class AdjustableClock(
+    private var current: Instant,
+    private val currentZone: ZoneId,
+) : Clock() {
+    override fun getZone(): ZoneId = currentZone
+
+    override fun withZone(zone: ZoneId): Clock = AdjustableClock(current, zone)
+
+    override fun instant(): Instant = current
+
+    fun set(instant: Instant) {
+        current = instant
+    }
+
+    fun advanceSeconds(seconds: Long) {
+        current = current.plusSeconds(seconds)
+    }
+}

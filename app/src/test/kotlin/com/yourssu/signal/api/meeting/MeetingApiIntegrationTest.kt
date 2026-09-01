@@ -2,6 +2,10 @@ package com.yourssu.signal.api.meeting
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.meeting.implement.MeetingRoom
+import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
+import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
+import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import com.yourssu.signal.domain.meeting.storage.MeetingMatchJpaRepository
 import com.yourssu.signal.domain.meeting.storage.MeetingMemberJpaRepository
 import com.yourssu.signal.domain.meeting.storage.MeetingRoomJpaRepository
@@ -20,6 +24,9 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -32,6 +39,7 @@ class MeetingApiIntegrationTest {
     @Autowired lateinit var objectMapper: ObjectMapper
     @Autowired lateinit var profileRepository: ProfileRepository
     @Autowired lateinit var meetingRoomJpaRepository: MeetingRoomJpaRepository
+    @Autowired lateinit var meetingRoomRepository: MeetingRoomRepository
     @Autowired lateinit var meetingMemberJpaRepository: MeetingMemberJpaRepository
     @Autowired lateinit var meetingMatchJpaRepository: MeetingMatchJpaRepository
 
@@ -217,6 +225,58 @@ class MeetingApiIntegrationTest {
         }.andExpect { status { isBadRequest() } }
     }
 
+    @Test
+    fun `만료된 방의 신청과 취소는 EXPIRED 상태와 슬롯 반환을 커밋한다`() {
+        val matchCreator = register()
+        val cancelCreator = register()
+        val applicant = register()
+        profileRepository.save(profile(matchCreator.uuid, "@expired_match_creator"))
+        profileRepository.save(profile(cancelCreator.uuid, "@expired_cancel_creator"))
+        val matchRoom = expiredRoom(matchCreator.uuid, MeetingSlot.SLOT_5)
+        val cancelRoom = expiredRoom(cancelCreator.uuid, MeetingSlot.SLOT_6)
+
+        mockMvc.post("/api/meetings/rooms/${matchRoom.id}/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@expired_applicant")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("ROOM_EXPIRED") }
+        }
+        mockMvc.post("/api/meetings/rooms/${cancelRoom.id}/cancel") {
+            bearer(cancelCreator.accessToken)
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("ROOM_EXPIRED") }
+        }
+
+        listOf(matchRoom.id!!, cancelRoom.id!!).forEach { roomId ->
+            val stored = meetingRoomJpaRepository.findById(roomId).orElseThrow()
+            check(stored.status == MeetingRoomStatus.EXPIRED)
+            check(stored.activeSlot == null)
+        }
+        check(meetingMatchJpaRepository.countByRoomId(matchRoom.id!!) == 0L)
+    }
+
+    @Test
+    fun `방 생성은 선택 슬롯의 만료 방만 정리한다`() {
+        val expiredCreator = register()
+        val otherExpiredCreator = register()
+        val newCreator = register()
+        profileRepository.save(profile(newCreator.uuid, "@new_slot_creator"))
+        val selected = expiredRoom(expiredCreator.uuid, MeetingSlot.SLOT_7)
+        val other = expiredRoom(otherExpiredCreator.uuid, MeetingSlot.SLOT_8)
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(newCreator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_7")
+        }.andExpect { status { isCreated() } }
+
+        check(meetingRoomJpaRepository.findById(selected.id!!).orElseThrow().status == MeetingRoomStatus.EXPIRED)
+        check(meetingRoomJpaRepository.findById(other.id!!).orElseThrow().status == MeetingRoomStatus.OPEN)
+    }
+
     private fun register(): RegisteredUser {
         val body = mockMvc.post("/api/auth/register")
             .andExpect { status { isCreated() } }
@@ -240,6 +300,23 @@ class MeetingApiIntegrationTest {
         introSentences = emptyList(),
         school = "숭실대학교",
     )
+
+    private fun expiredRoom(uuid: String, slot: MeetingSlot): MeetingRoom {
+        val zone = ZoneId.of("Asia/Seoul")
+        val now = LocalDateTime.now(zone)
+        return meetingRoomRepository.save(
+            MeetingRoom(
+                slot = slot,
+                activeSlot = slot,
+                creatorUuid = Uuid(uuid),
+                partySize = 2,
+                invitation = "만료 방",
+                status = MeetingRoomStatus.OPEN,
+                creationDate = LocalDate.now(zone),
+                expiresAt = now.minusSeconds(1),
+            )
+        )
+    }
 
     private fun roomCreateBody(slot: String) = """
         {

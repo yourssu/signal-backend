@@ -24,10 +24,10 @@ class MeetingService(
     private val clock: Clock,
 ) {
     fun getBoard(uuid: String): MeetingBoardResponse {
-        val now = LocalDateTime.now(clock)
-        expirationManager.expireDueRooms(now)
+        expirationManager.expireDueRooms(LocalDateTime.now(clock))
+        val queryNow = LocalDateTime.now(clock)
         val userUuid = Uuid(uuid)
-        val openRooms = meetingRoomRepository.findAllOpen(now).associateBy { it.slot }
+        val openRooms = meetingRoomRepository.findAllOpen(queryNow).associateBy { it.slot }
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
@@ -46,13 +46,13 @@ class MeetingService(
 
     @Transactional(rollbackFor = [com.yourssu.signal.handler.Error::class])
     fun createRoom(command: MeetingRoomCreateCommand): MeetingRoomResponse {
-        val now = LocalDateTime.now(clock)
-        expirationManager.expireDueRooms(now)
         val uuid = Uuid(command.uuid)
         if (!profileReader.existsByUuid(uuid)) throw ProfileRequiredException()
         if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
         }
+        val now = LocalDateTime.now(clock)
+        meetingRoomRepository.expireDueRoomInSlot(command.slot, now)
         if (meetingRoomRepository.findOpenBySlot(command.slot, now) != null) throw SlotAlreadyOccupiedException()
 
         val profile = profileReader.getByUuid(uuid)
@@ -81,23 +81,27 @@ class MeetingService(
         return room.toResponse()
     }
 
+    @Transactional(
+        rollbackFor = [com.yourssu.signal.handler.Error::class],
+        noRollbackFor = [RoomExpiredException::class],
+    )
     fun getRoom(@Suppress("UNUSED_PARAMETER") uuid: String, roomId: Long): MeetingRoomDetailResponse {
-        val now = LocalDateTime.now(clock)
-        expirationManager.expireDueRooms(now)
-        val room = meetingRoomRepository.findById(roomId) ?: throw MeetingRoomNotFoundException()
-        validateOpen(room)
+        val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
+        validateOpen(room, LocalDateTime.now(clock))
         return MeetingRoomDetailResponse(
             room = room.toResponse(),
             members = meetingMemberRepository.findAllByRoomId(roomId).map { it.toResponse() },
         )
     }
 
-    @Transactional(rollbackFor = [com.yourssu.signal.handler.Error::class])
+    @Transactional(
+        rollbackFor = [com.yourssu.signal.handler.Error::class],
+        noRollbackFor = [RoomExpiredException::class],
+    )
     fun match(command: MeetingMatchCommand): MeetingMatchResponse {
-        val now = LocalDateTime.now(clock)
-        expirationManager.expireDueRooms(now)
         val room = meetingRoomRepository.findByIdForUpdate(command.roomId) ?: throw MeetingRoomNotFoundException()
-        validateOpen(room)
+        val lockedNow = LocalDateTime.now(clock)
+        validateOpen(room, lockedNow)
         ProfileValidator.validateContact(command.contact)
         val applicantUuid = Uuid(command.uuid)
         if (applicantUuid == room.creatorUuid) throw SelfMatchNotAllowedException()
@@ -116,29 +120,33 @@ class MeetingService(
                 applicantUuid = applicantUuid,
                 creatorContact = creatorContact,
                 applicantContact = command.contact,
-                matchedAt = now,
+                matchedAt = lockedNow,
             )
         )
         meetingMemberRepository.saveAll(applicantMembers)
-        meetingRoomRepository.save(room.match(now))
+        meetingRoomRepository.save(room.match(lockedNow))
         return MeetingMatchResponse(meetingMatch.roomId, MeetingRoomStatus.MATCHED, meetingMatch.creatorContact)
     }
 
-    @Transactional(rollbackFor = [com.yourssu.signal.handler.Error::class])
+    @Transactional(
+        rollbackFor = [com.yourssu.signal.handler.Error::class],
+        noRollbackFor = [RoomExpiredException::class],
+    )
     fun cancel(uuid: String, roomId: Long) {
-        val now = LocalDateTime.now(clock)
-        expirationManager.expireDueRooms(now)
         val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
-        validateOpen(room)
+        val lockedNow = LocalDateTime.now(clock)
+        validateOpen(room, lockedNow)
         if (room.creatorUuid != Uuid(uuid)) throw MeetingRoomCancelForbiddenException()
-        meetingRoomRepository.save(room.cancel(now))
+        meetingRoomRepository.save(room.cancel(lockedNow))
     }
 
+    @Transactional(
+        rollbackFor = [com.yourssu.signal.handler.Error::class],
+        noRollbackFor = [RoomExpiredException::class],
+    )
     fun getResult(uuid: String, roomId: Long): MeetingResultResponse {
-        val now = LocalDateTime.now(clock)
-        expirationManager.expireDueRooms(now)
-        val room = meetingRoomRepository.findById(roomId) ?: throw MeetingRoomNotFoundException()
-        validateMatched(room)
+        val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
+        validateMatched(room, LocalDateTime.now(clock))
         val match = meetingMatchRepository.findByRoomId(roomId) ?: throw MeetingRoomNotFoundException()
         val contact = when (Uuid(uuid)) {
             room.creatorUuid -> match.applicantContact
@@ -166,7 +174,8 @@ class MeetingService(
         )
     }
 
-    private fun validateOpen(room: MeetingRoom) {
+    private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
+        expireIfDue(room, now)
         when (room.status) {
             MeetingRoomStatus.OPEN -> Unit
             MeetingRoomStatus.MATCHED -> throw RoomAlreadyMatchedException()
@@ -175,12 +184,20 @@ class MeetingService(
         }
     }
 
-    private fun validateMatched(room: MeetingRoom) {
+    private fun validateMatched(room: MeetingRoom, now: LocalDateTime) {
+        expireIfDue(room, now)
         when (room.status) {
             MeetingRoomStatus.MATCHED -> Unit
             MeetingRoomStatus.OPEN -> throw MeetingRoomNotFoundException()
             MeetingRoomStatus.CANCELLED -> throw RoomCancelledException()
             MeetingRoomStatus.EXPIRED -> throw RoomExpiredException()
+        }
+    }
+
+    private fun expireIfDue(room: MeetingRoom, now: LocalDateTime) {
+        if (room.status == MeetingRoomStatus.OPEN && room.isExpired(now)) {
+            meetingRoomRepository.save(room.expire(now))
+            throw RoomExpiredException()
         }
     }
 

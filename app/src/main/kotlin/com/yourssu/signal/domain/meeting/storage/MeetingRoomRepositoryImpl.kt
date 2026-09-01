@@ -50,6 +50,9 @@ class MeetingRoomRepositoryImpl(
 
     override fun expireDueRooms(now: LocalDateTime): Int =
         jpaRepository.expireDueRooms(MeetingRoomStatus.OPEN, MeetingRoomStatus.EXPIRED, now)
+
+    override fun expireDueRoomInSlot(slot: MeetingSlot, now: LocalDateTime): Int =
+        jpaRepository.expireDueRoomInSlot(slot, MeetingRoomStatus.OPEN, MeetingRoomStatus.EXPIRED, now)
 }
 
 interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
@@ -87,6 +90,24 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
         """
     )
     fun expireDueRooms(
+        openStatus: MeetingRoomStatus,
+        expiredStatus: MeetingRoomStatus,
+        now: LocalDateTime,
+    ): Int
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+        """
+        update MeetingRoomEntity r
+        set r.status = :expiredStatus,
+            r.activeSlot = null,
+            r.expiredAt = :now,
+            r.updatedTime = :now
+        where r.activeSlot = :slot and r.status = :openStatus and r.expiresAt <= :now
+        """
+    )
+    fun expireDueRoomInSlot(
+        slot: MeetingSlot,
         openStatus: MeetingRoomStatus,
         expiredStatus: MeetingRoomStatus,
         now: LocalDateTime,

@@ -7,8 +7,13 @@ import com.yourssu.signal.config.security.annotation.RequireAuth
 import com.yourssu.signal.domain.common.business.dto.Response
 import com.yourssu.signal.domain.report.business.ReportResponse
 import com.yourssu.signal.domain.report.business.ReportService
+import com.yourssu.signal.handler.dto.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse as OpenApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
@@ -23,8 +28,18 @@ import org.springframework.web.bind.annotation.*
 class ReportController(private val reportService: ReportService) {
     @Operation(
         summary = "신고 접수",
-        description = "현재 로그인한 사용자가 대상 프로필을 신고합니다.",
+        description = "현재 로그인한 사용자가 연락처를 열람한 프로필을 신고합니다.",
         security = [SecurityRequirement(name = "bearerAuth")],
+    )
+    @ApiResponses(
+        value = [
+            OpenApiResponse(responseCode = "201", description = "신고 접수 성공"),
+            OpenApiResponse(responseCode = "400", description = "요청값 검증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "403", description = "연락처를 열람하지 않은 프로필 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "404", description = "프로필 또는 사용자 정보 없음 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "이미 신고한 프로필 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+        ]
     )
     @PostMapping
     @RequireAuth
@@ -36,11 +51,21 @@ class ReportController(private val reportService: ReportService) {
 
     @Operation(
         summary = "신고 승인",
-        description = "비밀 키로 접수된 신고를 승인하고 후속 처리를 수행합니다.",
+        description = "관리자 비밀 키로 접수된 신고를 승인하고 후속 처리를 수행합니다.",
+    )
+    @ApiResponses(
+        value = [
+            OpenApiResponse(responseCode = "200", description = "신고 승인 성공"),
+            OpenApiResponse(responseCode = "400", description = "요청값 검증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "403", description = "관리자 비밀 키 검증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "404", description = "신고 없음 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "이미 처리된 신고 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+        ]
     )
     @PostMapping("/{reportId}/approve")
     fun approve(
-        @Parameter(description = "신고 ID", example = "1") @PathVariable @Positive reportId: Long,
+        @Parameter(description = "신고 ID", example = "1", schema = Schema(minimum = "1"))
+        @PathVariable @Positive reportId: Long,
         @Valid @RequestBody request: ReportApprovedRequest,
     ): ResponseEntity<Response<ReportResponse>> = ResponseEntity.ok(
         Response(result = reportService.approve(reportId, request.secretKey))

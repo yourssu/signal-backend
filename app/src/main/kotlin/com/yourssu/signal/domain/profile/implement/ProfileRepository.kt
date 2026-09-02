@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 interface ProfileRepository {
     fun save(profile: Profile): Profile
     fun getByUuid(uuid: Uuid): Profile
+    fun getNicknameByUuid(uuid: Uuid): String
     fun existsByUuid(uuid: Uuid): Boolean
     fun findAll(): List<Profile>
     fun countContacts(contact: String): Int

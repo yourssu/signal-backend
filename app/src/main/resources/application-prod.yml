@@ -21,7 +21,9 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:sql/migrations/issue-177-meeting.sql
+      schema-locations:
+        - classpath:sql/migrations/issue-177-meeting.sql
+        - classpath:sql/migrations/issue-179-latest-match-index.sql
       continue-on-error: false
 
 domain:

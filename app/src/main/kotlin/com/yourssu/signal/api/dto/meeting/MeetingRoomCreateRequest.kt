@@ -1,21 +1,15 @@
 package com.yourssu.signal.api.dto.meeting
 
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
-import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import com.yourssu.signal.domain.meeting.implement.MeetingRoom
+import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import jakarta.validation.Valid
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
 data class MeetingRoomCreateRequest(
     @field:NotBlank
     val slot: String,
-
-    @field:Min(2)
-    @field:Max(4)
-    val partySize: Int,
 
     @field:NotBlank
     @field:Size(max = MeetingRoom.MAX_INVITATION_LENGTH)
@@ -28,7 +22,6 @@ data class MeetingRoomCreateRequest(
     fun toCommand(uuid: String) = MeetingRoomCreateCommand(
         uuid = uuid,
         slot = MeetingSlot.of(slot),
-        partySize = partySize,
         invitation = invitation,
         companions = companions.map { it.toCommand() },
     )

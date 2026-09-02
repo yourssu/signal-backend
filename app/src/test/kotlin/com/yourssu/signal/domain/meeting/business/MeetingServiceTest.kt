@@ -75,10 +75,28 @@ class MeetingServiceTest : DescribeSpec({
             verify(expirationManager).expireDueRooms(LocalDateTime.of(2026, 8, 31, 12, 0))
             verify(roomRepository).findAllOpen(LocalDateTime.of(2026, 8, 31, 12, 0, 2))
         }
+
+        it("최근 30초 안에 매칭된 최신 방의 생성자 닉네임과 노출 기한을 반환한다") {
+            val matchedAt = LocalDateTime.of(2026, 8, 31, 11, 59, 45)
+            val matchedRoom = room(MeetingRoomStatus.MATCHED).copy(matchedAt = matchedAt)
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findLatestMatchedAfter(LocalDateTime.of(2026, 8, 31, 11, 59, 30)))
+                .thenReturn(matchedRoom)
+            whenever(profileReader.getNicknameByUuid(uuid)).thenReturn("방장")
+
+            val result = service.getBoard(uuid.value)
+
+            result.latestMatch!!.roomId shouldBe 1L
+            result.latestMatch!!.creatorNickname shouldBe "방장"
+            result.latestMatch!!.matchedAt.toLocalDateTime() shouldBe matchedAt
+            result.latestMatch!!.visibleUntil.toLocalDateTime() shouldBe matchedAt.plusSeconds(30)
+            verify(profileReader, never()).getByUuid(uuid)
+        }
     }
 
     describe("방 생성") {
-        it("생성자 프로필로 대표를 만들고 요청의 동행만 저장한다") {
+        it("생성자와 동행 친구 수로 방 인원수를 계산하고 요청의 동행만 저장한다") {
             val profile = profile(uuid)
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile)
@@ -93,15 +111,18 @@ class MeetingServiceTest : DescribeSpec({
                 MeetingRoomCreateCommand(
                     uuid = uuid.value,
                     slot = MeetingSlot.SLOT_1,
-                    partySize = 2,
                     invitation = "같이 놀아요",
-                    companions = listOf(MeetingMemberCommand(Gender.MALE, 2001, "경영학부")),
+                    companions = listOf(
+                        MeetingMemberCommand(Gender.MALE, 2001, "경영학부"),
+                        MeetingMemberCommand(Gender.FEMALE, 2002, "경제학과"),
+                    ),
                 )
             )
 
+            verify(roomRepository).save(check { it.partySize shouldBe 3 })
             val members = argumentCaptor<List<MeetingMember>>()
             verify(memberRepository).saveAll(members.capture())
-            members.firstValue.map { it.userUuid } shouldBe listOf(uuid, null)
+            members.firstValue.map { it.userUuid } shouldBe listOf(uuid, null, null)
             verify(roomRepository).expireDueRoomInSlot(eq(MeetingSlot.SLOT_1), any())
             verify(expirationManager, never()).expireDueRooms(any())
         }
@@ -111,7 +132,12 @@ class MeetingServiceTest : DescribeSpec({
 
             shouldThrow<ProfileRequiredException> {
                 service.createRoom(
-                    MeetingRoomCreateCommand(uuid.value, MeetingSlot.SLOT_1, 2, "초대", listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")))
+                    MeetingRoomCreateCommand(
+                        uuid.value,
+                        MeetingSlot.SLOT_1,
+                        "초대",
+                        listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")),
+                    )
                 )
             }
             verify(roomRepository, never()).save(any())

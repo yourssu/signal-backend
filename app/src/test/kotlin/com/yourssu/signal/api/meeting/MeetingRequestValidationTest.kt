@@ -5,6 +5,7 @@ import com.yourssu.signal.api.dto.meeting.MeetingMemberRequest
 import com.yourssu.signal.api.dto.meeting.MeetingRoomCreateRequest
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import jakarta.validation.Validation
 
@@ -17,23 +18,47 @@ class MeetingRequestValidationTest : DescribeSpec({
     )
 
     describe("미팅 방 생성 요청") {
-        it("지원하지 않는 인원수를 거부한다") {
+        it("인원수를 요청 필드로 받지 않는다") {
+            MeetingRoomCreateRequest::class.java.declaredFields.map { it.name } shouldNotContain "partySize"
+        }
+
+        it("동행 친구가 세 명이면 허용한다") {
             val request = MeetingRoomCreateRequest(
                 slot = "SLOT_1",
-                partySize = 5,
                 invitation = "같이 축제를 즐겨요",
-                companions = listOf(member),
+                companions = listOf(member, member, member),
             )
 
-            validator.validate(request).map { it.propertyPath.toString() } shouldContain "partySize"
+            validator.validate(request).map { it.propertyPath.toString() } shouldNotContain "companions"
+        }
+
+        it("생성자와 동행 친구 수를 합산해 인원수를 계산한다") {
+            (1..3).forEach { companionCount ->
+                val request = MeetingRoomCreateRequest(
+                    slot = "SLOT_1",
+                    invitation = "같이 축제를 즐겨요",
+                    companions = List(companionCount) { member },
+                )
+
+                request.toCommand("creator").partySize shouldBe companionCount + 1
+            }
         }
 
         it("대표자를 제외한 동행 친구가 없으면 거부한다") {
             val request = MeetingRoomCreateRequest(
                 slot = "SLOT_1",
-                partySize = 2,
                 invitation = "같이 축제를 즐겨요",
                 companions = emptyList(),
+            )
+
+            validator.validate(request).map { it.propertyPath.toString() } shouldContain "companions"
+        }
+
+        it("동행 친구가 네 명이면 거부한다") {
+            val request = MeetingRoomCreateRequest(
+                slot = "SLOT_1",
+                invitation = "같이 축제를 즐겨요",
+                companions = listOf(member, member, member, member),
             )
 
             validator.validate(request).map { it.propertyPath.toString() } shouldContain "companions"

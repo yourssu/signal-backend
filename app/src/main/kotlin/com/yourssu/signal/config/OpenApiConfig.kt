@@ -210,7 +210,11 @@ class OpenApiConfig {
             schema.stringProperty("code")?.example = "INVALID_INPUT"
         }
         schemas["MeetingCreationEligibilityResponse"]?.stringProperty("reason")?.setEnum(
-            listOf(MeetingService.PROFILE_REQUIRED, MeetingService.DAILY_CREATION_LIMIT_EXCEEDED)
+            listOf(
+                MeetingService.PROFILE_REQUIRED,
+                MeetingService.DAILY_CREATION_LIMIT_EXCEEDED,
+                MeetingService.DAILY_MEETING_LIMIT_EXCEEDED,
+            )
         )
         schemas["BankDepositSmsRequest"]?.stringProperty("type")?.setEnum(smsTypes)
 

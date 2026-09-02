@@ -137,7 +137,11 @@ class ReportMeetingOpenApiContractTest {
             .shouldContainExactlyInAnyOrder("kakao_sms", "kb_sms")
         schemas.path("MeetingCreationEligibilityResponse").path("properties").path("reason").path("enum")
             .map { it.asText() }
-            .shouldContainExactlyInAnyOrder("PROFILE_REQUIRED", "DAILY_CREATION_LIMIT_EXCEEDED")
+            .shouldContainExactlyInAnyOrder(
+                "PROFILE_REQUIRED",
+                "DAILY_CREATION_LIMIT_EXCEEDED",
+                "DAILY_MEETING_LIMIT_EXCEEDED",
+            )
 
         val genderParameter = document.path("paths").path("/api/profiles/genders/{gender}/count").path("get")
             .path("parameters").first { it.path("name").asText() == "gender" }

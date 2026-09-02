@@ -32,6 +32,7 @@ class MeetingService(
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
+            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
             else -> null
         }
         return MeetingBoardResponse(
@@ -52,6 +53,9 @@ class MeetingService(
         if (!profileReader.existsByUuid(uuid)) throw ProfileRequiredException()
         if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
+        }
+        if (meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.now(clock))) {
+            throw DailyMeetingLimitExceededException()
         }
         val now = LocalDateTime.now(clock)
         meetingRoomRepository.expireDueRoomInSlot(command.slot, now)
@@ -108,6 +112,7 @@ class MeetingService(
         ProfileValidator.validateContact(command.contact)
         val applicantUuid = Uuid(command.uuid)
         if (applicantUuid == room.creatorUuid) throw SelfMatchNotAllowedException()
+        validateParticipation(applicantUuid, lockedNow)
         val applicantMembers = buildMembers(
             roomId = room.id!!,
             teamSide = MeetingTeamSide.APPLICANT,
@@ -177,6 +182,14 @@ class MeetingService(
         )
     }
 
+    private fun validateParticipation(applicantUuid: Uuid, now: LocalDateTime) {
+        val today = now.toLocalDate()
+        val alreadyUsedToday = meetingRoomRepository.existsByCreatorUuidAndCreationDate(applicantUuid, today) ||
+            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(applicantUuid, today)
+        if (alreadyUsedToday) throw DailyMeetingLimitExceededException()
+        if (meetingRoomRepository.existsOpenByCreatorUuid(applicantUuid, now)) throw ActiveRoomExistsException()
+    }
+
     private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
         expireIfDue(room, now)
         when (room.status) {
@@ -239,5 +252,6 @@ class MeetingService(
         const val MATCH_NOTICE_SECONDS = 30L
         const val PROFILE_REQUIRED = "PROFILE_REQUIRED"
         const val DAILY_CREATION_LIMIT_EXCEEDED = "DAILY_CREATION_LIMIT_EXCEEDED"
+        const val DAILY_MEETING_LIMIT_EXCEEDED = "DAILY_MEETING_LIMIT_EXCEEDED"
     }
 }

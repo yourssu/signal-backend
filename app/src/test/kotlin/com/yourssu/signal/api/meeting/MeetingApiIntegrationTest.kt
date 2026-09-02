@@ -313,6 +313,112 @@ class MeetingApiIntegrationTest {
         check(meetingRoomJpaRepository.findById(other.id!!).orElseThrow().status == MeetingRoomStatus.OPEN)
     }
 
+    @Test
+    fun `방 생성과 성공 매칭은 사용자당 하루 한 번만 허용한다`() {
+        val creator = register()
+        val otherCreator = register()
+        val applicant = register()
+        profileRepository.save(profile(creator.uuid, "@daily_creator"))
+        profileRepository.save(profile(otherCreator.uuid, "@daily_other_creator"))
+        profileRepository.save(profile(applicant.uuid, "@daily_applicant"))
+        val roomId = createRoom(creator, "SLOT_1")
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@daily_applicant")
+        }.andExpect { status { isCreated() } }
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_MEETING_LIMIT_EXCEEDED") }
+        }
+
+        val otherRoomId = createRoom(otherCreator, "SLOT_3")
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@daily_applicant")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_MEETING_LIMIT_EXCEEDED") }
+        }
+
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@daily_creator")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_MEETING_LIMIT_EXCEEDED") }
+        }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.canCreate") { value(false) }
+            jsonPath("$.result.creationEligibility.reason") { value("DAILY_MEETING_LIMIT_EXCEEDED") }
+        }
+        check(meetingMatchJpaRepository.countByRoomId(otherRoomId) == 0L)
+    }
+
+    @Test
+    fun `실패한 신청은 하루 참여 기회를 소비하지 않는다`() {
+        val creator = register()
+        val applicant = register()
+        profileRepository.save(profile(creator.uuid, "@retry_creator"))
+        val roomId = createRoom(creator, "SLOT_4")
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("invalid contact")
+        }.andExpect { status { isBadRequest() } }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@retry_applicant")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+        }
+    }
+
+    @Test
+    fun `열린 방을 만들어 둔 사용자는 다른 방에 신청할 수 없다`() {
+        val creator = register()
+        val holder = register()
+        profileRepository.save(profile(creator.uuid, "@active_room_creator"))
+        openRoom(holder.uuid, MeetingSlot.SLOT_5, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1))
+        val roomId = createRoom(creator, "SLOT_6")
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(holder.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@active_room_holder")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("ACTIVE_ROOM_EXISTS") }
+        }
+        check(meetingMatchJpaRepository.countByRoomId(roomId) == 0L)
+    }
+
+    private fun createRoom(user: RegisteredUser, slot: String): Long {
+        val body = mockMvc.post("/api/meetings/rooms") {
+            bearer(user.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody(slot)
+        }.andExpect { status { isCreated() } }
+            .andReturn().response.contentAsString
+        return objectMapper.readTree(body).path("result").path("id").asLong()
+    }
+
     private fun register(): RegisteredUser {
         val body = mockMvc.post("/api/auth/register")
             .andExpect { status { isCreated() } }
@@ -336,6 +442,23 @@ class MeetingApiIntegrationTest {
         introSentences = emptyList(),
         school = "숭실대학교",
     )
+
+    private fun openRoom(uuid: String, slot: MeetingSlot, creationDate: LocalDate): MeetingRoom {
+        val zone = ZoneId.of("Asia/Seoul")
+        return meetingRoomRepository.save(
+            MeetingRoom(
+                slot = slot,
+                activeSlot = slot,
+                creatorUuid = Uuid(uuid),
+                creatorAnimal = Animal.DOG,
+                partySize = 2,
+                invitation = "진행 중인 방",
+                status = MeetingRoomStatus.OPEN,
+                creationDate = creationDate,
+                expiresAt = LocalDateTime.now(zone).plusHours(1),
+            )
+        )
+    }
 
     private fun expiredRoom(uuid: String, slot: MeetingSlot): MeetingRoom {
         val zone = ZoneId.of("Asia/Seoul")

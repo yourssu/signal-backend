@@ -66,7 +66,7 @@ class MeetingController(
             OpenApiResponse(responseCode = "201", description = "방 생성 성공"),
             OpenApiResponse(responseCode = "400", description = "슬롯·초대 문구·동행자 검증 실패 (code: INVALID_MEETING_SLOT, INVALID_MEETING_INVITATION, INVALID_MEETING_MEMBER)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
-            OpenApiResponse(responseCode = "409", description = "프로필 없음, 일일 생성 제한 또는 슬롯 사용 중 (code: PROFILE_REQUIRED, DAILY_CREATION_LIMIT_EXCEEDED, SLOT_ALREADY_OCCUPIED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "프로필 없음, 일일 생성·참여 제한 또는 슬롯 사용 중 (code: PROFILE_REQUIRED, DAILY_CREATION_LIMIT_EXCEEDED, DAILY_MEETING_LIMIT_EXCEEDED, SLOT_ALREADY_OCCUPIED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
         ]
     )
     @PostMapping("/rooms")
@@ -112,7 +112,7 @@ class MeetingController(
             OpenApiResponse(responseCode = "400", description = "방 ID·팀 인원·참여자·연락처 검증 실패 (code: INVALID_COMPANION_COUNT, INVALID_MEETING_MEMBER)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "404", description = "방 없음 (code: MEETING_ROOM_NOT_FOUND)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
-            OpenApiResponse(responseCode = "409", description = "본인 방 신청 또는 이미 매칭·취소·만료된 방 (code: SELF_MATCH_NOT_ALLOWED, ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "본인 방 신청, 일일 생성·참여 제한, 생성한 방 진행 중 또는 이미 매칭·취소·만료된 방 (code: SELF_MATCH_NOT_ALLOWED, DAILY_MEETING_LIMIT_EXCEEDED, ACTIVE_ROOM_EXISTS, ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
         ]
     )
     @PostMapping("/rooms/{roomId}/matches")

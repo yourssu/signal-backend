@@ -46,7 +46,7 @@ class MeetingRoomEntity(
     val creatorUuid: String,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "creator_animal", length = 50)
+    @Column(name = "creator_animal", nullable = false, length = 50)
     val creatorAnimal: Animal,
 
     @Column(name = "party_size", nullable = false)

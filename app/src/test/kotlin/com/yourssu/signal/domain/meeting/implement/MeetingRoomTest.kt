@@ -63,8 +63,9 @@ class MeetingRoomTest : DescribeSpec({
     }
 
     describe("미팅 슬롯") {
-        it("컴파일 시 고정된 슬롯 식별자가 10개다") {
-            MeetingSlot.entries.size shouldBe 10
+        it("외부에서 선택 가능한 슬롯 식별자는 7개이고 기존 값은 읽을 수 있다") {
+            MeetingSlot.selectableEntries.size shouldBe 7
+            MeetingSlot.selectableEntries.map { it.name } shouldBe (1..7).map { "SLOT_$it" }
             MeetingSlot.entries.map { it.name } shouldBe (1..10).map { "SLOT_$it" }
         }
     }

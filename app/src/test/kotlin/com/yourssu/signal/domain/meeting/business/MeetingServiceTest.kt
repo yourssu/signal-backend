@@ -59,7 +59,7 @@ class MeetingServiceTest : DescribeSpec({
     }
 
     describe("보드 조회") {
-        it("프로필이 없으면 10개 슬롯과 PROFILE_REQUIRED 생성 불가 사유를 반환한다") {
+        it("프로필이 없으면 7개 슬롯과 PROFILE_REQUIRED 생성 불가 사유를 반환한다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(false)
             whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
             doAnswer {
@@ -69,7 +69,7 @@ class MeetingServiceTest : DescribeSpec({
 
             val result = service.getBoard(uuid.value)
 
-            result.slots shouldHaveSize 10
+            result.slots shouldHaveSize 7
             result.creationEligibility.canCreate shouldBe false
             result.creationEligibility.reason shouldBe MeetingService.PROFILE_REQUIRED
             verify(expirationManager).expireDueRooms(LocalDateTime.of(2026, 8, 31, 12, 0))

@@ -14,7 +14,9 @@ enum class MeetingSlot {
     ;
 
     companion object {
-        fun of(value: String): MeetingSlot = entries.firstOrNull { it.name == value.uppercase() }
+        val selectableEntries: List<MeetingSlot> = entries.take(7)
+
+        fun of(value: String): MeetingSlot = selectableEntries.firstOrNull { it.name == value.uppercase() }
             ?: throw InvalidMeetingSlotException()
     }
 }

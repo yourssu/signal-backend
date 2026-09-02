@@ -36,7 +36,7 @@ class MeetingService(
         }
         return MeetingBoardResponse(
             creationEligibility = MeetingCreationEligibilityResponse(reason == null, reason),
-            slots = MeetingSlot.entries.map { slot ->
+            slots = MeetingSlot.selectableEntries.map { slot ->
                 MeetingSlotResponse(
                     slot = slot,
                     room = openRooms[slot]?.toSummary(),

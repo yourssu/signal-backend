@@ -80,7 +80,7 @@ class MeetingApiIntegrationTest {
             bearer(applicant.accessToken)
         }.andExpect {
             status { isOk() }
-            jsonPath("$.result.slots", hasSize<Any>(10))
+            jsonPath("$.result.slots", hasSize<Any>(7))
             jsonPath("$.result.latestMatch") { doesNotExist() }
             jsonPath("$.result.slots[0].order") { doesNotExist() }
             jsonPath("$.result.slots[0].xRatio") { doesNotExist() }
@@ -145,7 +145,7 @@ class MeetingApiIntegrationTest {
                     mockMvc.post("/api/meetings/rooms") {
                         bearer(user.accessToken)
                         contentType = MediaType.APPLICATION_JSON
-                        content = roomCreateBody("SLOT_10")
+                        content = roomCreateBody("SLOT_7")
                     }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
                 }
             }
@@ -161,7 +161,7 @@ class MeetingApiIntegrationTest {
             mockMvc.post("/api/meetings/rooms") {
                 bearer(loser.accessToken)
                 contentType = MediaType.APPLICATION_JSON
-                content = roomCreateBody("SLOT_9")
+                content = roomCreateBody("SLOT_6")
             }.andExpect { status { isCreated() } }
         } finally {
             executor.shutdownNow()
@@ -176,7 +176,7 @@ class MeetingApiIntegrationTest {
         val createdBody = mockMvc.post("/api/meetings/rooms") {
             bearer(creator.accessToken)
             contentType = MediaType.APPLICATION_JSON
-            content = roomCreateBody("SLOT_9")
+            content = roomCreateBody("SLOT_6")
         }.andExpect { status { isCreated() } }
             .andReturn().response.contentAsString
         val roomId = objectMapper.readTree(createdBody).path("result").path("id").asLong()
@@ -230,6 +230,15 @@ class MeetingApiIntegrationTest {
             bearer(creator.accessToken)
             contentType = MediaType.APPLICATION_JSON
             content = roomCreateBody("SLOT_8")
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.code") { value("INVALID_MEETING_SLOT") }
+        }
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_7")
         }.andExpect { status { isCreated() } }
     }
 
@@ -281,13 +290,13 @@ class MeetingApiIntegrationTest {
         val otherExpiredCreator = register()
         val newCreator = register()
         profileRepository.save(profile(newCreator.uuid, "@new_slot_creator"))
-        val selected = expiredRoom(expiredCreator.uuid, MeetingSlot.SLOT_7)
-        val other = expiredRoom(otherExpiredCreator.uuid, MeetingSlot.SLOT_8)
+        val selected = expiredRoom(expiredCreator.uuid, MeetingSlot.SLOT_6)
+        val other = expiredRoom(otherExpiredCreator.uuid, MeetingSlot.SLOT_7)
 
         mockMvc.post("/api/meetings/rooms") {
             bearer(newCreator.accessToken)
             contentType = MediaType.APPLICATION_JSON
-            content = roomCreateBody("SLOT_7")
+            content = roomCreateBody("SLOT_6")
         }.andExpect { status { isCreated() } }
 
         check(meetingRoomJpaRepository.findById(selected.id!!).orElseThrow().status == MeetingRoomStatus.EXPIRED)

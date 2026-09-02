@@ -70,7 +70,7 @@ class MeetingRepositoryConcurrencyTest {
         val start = CountDownLatch(1)
         val executor = Executors.newFixedThreadPool(2)
         try {
-            val slots = listOf(MeetingSlot.SLOT_8, MeetingSlot.SLOT_9)
+            val slots = listOf(MeetingSlot.SLOT_6, MeetingSlot.SLOT_7)
             val results = slots.map { slot ->
                 executor.submit<Boolean> {
                     ready.countDown()
@@ -95,7 +95,7 @@ class MeetingRepositoryConcurrencyTest {
     @Test
     fun `동일 방 동시 매칭은 방 잠금으로 하나만 성공한다`() {
         val now = LocalDateTime.of(2026, 8, 31, 12, 0)
-        val room = repository.save(room("match-creator", MeetingSlot.SLOT_10, now))
+        val room = repository.save(room("match-creator", MeetingSlot.SLOT_7, now))
         val roomId = room.id!!
         val ready = CountDownLatch(2)
         val start = CountDownLatch(1)

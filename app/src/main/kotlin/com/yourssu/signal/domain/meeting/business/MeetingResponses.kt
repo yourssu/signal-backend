@@ -9,6 +9,14 @@ import java.time.OffsetDateTime
 data class MeetingBoardResponse(
     val creationEligibility: MeetingCreationEligibilityResponse,
     val slots: List<MeetingSlotResponse>,
+    val latestMatch: MeetingLatestMatchResponse?,
+)
+
+data class MeetingLatestMatchResponse(
+    val roomId: Long,
+    val creatorNickname: String,
+    val matchedAt: OffsetDateTime,
+    val visibleUntil: OffsetDateTime,
 )
 
 data class MeetingCreationEligibilityResponse(

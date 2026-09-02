@@ -95,6 +95,40 @@ class MeetingRoomRepositoryImplTest {
         assertEquals(MeetingSlot.SLOT_4, repository.findById(otherDue.id!!)!!.activeSlot)
     }
 
+    @Test
+    fun `기준 시각 이후 매칭된 방 중 가장 최신 방을 반환한다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val old = repository.save(room("old-match", MeetingSlot.SLOT_1, now.minusMinutes(1)))
+        repository.save(old.match(now.minusSeconds(31)))
+        val recent = repository.save(room("recent-match", MeetingSlot.SLOT_2, now.minusSeconds(20)))
+        repository.save(recent.match(now.minusSeconds(10)))
+        repository.save(room("still-open", MeetingSlot.SLOT_3, now))
+
+        val result = repository.findLatestMatchedAfter(now.minusSeconds(30))
+
+        assertEquals(recent.id, result?.id)
+    }
+
+    @Test
+    fun `정확히 기준 시각에 매칭된 방은 반환하지 않는다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val boundary = repository.save(room("boundary-match", MeetingSlot.SLOT_1, now.minusSeconds(30)))
+        repository.save(boundary.match(now.minusSeconds(30)))
+
+        assertNull(repository.findLatestMatchedAfter(now.minusSeconds(30)))
+    }
+
+    @Test
+    fun `매칭 시각이 같으면 나중에 저장된 방을 반환한다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val first = repository.save(room("tie-first", MeetingSlot.SLOT_1, now.minusSeconds(20)))
+        repository.save(first.match(now.minusSeconds(10)))
+        val second = repository.save(room("tie-second", MeetingSlot.SLOT_2, now.minusSeconds(20)))
+        repository.save(second.match(now.minusSeconds(10)))
+
+        assertEquals(second.id, repository.findLatestMatchedAfter(now.minusSeconds(30))?.id)
+    }
+
     private fun room(creator: String, slot: MeetingSlot, createdAt: LocalDateTime) = MeetingRoom(
         slot = slot,
         activeSlot = slot,

@@ -45,6 +45,12 @@ class MeetingRoomRepositoryImpl(
     override fun findAllOpen(now: LocalDateTime): List<MeetingRoom> =
         jpaRepository.findAllOpen(MeetingRoomStatus.OPEN, now).map { it.toDomain() }
 
+    override fun findLatestMatchedAfter(since: LocalDateTime): MeetingRoom? =
+        jpaRepository.findFirstByStatusAndMatchedAtGreaterThanOrderByMatchedAtDescIdDesc(
+            MeetingRoomStatus.MATCHED,
+            since,
+        )?.toDomain()
+
     override fun existsByCreatorUuidAndCreationDate(creatorUuid: Uuid, creationDate: LocalDate): Boolean =
         jpaRepository.existsByCreatorUuidAndCreationDate(creatorUuid.value, creationDate)
 
@@ -77,6 +83,11 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
     fun findAllOpen(status: MeetingRoomStatus, now: LocalDateTime): List<MeetingRoomEntity>
 
     fun existsByCreatorUuidAndCreationDate(creatorUuid: String, creationDate: LocalDate): Boolean
+
+    fun findFirstByStatusAndMatchedAtGreaterThanOrderByMatchedAtDescIdDesc(
+        status: MeetingRoomStatus,
+        matchedAt: LocalDateTime,
+    ): MeetingRoomEntity?
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(

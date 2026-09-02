@@ -14,6 +14,8 @@ class ProfileReader(
         return profile.copy(introSentences = introSentences)
     }
 
+    fun getNicknameByUuid(uuid: Uuid): String = profileRepository.getNicknameByUuid(uuid)
+
     fun existsByUuid(uuid: Uuid): Boolean {
         return profileRepository.existsByUuid(uuid)
     }

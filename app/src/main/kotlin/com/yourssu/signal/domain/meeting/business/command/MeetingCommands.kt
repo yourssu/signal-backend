@@ -12,10 +12,11 @@ data class MeetingMemberCommand(
 data class MeetingRoomCreateCommand(
     val uuid: String,
     val slot: MeetingSlot,
-    val partySize: Int,
     val invitation: String,
     val companions: List<MeetingMemberCommand>,
-)
+) {
+    val partySize: Int = companions.size + 1
+}
 
 data class MeetingMatchCommand(
     val uuid: String,

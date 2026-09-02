@@ -28,6 +28,7 @@ class MeetingService(
         val queryNow = LocalDateTime.now(clock)
         val userUuid = Uuid(uuid)
         val openRooms = meetingRoomRepository.findAllOpen(queryNow).associateBy { it.slot }
+        val latestMatch = meetingRoomRepository.findLatestMatchedAfter(queryNow.minusSeconds(MATCH_NOTICE_SECONDS))
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
@@ -41,6 +42,7 @@ class MeetingService(
                     room = openRooms[slot]?.toSummary(),
                 )
             },
+            latestMatch = latestMatch?.toLatestMatchResponse(),
         )
     }
 
@@ -219,7 +221,18 @@ class MeetingService(
 
     private fun MeetingMember.toResponse() = MeetingMemberResponse(teamSide, memberOrder, gender, birthYear, department)
 
+    private fun MeetingRoom.toLatestMatchResponse(): MeetingLatestMatchResponse? {
+        val matchedTime = matchedAt ?: return null
+        return MeetingLatestMatchResponse(
+            roomId = id!!,
+            creatorNickname = profileReader.getNicknameByUuid(creatorUuid),
+            matchedAt = matchedTime.atZone(clock.zone).toOffsetDateTime(),
+            visibleUntil = matchedTime.plusSeconds(MATCH_NOTICE_SECONDS).atZone(clock.zone).toOffsetDateTime(),
+        )
+    }
+
     companion object {
+        const val MATCH_NOTICE_SECONDS = 30L
         const val PROFILE_REQUIRED = "PROFILE_REQUIRED"
         const val DAILY_CREATION_LIMIT_EXCEEDED = "DAILY_CREATION_LIMIT_EXCEEDED"
     }

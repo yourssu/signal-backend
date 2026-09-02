@@ -2,6 +2,7 @@ package com.yourssu.signal.api.meeting
 
 import com.yourssu.signal.domain.meeting.business.dto.MeetingBoardResponse
 import com.yourssu.signal.domain.meeting.business.dto.MeetingMemberResponse
+import com.yourssu.signal.domain.meeting.business.dto.MeetingLatestMatchResponse
 import com.yourssu.signal.domain.meeting.business.dto.MeetingRoomDetailResponse
 import com.yourssu.signal.domain.meeting.business.dto.MeetingRoomResponse
 import com.yourssu.signal.domain.meeting.business.dto.MeetingRoomSummaryResponse
@@ -19,6 +20,7 @@ class MeetingContactExposureContractTest : DescribeSpec({
                 MeetingRoomDetailResponse::class.java,
                 MeetingRoomResponse::class.java,
                 MeetingMemberResponse::class.java,
+                MeetingLatestMatchResponse::class.java,
             )
 
             preMatchResponseTypes

@@ -81,6 +81,7 @@ class MeetingApiIntegrationTest {
         }.andExpect {
             status { isOk() }
             jsonPath("$.result.slots", hasSize<Any>(10))
+            jsonPath("$.result.latestMatch") { doesNotExist() }
             jsonPath("$.result.slots[0].order") { doesNotExist() }
             jsonPath("$.result.slots[0].xRatio") { doesNotExist() }
             jsonPath("$.result.slots[0].yRatio") { doesNotExist() }
@@ -94,6 +95,17 @@ class MeetingApiIntegrationTest {
             status { isCreated() }
             jsonPath("$.result.status") { value("MATCHED") }
             jsonPath("$.result.counterpartContact") { value("@jwt_creator") }
+        }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.latestMatch.roomId") { value(roomId) }
+            jsonPath("$.result.latestMatch.creatorNickname") { value("방장-${creator.uuid.take(6)}") }
+            jsonPath("$.result.latestMatch.matchedAt") { exists() }
+            jsonPath("$.result.latestMatch.visibleUntil") { exists() }
+            jsonPath("$.result.latestMatch.counterpartContact") { doesNotExist() }
         }
 
         mockMvc.get("/api/meetings/rooms/$roomId/result") {
@@ -186,10 +198,17 @@ class MeetingApiIntegrationTest {
                 }
             """.trimIndent()
         }.andExpect { status { isBadRequest() } }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.latestMatch") { doesNotExist() }
+        }
     }
 
     @Test
-    fun `도메인 검증에 실패한 방 생성은 일일 생성 기회를 소비하지 않는다`() {
+    fun `동행자가 없는 방 생성 요청은 일일 생성 기회를 소비하지 않는다`() {
         val creator = register()
         profileRepository.save(profile(creator.uuid, "@jwt_rollback_creator"))
 
@@ -199,14 +218,12 @@ class MeetingApiIntegrationTest {
             content = """
                 {
                   "slot":"SLOT_7",
-                  "partySize":3,
-                  "invitation":"인원 불일치",
-                  "companions":[{"gender":"MALE","birthYear":2001,"department":"경영학부"}]
+                  "invitation":"동행자 없음",
+                  "companions":[]
                 }
             """.trimIndent()
         }.andExpect {
             status { isBadRequest() }
-            jsonPath("$.code") { value("INVALID_COMPANION_COUNT") }
         }
 
         mockMvc.post("/api/meetings/rooms") {
@@ -321,7 +338,6 @@ class MeetingApiIntegrationTest {
     private fun roomCreateBody(slot: String) = """
         {
           "slot":"$slot",
-          "partySize":2,
           "invitation":"같이 놀아요",
           "companions":[{"gender":"MALE","birthYear":2001,"department":"경영학부"}]
         }

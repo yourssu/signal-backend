@@ -72,6 +72,7 @@ class MeetingApiIntegrationTest {
         }.andExpect {
             status { isCreated() }
             jsonPath("$.result.status") { value("OPEN") }
+            jsonPath("$.result.creatorAnimal") { value("DOG") }
             jsonPath("$.result.expiresAt") { value(org.hamcrest.Matchers.endsWith("+09:00")) }
         }.andReturn().response.contentAsString
         val roomId = objectMapper.readTree(createdBody).path("result").path("id").asLong()
@@ -81,10 +82,18 @@ class MeetingApiIntegrationTest {
         }.andExpect {
             status { isOk() }
             jsonPath("$.result.slots", hasSize<Any>(7))
+            jsonPath("$.result.slots[0].room.creatorAnimal") { value("DOG") }
             jsonPath("$.result.latestMatch") { doesNotExist() }
             jsonPath("$.result.slots[0].order") { doesNotExist() }
             jsonPath("$.result.slots[0].xRatio") { doesNotExist() }
             jsonPath("$.result.slots[0].yRatio") { doesNotExist() }
+        }
+
+        mockMvc.get("/api/meetings/rooms/$roomId") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.room.creatorAnimal") { value("DOG") }
         }
 
         mockMvc.post("/api/meetings/rooms/$roomId/matches") {
@@ -103,6 +112,7 @@ class MeetingApiIntegrationTest {
             status { isOk() }
             jsonPath("$.result.latestMatch.roomId") { value(roomId) }
             jsonPath("$.result.latestMatch.creatorNickname") { value("방장-${creator.uuid.take(6)}") }
+            jsonPath("$.result.latestMatch.creatorAnimal") { value("DOG") }
             jsonPath("$.result.latestMatch.matchedAt") { exists() }
             jsonPath("$.result.latestMatch.visibleUntil") { exists() }
             jsonPath("$.result.latestMatch.counterpartContact") { doesNotExist() }
@@ -335,6 +345,7 @@ class MeetingApiIntegrationTest {
                 slot = slot,
                 activeSlot = slot,
                 creatorUuid = Uuid(uuid),
+                creatorAnimal = Animal.DOG,
                 partySize = 2,
                 invitation = "만료 방",
                 status = MeetingRoomStatus.OPEN,

@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.common.storage.BaseEntity
 import com.yourssu.signal.domain.meeting.implement.MeetingRoom
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
+import com.yourssu.signal.domain.profile.implement.Animal
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -44,6 +45,10 @@ class MeetingRoomEntity(
     @Column(name = "creator_uuid", nullable = false, length = 36)
     val creatorUuid: String,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "creator_animal", length = 50)
+    val creatorAnimal: Animal,
+
     @Column(name = "party_size", nullable = false)
     val partySize: Int,
 
@@ -77,6 +82,7 @@ class MeetingRoomEntity(
             slot = room.slot,
             activeSlot = room.activeSlot,
             creatorUuid = room.creatorUuid.value,
+            creatorAnimal = room.creatorAnimal,
             partySize = room.partySize,
             invitation = room.invitation,
             status = room.status,
@@ -94,6 +100,7 @@ class MeetingRoomEntity(
         slot = slot,
         activeSlot = activeSlot,
         creatorUuid = Uuid(creatorUuid),
+        creatorAnimal = creatorAnimal,
         partySize = partySize,
         invitation = invitation,
         status = status,

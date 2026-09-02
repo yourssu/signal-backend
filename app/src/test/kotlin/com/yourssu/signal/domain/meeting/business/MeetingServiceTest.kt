@@ -45,6 +45,7 @@ class MeetingServiceTest : DescribeSpec({
         slot = MeetingSlot.SLOT_1,
         activeSlot = MeetingSlot.SLOT_1.takeIf { status == MeetingRoomStatus.OPEN },
         creatorUuid = uuid,
+        creatorAnimal = Animal.DOG,
         partySize = 2,
         invitation = "초대",
         status = status,

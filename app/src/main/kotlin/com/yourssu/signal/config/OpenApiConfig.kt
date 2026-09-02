@@ -152,6 +152,11 @@ class OpenApiConfig {
         listOf("MeetingRoomResponse", "MeetingRoomSummaryResponse").forEach { schemaName ->
             schemas[schemaName]?.let { schema ->
                 schema.positiveExample("id", 1L)
+                schema.stringProperty("creatorAnimal")?.apply {
+                    setEnum(animals)
+                    description = "방 생성 당시 생성자 프로필의 동물상"
+                    example = "DOG"
+                }
                 schema.property("partySize")?.apply {
                     minimum = BigDecimal.valueOf(2)
                     maximum = BigDecimal.valueOf(4)
@@ -166,6 +171,11 @@ class OpenApiConfig {
         schemas["MeetingLatestMatchResponse"]?.let { schema ->
             schema.positiveExample("roomId", 1L)
             schema.stringProperty("creatorNickname")?.example = "시그널"
+            schema.stringProperty("creatorAnimal")?.apply {
+                setEnum(animals)
+                description = "매칭된 방 생성 당시 생성자 프로필의 동물상"
+                example = "DOG"
+            }
             schema.stringProperty("matchedAt")?.example = "2026-09-02T12:00:00+09:00"
             schema.stringProperty("visibleUntil")?.example = "2026-09-02T12:00:30+09:00"
         }

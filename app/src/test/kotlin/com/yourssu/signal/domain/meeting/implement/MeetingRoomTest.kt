@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.meeting.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.profile.implement.Animal
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -15,6 +16,7 @@ class MeetingRoomTest : DescribeSpec({
         slot = MeetingSlot.SLOT_1,
         activeSlot = MeetingSlot.SLOT_1,
         creatorUuid = Uuid("creator"),
+        creatorAnimal = Animal.DOG,
         partySize = partySize,
         invitation = "같이 놀아요",
         status = MeetingRoomStatus.OPEN,

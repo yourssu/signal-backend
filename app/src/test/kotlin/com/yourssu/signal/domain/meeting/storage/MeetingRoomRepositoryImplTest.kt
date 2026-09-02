@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import com.yourssu.signal.domain.meeting.implement.SlotAlreadyOccupiedException
+import com.yourssu.signal.domain.profile.implement.Animal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -43,6 +44,7 @@ class MeetingRoomRepositoryImplTest {
         assertEquals(2, jpaRepository.countBySlot(MeetingSlot.SLOT_1))
         assertNull(jpaRepository.findById(first.id!!).orElseThrow().activeSlot)
         assertEquals(MeetingSlot.SLOT_1, second.activeSlot)
+        assertEquals(Animal.DOG, second.creatorAnimal)
     }
 
     @Test
@@ -133,6 +135,7 @@ class MeetingRoomRepositoryImplTest {
         slot = slot,
         activeSlot = slot,
         creatorUuid = Uuid(creator),
+        creatorAnimal = Animal.DOG,
         partySize = 3,
         invitation = "같이 만나요",
         status = MeetingRoomStatus.OPEN,

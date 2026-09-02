@@ -1,6 +1,7 @@
 package com.yourssu.signal.domain.meeting.implement
 
 import com.yourssu.signal.domain.common.implement.Uuid
+import com.yourssu.signal.domain.profile.implement.Animal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -9,6 +10,7 @@ data class MeetingRoom(
     val slot: MeetingSlot,
     val activeSlot: MeetingSlot?,
     val creatorUuid: Uuid,
+    val creatorAnimal: Animal,
     val partySize: Int,
     val invitation: String,
     val status: MeetingRoomStatus,

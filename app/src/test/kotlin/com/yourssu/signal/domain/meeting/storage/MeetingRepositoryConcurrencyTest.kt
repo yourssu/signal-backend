@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.meeting.implement.MeetingRoom
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
+import com.yourssu.signal.domain.profile.implement.Animal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -138,6 +139,7 @@ class MeetingRepositoryConcurrencyTest {
         slot = slot,
         activeSlot = slot,
         creatorUuid = Uuid(creator),
+        creatorAnimal = Animal.DOG,
         partySize = 3,
         invitation = "같이 만나요",
         status = MeetingRoomStatus.OPEN,

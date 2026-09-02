@@ -63,6 +63,7 @@ class MeetingService(
                 slot = command.slot,
                 activeSlot = command.slot,
                 creatorUuid = uuid,
+                creatorAnimal = profile.animal,
                 partySize = command.partySize,
                 invitation = command.invitation,
                 status = MeetingRoomStatus.OPEN,
@@ -206,6 +207,7 @@ class MeetingService(
     private fun MeetingRoom.toResponse() = MeetingRoomResponse(
         id = id!!,
         slot = slot,
+        creatorAnimal = creatorAnimal,
         partySize = partySize,
         invitation = invitation,
         status = status,
@@ -214,6 +216,7 @@ class MeetingService(
 
     private fun MeetingRoom.toSummary() = MeetingRoomSummaryResponse(
         id!!,
+        creatorAnimal,
         partySize,
         invitation,
         expiresAt.atZone(clock.zone).toOffsetDateTime(),
@@ -226,6 +229,7 @@ class MeetingService(
         return MeetingLatestMatchResponse(
             roomId = id!!,
             creatorNickname = profileReader.getNicknameByUuid(creatorUuid),
+            creatorAnimal = creatorAnimal,
             matchedAt = matchedTime.atZone(clock.zone).toOffsetDateTime(),
             visibleUntil = matchedTime.plusSeconds(MATCH_NOTICE_SECONDS).atZone(clock.zone).toOffsetDateTime(),
         )

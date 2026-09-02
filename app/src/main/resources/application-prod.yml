@@ -24,6 +24,7 @@ spring:
       schema-locations:
         - classpath:sql/migrations/issue-177-meeting.sql
         - classpath:sql/migrations/issue-179-latest-match-index.sql
+        - classpath:sql/migrations/issue-185-creator-animal.sql
       continue-on-error: false
 
 domain:

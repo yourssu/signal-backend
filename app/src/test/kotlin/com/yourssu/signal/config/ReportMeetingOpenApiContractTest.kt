@@ -95,6 +95,13 @@ class ReportMeetingOpenApiContractTest {
         roomResponse.path("partySize").path("minimum").asInt() shouldBe 2
         roomResponse.path("partySize").path("maximum").asInt() shouldBe 4
         roomResponse.path("partySize").path("example").asInt() shouldBe 2
+        roomResponse.path("creatorAnimal").path("enum").map { it.asText() }
+            .shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
+        roomResponse.path("creatorAnimal").path("example").asText() shouldBe "DOG"
+        schemas.path("MeetingRoomSummaryResponse").path("properties").path("creatorAnimal").path("enum")
+            .map { it.asText() }.shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
+        schemas.path("MeetingLatestMatchResponse").path("properties").path("creatorAnimal").path("enum")
+            .map { it.asText() }.shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
         listOf("MeetingRoomResponse", "MeetingSlotResponse").forEach { schemaName ->
             schemas.path(schemaName).path("properties").path("slot").path("enum").map { it.asText() } shouldBe
                 MeetingSlot.selectableEntries.map { it.name }

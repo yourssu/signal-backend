@@ -171,6 +171,49 @@ class MeetingServiceTest : DescribeSpec({
             verify(roomRepository, never()).save(any())
         }
 
+        it("방장으로 오늘 매칭에 성공한 사용자는 방을 생성할 수 없다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(matchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(true)
+
+            shouldThrow<DailyMeetingLimitExceededException> {
+                service.createRoom(
+                    MeetingRoomCreateCommand(
+                        uuid.value,
+                        MeetingSlot.SLOT_1,
+                        "초대",
+                        listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")),
+                    )
+                )
+            }
+            verify(roomRepository, never()).save(any())
+        }
+
+        it("생성한 방이 열려 있으면 날짜가 바뀌어도 방을 더 만들 수 없다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsOpenByCreatorUuid(uuid, LocalDateTime.of(2026, 8, 31, 12, 0)))
+                .thenReturn(true)
+
+            shouldThrow<ActiveRoomExistsException> {
+                service.createRoom(
+                    MeetingRoomCreateCommand(
+                        uuid.value,
+                        MeetingSlot.SLOT_1,
+                        "초대",
+                        listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")),
+                    )
+                )
+            }
+            verify(roomRepository, never()).save(any())
+            verify(roomRepository, never()).findOpenBySlot(any(), any())
+        }
+
         it("프로필이 없으면 저장하지 않는다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(false)
 
@@ -244,9 +287,32 @@ class MeetingServiceTest : DescribeSpec({
             verify(matchRepository, never()).save(any())
         }
 
-        it("오늘 방을 생성한 사용자는 다른 방에 신청할 수 없다") {
+        it("방을 만들었지만 매칭되지 않은 사용자는 다른 방에 신청할 수 있다") {
             whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
             whenever(roomRepository.existsByCreatorUuidAndCreationDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(true)
+            whenever(matchRepository.existsByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsMatchedByCreatorUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsOpenByCreatorUuid(applicant, LocalDateTime.of(2026, 8, 31, 12, 0)))
+                .thenReturn(false)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
+            whenever(matchRepository.save(any())).thenAnswer { it.getArgument(0) }
+            whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument(0) }
+
+            service.match(matchCommand())
+
+            verify(matchRepository).save(any())
+            verify(roomRepository).save(check { it.status shouldBe MeetingRoomStatus.MATCHED })
+        }
+
+        it("방장으로 오늘 매칭에 성공한 사용자는 다른 방에 신청할 수 없다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(matchRepository.existsByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsMatchedByCreatorUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(true)
 
             shouldThrow<DailyMeetingLimitExceededException> { service.match(matchCommand()) }

@@ -32,7 +32,7 @@ class MeetingService(
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
-            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
+            matchedToday(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
             else -> null
         }
         return MeetingBoardResponse(
@@ -54,10 +54,11 @@ class MeetingService(
         if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
         }
-        if (meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.now(clock))) {
+        if (matchedToday(uuid, LocalDate.now(clock))) {
             throw DailyMeetingLimitExceededException()
         }
         val now = LocalDateTime.now(clock)
+        if (meetingRoomRepository.existsOpenByCreatorUuid(uuid, now)) throw ActiveRoomExistsException()
         meetingRoomRepository.expireDueRoomInSlot(command.slot, now)
         if (meetingRoomRepository.findOpenBySlot(command.slot, now) != null) throw SlotAlreadyOccupiedException()
 
@@ -183,12 +184,13 @@ class MeetingService(
     }
 
     private fun validateParticipation(applicantUuid: Uuid, now: LocalDateTime) {
-        val today = now.toLocalDate()
-        val alreadyUsedToday = meetingRoomRepository.existsByCreatorUuidAndCreationDate(applicantUuid, today) ||
-            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(applicantUuid, today)
-        if (alreadyUsedToday) throw DailyMeetingLimitExceededException()
+        if (matchedToday(applicantUuid, now.toLocalDate())) throw DailyMeetingLimitExceededException()
         if (meetingRoomRepository.existsOpenByCreatorUuid(applicantUuid, now)) throw ActiveRoomExistsException()
     }
+
+    private fun matchedToday(uuid: Uuid, today: LocalDate): Boolean =
+        meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, today) ||
+            meetingRoomRepository.existsMatchedByCreatorUuidAndMatchedDate(uuid, today)
 
     private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
         expireIfDue(room, now)

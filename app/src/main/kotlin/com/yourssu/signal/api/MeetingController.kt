@@ -66,7 +66,7 @@ class MeetingController(
             OpenApiResponse(responseCode = "201", description = "방 생성 성공"),
             OpenApiResponse(responseCode = "400", description = "슬롯·초대 문구·동행자 검증 실패 (code: INVALID_MEETING_SLOT, INVALID_MEETING_INVITATION, INVALID_MEETING_MEMBER)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
-            OpenApiResponse(responseCode = "409", description = "프로필 없음, 일일 생성·참여 제한 또는 슬롯 사용 중 (code: PROFILE_REQUIRED, DAILY_CREATION_LIMIT_EXCEEDED, DAILY_MEETING_LIMIT_EXCEEDED, SLOT_ALREADY_OCCUPIED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "프로필 없음, 일일 생성·매칭 제한, 생성한 방 진행 중 또는 슬롯 사용 중 (code: PROFILE_REQUIRED, DAILY_CREATION_LIMIT_EXCEEDED, DAILY_MEETING_LIMIT_EXCEEDED, ACTIVE_ROOM_EXISTS, SLOT_ALREADY_OCCUPIED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
         ]
     )
     @PostMapping("/rooms")

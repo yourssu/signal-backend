@@ -12,7 +12,7 @@ class InvalidMeetingSlotException : BadRequestException(message = "올바르지 
 class InvalidMeetingInvitationException : BadRequestException(message = "미팅 초대 문구는 1자부터 500자까지 가능합니다.", code = "INVALID_MEETING_INVITATION")
 class ProfileRequiredException : ConflictException(message = "방 생성에는 프로필 등록이 필요합니다.", code = "PROFILE_REQUIRED")
 class DailyCreationLimitExceededException : ConflictException(message = "오늘 이미 미팅 방을 생성했습니다.", code = "DAILY_CREATION_LIMIT_EXCEEDED")
-class DailyMeetingLimitExceededException : ConflictException(message = "미팅 방 생성과 참여는 하루에 한 번만 가능합니다.", code = "DAILY_MEETING_LIMIT_EXCEEDED")
+class DailyMeetingLimitExceededException : ConflictException(message = "오늘 이미 미팅 매칭이 완료되었습니다.", code = "DAILY_MEETING_LIMIT_EXCEEDED")
 class ActiveRoomExistsException : ConflictException(message = "생성한 미팅 방이 진행 중입니다. 방을 취소한 뒤 신청해 주세요.", code = "ACTIVE_ROOM_EXISTS")
 class SlotAlreadyOccupiedException : ConflictException(message = "이미 사용 중인 미팅 슬롯입니다.", code = "SLOT_ALREADY_OCCUPIED")
 class RoomAlreadyMatchedException : ConflictException(message = "이미 매칭된 미팅 방입니다.", code = "ROOM_ALREADY_MATCHED")

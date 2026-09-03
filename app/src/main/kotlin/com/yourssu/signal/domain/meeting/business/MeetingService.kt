@@ -33,6 +33,7 @@ class MeetingService(
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
             matchedToday(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
+            meetingRoomRepository.existsOpenByCreatorUuid(userUuid, queryNow) -> ACTIVE_ROOM_EXISTS
             else -> null
         }
         return MeetingBoardResponse(
@@ -255,5 +256,6 @@ class MeetingService(
         const val PROFILE_REQUIRED = "PROFILE_REQUIRED"
         const val DAILY_CREATION_LIMIT_EXCEEDED = "DAILY_CREATION_LIMIT_EXCEEDED"
         const val DAILY_MEETING_LIMIT_EXCEEDED = "DAILY_MEETING_LIMIT_EXCEEDED"
+        const val ACTIVE_ROOM_EXISTS = "ACTIVE_ROOM_EXISTS"
     }
 }

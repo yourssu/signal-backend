@@ -454,6 +454,14 @@ class MeetingApiIntegrationTest {
         profileRepository.save(profile(host.uuid, "@active_room_host"))
         openRoom(host.uuid, MeetingSlot.SLOT_5, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1))
 
+        mockMvc.get("/api/meetings/board") {
+            bearer(host.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.canCreate") { value(false) }
+            jsonPath("$.result.creationEligibility.reason") { value("ACTIVE_ROOM_EXISTS") }
+        }
+
         mockMvc.post("/api/meetings/rooms") {
             bearer(host.accessToken)
             contentType = MediaType.APPLICATION_JSON

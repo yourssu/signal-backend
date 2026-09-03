@@ -214,6 +214,7 @@ class OpenApiConfig {
                 MeetingService.PROFILE_REQUIRED,
                 MeetingService.DAILY_CREATION_LIMIT_EXCEEDED,
                 MeetingService.DAILY_MEETING_LIMIT_EXCEEDED,
+                MeetingService.ACTIVE_ROOM_EXISTS,
             )
         )
         schemas["BankDepositSmsRequest"]?.stringProperty("type")?.setEnum(smsTypes)

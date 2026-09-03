@@ -100,6 +100,23 @@ class MeetingServiceTest : DescribeSpec({
             result.creationEligibility.reason shouldBe MeetingService.DAILY_MEETING_LIMIT_EXCEEDED
         }
 
+        it("생성한 방이 열려 있으면 ACTIVE_ROOM_EXISTS 생성 불가 사유를 반환한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(matchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(false)
+            whenever(roomRepository.existsOpenByCreatorUuid(eq(uuid), any())).thenReturn(true)
+
+            val result = service.getBoard(uuid.value)
+
+            result.creationEligibility.canCreate shouldBe false
+            result.creationEligibility.reason shouldBe MeetingService.ACTIVE_ROOM_EXISTS
+        }
+
         it("최근 30초 안에 매칭된 최신 방의 생성자 닉네임과 노출 기한을 반환한다") {
             val matchedAt = LocalDateTime.of(2026, 8, 31, 11, 59, 45)
             val matchedRoom = room(MeetingRoomStatus.MATCHED).copy(matchedAt = matchedAt)

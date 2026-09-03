@@ -141,6 +141,7 @@ class ReportMeetingOpenApiContractTest {
                 "PROFILE_REQUIRED",
                 "DAILY_CREATION_LIMIT_EXCEEDED",
                 "DAILY_MEETING_LIMIT_EXCEEDED",
+                "ACTIVE_ROOM_EXISTS",
             )
 
         val genderParameter = document.path("paths").path("/api/profiles/genders/{gender}/count").path("get")

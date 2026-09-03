@@ -32,11 +32,12 @@ class MeetingService(
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
+            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
             else -> null
         }
         return MeetingBoardResponse(
             creationEligibility = MeetingCreationEligibilityResponse(reason == null, reason),
-            slots = MeetingSlot.entries.map { slot ->
+            slots = MeetingSlot.selectableEntries.map { slot ->
                 MeetingSlotResponse(
                     slot = slot,
                     room = openRooms[slot]?.toSummary(),
@@ -53,6 +54,9 @@ class MeetingService(
         if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
         }
+        if (meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.now(clock))) {
+            throw DailyMeetingLimitExceededException()
+        }
         val now = LocalDateTime.now(clock)
         meetingRoomRepository.expireDueRoomInSlot(command.slot, now)
         if (meetingRoomRepository.findOpenBySlot(command.slot, now) != null) throw SlotAlreadyOccupiedException()
@@ -63,6 +67,7 @@ class MeetingService(
                 slot = command.slot,
                 activeSlot = command.slot,
                 creatorUuid = uuid,
+                creatorAnimal = profile.animal,
                 partySize = command.partySize,
                 invitation = command.invitation,
                 status = MeetingRoomStatus.OPEN,
@@ -107,6 +112,7 @@ class MeetingService(
         ProfileValidator.validateContact(command.contact)
         val applicantUuid = Uuid(command.uuid)
         if (applicantUuid == room.creatorUuid) throw SelfMatchNotAllowedException()
+        validateParticipation(applicantUuid, lockedNow)
         val applicantMembers = buildMembers(
             roomId = room.id!!,
             teamSide = MeetingTeamSide.APPLICANT,
@@ -176,6 +182,14 @@ class MeetingService(
         )
     }
 
+    private fun validateParticipation(applicantUuid: Uuid, now: LocalDateTime) {
+        val today = now.toLocalDate()
+        val alreadyUsedToday = meetingRoomRepository.existsByCreatorUuidAndCreationDate(applicantUuid, today) ||
+            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(applicantUuid, today)
+        if (alreadyUsedToday) throw DailyMeetingLimitExceededException()
+        if (meetingRoomRepository.existsOpenByCreatorUuid(applicantUuid, now)) throw ActiveRoomExistsException()
+    }
+
     private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
         expireIfDue(room, now)
         when (room.status) {
@@ -206,6 +220,7 @@ class MeetingService(
     private fun MeetingRoom.toResponse() = MeetingRoomResponse(
         id = id!!,
         slot = slot,
+        creatorAnimal = creatorAnimal,
         partySize = partySize,
         invitation = invitation,
         status = status,
@@ -214,6 +229,7 @@ class MeetingService(
 
     private fun MeetingRoom.toSummary() = MeetingRoomSummaryResponse(
         id!!,
+        creatorAnimal,
         partySize,
         invitation,
         expiresAt.atZone(clock.zone).toOffsetDateTime(),
@@ -226,6 +242,7 @@ class MeetingService(
         return MeetingLatestMatchResponse(
             roomId = id!!,
             creatorNickname = profileReader.getNicknameByUuid(creatorUuid),
+            creatorAnimal = creatorAnimal,
             matchedAt = matchedTime.atZone(clock.zone).toOffsetDateTime(),
             visibleUntil = matchedTime.plusSeconds(MATCH_NOTICE_SECONDS).atZone(clock.zone).toOffsetDateTime(),
         )
@@ -235,5 +252,6 @@ class MeetingService(
         const val MATCH_NOTICE_SECONDS = 30L
         const val PROFILE_REQUIRED = "PROFILE_REQUIRED"
         const val DAILY_CREATION_LIMIT_EXCEEDED = "DAILY_CREATION_LIMIT_EXCEEDED"
+        const val DAILY_MEETING_LIMIT_EXCEEDED = "DAILY_MEETING_LIMIT_EXCEEDED"
     }
 }

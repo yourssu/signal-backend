@@ -7,7 +7,10 @@ import com.yourssu.signal.domain.meeting.implement.MeetingMatchRepository
 import com.yourssu.signal.domain.meeting.implement.RoomAlreadyMatchedException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Repository
 class MeetingMatchRepositoryImpl(
@@ -34,6 +37,13 @@ class MeetingMatchRepositoryImpl(
     override fun findAllByApplicantUuid(applicantUuid: Uuid): List<MeetingMatch> =
         jpaRepository.findAllByApplicantUuid(applicantUuid.value).map { it.toDomain() }
 
+    override fun existsByApplicantUuidAndMatchedDate(applicantUuid: Uuid, matchedDate: LocalDate): Boolean =
+        jpaRepository.existsMatchedInPeriod(
+            applicantUuid = applicantUuid.value,
+            startInclusive = matchedDate.atStartOfDay(),
+            endExclusive = matchedDate.plusDays(1).atStartOfDay(),
+        )
+
     private fun MeetingMatchEntity.toDomain() = toDomain(
         creatorContact = dataCipher.decrypt(creatorContact),
         applicantContact = dataCipher.decrypt(applicantContact),
@@ -43,5 +53,19 @@ class MeetingMatchRepositoryImpl(
 interface MeetingMatchJpaRepository : JpaRepository<MeetingMatchEntity, Long> {
     fun findByRoomId(roomId: Long): MeetingMatchEntity?
     fun findAllByApplicantUuid(applicantUuid: String): List<MeetingMatchEntity>
+
+    @Query(
+        """
+        select case when count(m) > 0 then true else false end from MeetingMatchEntity m
+        where m.applicantUuid = :applicantUuid
+            and m.matchedAt >= :startInclusive and m.matchedAt < :endExclusive
+        """
+    )
+    fun existsMatchedInPeriod(
+        applicantUuid: String,
+        startInclusive: LocalDateTime,
+        endExclusive: LocalDateTime,
+    ): Boolean
+
     fun countByRoomId(roomId: Long): Long
 }

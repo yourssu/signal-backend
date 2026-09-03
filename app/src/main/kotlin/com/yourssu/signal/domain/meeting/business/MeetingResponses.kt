@@ -3,6 +3,7 @@ package com.yourssu.signal.domain.meeting.business.dto
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import com.yourssu.signal.domain.meeting.implement.MeetingTeamSide
+import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.Gender
 import java.time.OffsetDateTime
 
@@ -15,6 +16,7 @@ data class MeetingBoardResponse(
 data class MeetingLatestMatchResponse(
     val roomId: Long,
     val creatorNickname: String,
+    val creatorAnimal: Animal,
     val matchedAt: OffsetDateTime,
     val visibleUntil: OffsetDateTime,
 )
@@ -31,6 +33,7 @@ data class MeetingSlotResponse(
 
 data class MeetingRoomSummaryResponse(
     val id: Long,
+    val creatorAnimal: Animal,
     val partySize: Int,
     val invitation: String,
     val expiresAt: OffsetDateTime,
@@ -39,6 +42,7 @@ data class MeetingRoomSummaryResponse(
 data class MeetingRoomResponse(
     val id: Long,
     val slot: MeetingSlot,
+    val creatorAnimal: Animal,
     val partySize: Int,
     val invitation: String,
     val status: MeetingRoomStatus,

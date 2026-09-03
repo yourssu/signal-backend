@@ -7,10 +7,13 @@ import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import com.yourssu.signal.domain.meeting.implement.SlotAlreadyOccupiedException
+import com.yourssu.signal.domain.profile.implement.Animal
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,6 +46,7 @@ class MeetingRoomRepositoryImplTest {
         assertEquals(2, jpaRepository.countBySlot(MeetingSlot.SLOT_1))
         assertNull(jpaRepository.findById(first.id!!).orElseThrow().activeSlot)
         assertEquals(MeetingSlot.SLOT_1, second.activeSlot)
+        assertEquals(Animal.DOG, second.creatorAnimal)
     }
 
     @Test
@@ -129,10 +133,34 @@ class MeetingRoomRepositoryImplTest {
         assertEquals(second.id, repository.findLatestMatchedAfter(now.minusSeconds(30))?.id)
     }
 
+    @Test
+    fun `만료된 방과 종료된 방은 활성 생성 방으로 보지 않는다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val open = repository.save(room("active-creator", MeetingSlot.SLOT_1, now))
+
+        assertTrue(repository.existsOpenByCreatorUuid(Uuid("active-creator"), now))
+        assertFalse(repository.existsOpenByCreatorUuid(Uuid("active-creator"), open.expiresAt))
+        assertFalse(repository.existsOpenByCreatorUuid(Uuid("other-creator"), now))
+
+        repository.save(open.cancel(now.plusMinutes(1)))
+        assertFalse(repository.existsOpenByCreatorUuid(Uuid("active-creator"), now))
+    }
+
+    @Test
+    fun `매칭된 방은 활성 생성 방으로 보지 않는다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val open = repository.save(room("matched-creator", MeetingSlot.SLOT_2, now))
+
+        repository.save(open.match(now.plusMinutes(1)))
+
+        assertFalse(repository.existsOpenByCreatorUuid(Uuid("matched-creator"), now))
+    }
+
     private fun room(creator: String, slot: MeetingSlot, createdAt: LocalDateTime) = MeetingRoom(
         slot = slot,
         activeSlot = slot,
         creatorUuid = Uuid(creator),
+        creatorAnimal = Animal.DOG,
         partySize = 3,
         invitation = "같이 만나요",
         status = MeetingRoomStatus.OPEN,

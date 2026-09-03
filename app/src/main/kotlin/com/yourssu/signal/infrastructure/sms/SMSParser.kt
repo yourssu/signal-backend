@@ -17,5 +17,7 @@ interface SMSParser {
             return parsers.find { it.type == type }
                 ?: throw InvalidBankException(type)
         }
+
+        fun supportedTypes(): List<String> = parsers.map { it.type }
     }
 }

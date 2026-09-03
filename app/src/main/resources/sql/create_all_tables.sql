@@ -231,6 +231,7 @@ CREATE TABLE meeting_room (
     slot VARCHAR(20) NOT NULL,
     active_slot VARCHAR(20) DEFAULT NULL,
     creator_uuid VARCHAR(36) NOT NULL,
+    creator_animal VARCHAR(50) NOT NULL,
     party_size INT NOT NULL,
     invitation VARCHAR(500) NOT NULL,
     status VARCHAR(20) NOT NULL,

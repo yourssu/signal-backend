@@ -5,13 +5,16 @@ import com.yourssu.signal.domain.meeting.implement.MeetingMatch
 import com.yourssu.signal.domain.meeting.implement.MeetingMatchRepository
 import com.yourssu.signal.domain.meeting.implement.RoomAlreadyMatchedException
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @SpringBootTest
@@ -39,6 +42,27 @@ class MeetingMatchRepositoryImplTest {
         assertThrows(RoomAlreadyMatchedException::class.java) {
             repository.save(match(roomId = 1002, applicantUuid = "other-applicant"))
         }
+    }
+
+    @Test
+    fun `신청자의 당일 성공 매칭 이력만 조회한다`() {
+        repository.save(match(roomId = 1003, applicantUuid = "daily-applicant"))
+
+        assertTrue(repository.existsByApplicantUuidAndMatchedDate(Uuid("daily-applicant"), LocalDate.of(2026, 8, 31)))
+        assertFalse(repository.existsByApplicantUuidAndMatchedDate(Uuid("daily-applicant"), LocalDate.of(2026, 9, 1)))
+        assertFalse(repository.existsByApplicantUuidAndMatchedDate(Uuid("daily-applicant"), LocalDate.of(2026, 8, 30)))
+        assertFalse(repository.existsByApplicantUuidAndMatchedDate(Uuid("other-applicant"), LocalDate.of(2026, 8, 31)))
+    }
+
+    @Test
+    fun `자정 경계의 매칭은 해당 날짜에만 포함된다`() {
+        repository.save(
+            match(roomId = 1004, applicantUuid = "midnight-applicant")
+                .copy(matchedAt = LocalDateTime.of(2026, 8, 31, 0, 0))
+        )
+
+        assertTrue(repository.existsByApplicantUuidAndMatchedDate(Uuid("midnight-applicant"), LocalDate.of(2026, 8, 31)))
+        assertFalse(repository.existsByApplicantUuidAndMatchedDate(Uuid("midnight-applicant"), LocalDate.of(2026, 8, 30)))
     }
 
     private fun match(roomId: Long, applicantUuid: String = "applicant") = MeetingMatch(

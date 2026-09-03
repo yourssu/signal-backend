@@ -7,6 +7,7 @@ import com.yourssu.signal.domain.meeting.implement.MeetingRoom
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
+import com.yourssu.signal.domain.profile.implement.Animal
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -70,7 +71,7 @@ class MeetingRepositoryConcurrencyTest {
         val start = CountDownLatch(1)
         val executor = Executors.newFixedThreadPool(2)
         try {
-            val slots = listOf(MeetingSlot.SLOT_8, MeetingSlot.SLOT_9)
+            val slots = listOf(MeetingSlot.SLOT_6, MeetingSlot.SLOT_7)
             val results = slots.map { slot ->
                 executor.submit<Boolean> {
                     ready.countDown()
@@ -95,7 +96,7 @@ class MeetingRepositoryConcurrencyTest {
     @Test
     fun `동일 방 동시 매칭은 방 잠금으로 하나만 성공한다`() {
         val now = LocalDateTime.of(2026, 8, 31, 12, 0)
-        val room = repository.save(room("match-creator", MeetingSlot.SLOT_10, now))
+        val room = repository.save(room("match-creator", MeetingSlot.SLOT_7, now))
         val roomId = room.id!!
         val ready = CountDownLatch(2)
         val start = CountDownLatch(1)
@@ -138,6 +139,7 @@ class MeetingRepositoryConcurrencyTest {
         slot = slot,
         activeSlot = slot,
         creatorUuid = Uuid(creator),
+        creatorAnimal = Animal.DOG,
         partySize = 3,
         invitation = "같이 만나요",
         status = MeetingRoomStatus.OPEN,

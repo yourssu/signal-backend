@@ -18,7 +18,7 @@ class ProfileRequestValidationTest : DescribeSpec({
                     department = "컴퓨터학부",
                     birthYear = 2000,
                     animal = "DOG",
-                    contact = "01000000000",
+                    contact = "0101234567",
                     mbti = "ENFP",
                     nickname = "테스트",
                     introSentences = emptyList(),
@@ -52,7 +52,7 @@ class ProfileRequestValidationTest : DescribeSpec({
                 val request = ProfileUpdateRequest(
                     nickname = "테스트",
                     introSentences = emptyList(),
-                    contact = "01019999999",
+                    contact = "01112345678",
                 )
 
                 validator.validate(request).map { it.propertyPath.toString() } shouldContain "contact"

@@ -42,6 +42,12 @@ class ProfileRepositoryImpl(
         .fetchFirst()
         ?: throw ProfileNotFoundException()
 
+    override fun findIdByUuid(uuid: Uuid): Long? = jpaQueryFactory
+        .select(profileEntity.id)
+        .from(profileEntity)
+        .where(profileEntity.uuid.eq(uuid.value))
+        .fetchFirst()
+
     override fun getById(id: Long): Profile {
         return decryptContact(profileJpaRepository.findById(id)
             .orElseThrow { ProfileNotFoundException() }

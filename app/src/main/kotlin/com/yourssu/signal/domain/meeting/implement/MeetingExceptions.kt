@@ -21,4 +21,5 @@ class RoomExpiredException : ConflictException(message = "만료된 미팅 방�
 class MeetingResultForbiddenException : ForbiddenException(message = "매칭 결과를 조회할 권한이 없습니다.", code = "MEETING_RESULT_FORBIDDEN")
 class MeetingRoomNotFoundException : NotFoundException(message = "미팅 방을 찾을 수 없습니다.", code = "MEETING_ROOM_NOT_FOUND")
 class MeetingRoomCancelForbiddenException : ForbiddenException(message = "방 생성자만 취소할 수 있습니다.", code = "MEETING_ROOM_CANCEL_FORBIDDEN")
+class MeetingBlockedException : ForbiddenException(message = "미팅 이용이 제한된 사용자입니다.", code = "MEETING_BLOCKED")
 class SelfMatchNotAllowedException : ConflictException(message = "자신이 생성한 미팅 방에는 신청할 수 없습니다.", code = "SELF_MATCH_NOT_ALLOWED")

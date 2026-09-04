@@ -1,11 +1,13 @@
 package com.yourssu.signal.domain.meeting.business
 
+import com.yourssu.signal.domain.blacklist.implement.BlacklistReader
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.meeting.business.command.MeetingMemberCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingMatchCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
 import com.yourssu.signal.domain.meeting.implement.*
 import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.report.implement.ReportReader
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -22,13 +24,16 @@ class MeetingServiceTest : DescribeSpec({
     val memberRepository = mock<MeetingMemberRepository>()
     val matchRepository = mock<MeetingMatchRepository>()
     val profileReader = mock<ProfileReader>()
+    val blacklistReader = mock<BlacklistReader>()
+    val reportReader = mock<ReportReader>()
     val expirationManager = mock<MeetingExpirationManager>()
     val clock = AdjustableClock(Instant.parse("2026-08-31T03:00:00Z"), ZoneId.of("Asia/Seoul"))
-    val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, expirationManager, clock)
+    val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, expirationManager, clock)
     val uuid = Uuid("creator")
     val applicant = Uuid("applicant")
 
-    fun profile(uuid: Uuid) = Profile(
+    fun profile(uuid: Uuid, id: Long = 1L) = Profile(
+        id = id,
         uuid = uuid,
         gender = Gender.MALE,
         department = "컴퓨터학부",
@@ -64,7 +69,7 @@ class MeetingServiceTest : DescribeSpec({
     )
 
     beforeEach {
-        reset(roomRepository, memberRepository, matchRepository, profileReader, expirationManager)
+        reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, expirationManager)
         clock.set(Instant.parse("2026-08-31T03:00:00Z"))
     }
 
@@ -84,6 +89,19 @@ class MeetingServiceTest : DescribeSpec({
             result.creationEligibility.reason shouldBe MeetingService.PROFILE_REQUIRED
             verify(expirationManager).expireDueRooms(LocalDateTime.of(2026, 8, 31, 12, 0))
             verify(roomRepository).findAllOpen(LocalDateTime.of(2026, 8, 31, 12, 0, 2))
+        }
+
+        it("블랙리스트에 등록됐으면 MEETING_BLOCKED 생성 불가 사유를 반환한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.findIdByUuid(uuid)).thenReturn(5L)
+            whenever(blacklistReader.getAllBlacklistIds()).thenReturn(setOf(5L))
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+
+            val result = service.getBoard(uuid.value)
+
+            result.creationEligibility.canCreate shouldBe false
+            result.creationEligibility.reason shouldBe MeetingService.MEETING_BLOCKED
+            verify(profileReader, never()).getByUuid(uuid)
         }
 
         it("오늘 매칭에 성공했으면 DAILY_MEETING_LIMIT_EXCEEDED 생성 불가 사유를 반환한다") {
@@ -166,6 +184,70 @@ class MeetingServiceTest : DescribeSpec({
             members.firstValue.map { it.userUuid } shouldBe listOf(uuid, null, null)
             verify(roomRepository).expireDueRoomInSlot(eq(MeetingSlot.SLOT_1), any())
             verify(expirationManager, never()).expireDueRooms(any())
+        }
+
+        it("블랙리스트에 등록된 사용자는 방을 생성할 수 없다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 7L))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
+            whenever(blacklistReader.existsByProfileId(7L)).thenReturn(true)
+
+            shouldThrow<MeetingBlockedException> {
+                service.createRoom(
+                    MeetingRoomCreateCommand(
+                        uuid.value,
+                        MeetingSlot.SLOT_1,
+                        "초대",
+                        listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")),
+                    )
+                )
+            }
+            verify(roomRepository, never()).save(any())
+        }
+
+        it("승인된 신고의 연락처를 쓰는 프로필은 블랙리스트가 아니어도 방을 생성할 수 없다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 8L).copy(contact = "@reported"))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
+            whenever(blacklistReader.existsByProfileId(8L)).thenReturn(false)
+            whenever(reportReader.findApprovedContacts()).thenReturn(listOf("@Reported"))
+
+            shouldThrow<MeetingBlockedException> {
+                service.createRoom(
+                    MeetingRoomCreateCommand(
+                        uuid.value,
+                        MeetingSlot.SLOT_1,
+                        "초대",
+                        listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")),
+                    )
+                )
+            }
+            verify(roomRepository, never()).save(any())
+        }
+
+        it("중복 연락처 정리로 블랙리스트에 오른 프로필과 같은 연락처여도 신고 이력이 없으면 방을 생성한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 11L))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
+            whenever(blacklistReader.existsByProfileId(11L)).thenReturn(false)
+            whenever(blacklistReader.getAllBlacklistIds()).thenReturn(setOf(10L))
+            whenever(reportReader.findApprovedContacts()).thenReturn(emptyList())
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument<MeetingRoom>(0).copy(id = 1L) }
+            whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
+
+            service.createRoom(
+                MeetingRoomCreateCommand(
+                    uuid.value,
+                    MeetingSlot.SLOT_1,
+                    "초대",
+                    listOf(MeetingMemberCommand(Gender.MALE, 2000, "컴퓨터학부")),
+                )
+            )
+
+            verify(roomRepository).save(any())
         }
 
         it("오늘 매칭에 성공한 사용자는 방을 생성할 수 없다") {
@@ -302,6 +384,50 @@ class MeetingServiceTest : DescribeSpec({
                 )
             }
             verify(matchRepository, never()).save(any())
+        }
+
+        it("블랙리스트에 등록된 사용자는 방에 신청할 수 없다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(true)
+            whenever(profileReader.getByUuid(applicant)).thenReturn(profile(applicant, id = 9L))
+            whenever(blacklistReader.existsByProfileId(9L)).thenReturn(true)
+
+            shouldThrow<MeetingBlockedException> { service.match(matchCommand()) }
+            verify(matchRepository, never()).save(any())
+        }
+
+        it("프로필이 없어도 승인된 신고의 연락처로 신청하면 거절한다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(false)
+            whenever(reportReader.findApprovedContacts()).thenReturn(listOf("@applicant"))
+
+            shouldThrow<MeetingBlockedException> { service.match(matchCommand()) }
+            verify(matchRepository, never()).save(any())
+        }
+
+        it("승인된 신고 연락처와 대소문자만 다른 연락처로도 신청할 수 없다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(false)
+            whenever(reportReader.findApprovedContacts()).thenReturn(listOf("@Applicant"))
+
+            shouldThrow<MeetingBlockedException> { service.match(matchCommand()) }
+            verify(matchRepository, never()).save(any())
+        }
+
+        it("승인된 신고가 있어도 무관한 신청자는 매칭에 성공한다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(false)
+            whenever(reportReader.findApprovedContacts()).thenReturn(listOf("@someoneelse", "01099998888"))
+            whenever(roomRepository.existsOpenByCreatorUuid(applicant, LocalDateTime.of(2026, 8, 31, 12, 0)))
+                .thenReturn(false)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
+            whenever(matchRepository.save(any())).thenAnswer { it.getArgument(0) }
+            whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument(0) }
+
+            val result = service.match(matchCommand())
+
+            result.status shouldBe MeetingRoomStatus.MATCHED
         }
 
         it("방을 만들었지만 매칭되지 않은 사용자는 다른 방에 신청할 수 있다") {

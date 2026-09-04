@@ -30,11 +30,15 @@ class ReportRepositoryImpl(
         ?: throw ReportNotFoundException()
 
     override fun approve(id: Long) { jpaRepository.updateStatus(id, ReportStatus.APPROVED) }
+
+    override fun findApprovedContacts(): List<String> = jpaRepository.findByStatus(ReportStatus.APPROVED)
+        .map { dataCipher.decrypt(it.reportedContact) }
 }
 
 interface ReportJpaRepository : JpaRepository<ReportEntity, Long> {
     fun existsByReporterUuidAndReportedProfileId(reporterUuid: String, reportedProfileId: Long): Boolean
     fun countByReporterUuidAndReportedProfileId(reporterUuid: String, reportedProfileId: Long): Long
+    fun findByStatus(status: ReportStatus): List<ReportEntity>
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from ReportEntity r where r.id = :id")

@@ -69,7 +69,7 @@ class MeetingRequestValidationTest : DescribeSpec({
         it("연락처 형식이 올바르지 않으면 거부한다") {
             val request = MeetingMatchRequest(
                 representative = member,
-                contact = "01000000000",
+                contact = "0101234567",
                 companions = listOf(member),
             )
 

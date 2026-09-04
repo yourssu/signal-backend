@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.profile.implement.exception.AnimalGenderMismatc
 import com.yourssu.signal.domain.profile.implement.exception.ContactFormatViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.ContactLimitExceededException
 import com.yourssu.signal.domain.profile.implement.exception.DepartmentLengthViolatedException
+import com.yourssu.signal.domain.profile.implement.exception.DummyContactException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceLengthViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.IntroSentenceSizeViolatedException
 import com.yourssu.signal.domain.profile.implement.exception.MbtiNotFoundException
@@ -45,6 +46,9 @@ object ProfileValidator {
     fun validateContact(contact: String) {
         if (!ProfileValidationPolicy.isValidContact(contact)) {
             throw ContactFormatViolatedException()
+        }
+        if (ProfileValidationPolicy.isDummyContact(contact)) {
+            throw DummyContactException()
         }
     }
 

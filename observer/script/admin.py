@@ -188,7 +188,7 @@ def handle_dev_command(ack, command, say, respond):
 
     args = command.get("text", "").split()
     if not args:
-        respond("❌ 사용법: /dev t [인증번호] <개수> | /dev add|delete [식별번호] | /dev report [신고 ID]")
+        respond("❌ 사용법: /dev t [인증번호] <개수> | /dev add|delete [식별번호] | /dev report [신고 ID] | /dev cancel [방 ID]")
         return
 
     subcommand = args[0].lower()
@@ -245,7 +245,22 @@ def handle_dev_command(ack, command, say, respond):
                 respond(f"❌ DEV 신고 승인 실패: {response.text}")
             return
 
-        respond("❌ 지원하지 않는 DEV 명령입니다. 사용법: /dev t|add|delete|report ...")
+        if subcommand == "cancel":
+            if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
+                respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
+                return
+            if len(args) != 2 or not args[1].isdigit() or int(args[1]) <= 0:
+                respond("❌ 사용법: /dev cancel [방 ID]")
+                return
+            room_id = args[1]
+            response = reply_meeting_cancel(room_id)
+            if response.status_code == 204:
+                say(meeting_cancel_message("dev", room_id))
+            else:
+                respond(f"❌ DEV 미팅 방 취소 실패: {response.text}")
+            return
+
+        respond("❌ 지원하지 않는 DEV 명령입니다. 사용법: /dev t|add|delete|report|cancel ...")
     except ValueError:
         respond("❌ 티켓 개수는 숫자여야 합니다.")
     except Exception as e:
@@ -287,6 +302,50 @@ def reply_report(report_id):
         json={"secretKey": ADMIN_ACCESS_KEY},
         headers={'Content-Type': 'application/json'}
     )
+
+
+def reply_meeting_cancel(room_id):
+    return requests.post(
+        f'{API_HOST}/api/meetings/rooms/{room_id}/admin-cancel',
+        json={"secretKey": ADMIN_ACCESS_KEY},
+        headers={'Content-Type': 'application/json'},
+        timeout=10,
+    )
+
+
+def meeting_cancel_message(environment, room_id):
+    prefix = "DEV " if environment == "dev" else ""
+    return f"""✅ *{prefix}미팅 방 취소 성공* ✅
+    -  🆔 *방 ID*: {room_id}
+    -  🔒 *처리 결과*: 공개 보드에서 제외"""
+
+
+@app.command("/cancel")
+def handle_cancel_command(ack, command, say, respond):
+    ack()
+
+    try:
+        if ENVIRONMENT != "prod":
+            respond("❌ /cancel 명령은 PROD 환경에서만 사용할 수 있습니다.")
+            return
+        if command.get("channel_id") != SLACK_ADMIN_CHANNEL:
+            respond("❌ 이 명령은 관리자 채널에서만 사용할 수 있습니다.")
+            return
+        args = command['text'].split()
+        if len(args) != 1 or not args[0].isdigit() or int(args[0]) <= 0:
+            respond("❌ 사용법: /cancel [방 ID]")
+            return
+
+        room_id = args[0]
+        response = reply_meeting_cancel(room_id)
+        if response.status_code == 204:
+            say(meeting_cancel_message("prod", room_id))
+        else:
+            respond(f"❌ 미팅 방 취소 실패: {response.text}")
+    except Exception as e:
+        message = f"❌ 오류 발생: {str(e)}"
+        respond(message)
+        logger.error(f"{message}", exc_info=True)
 
 
 def start_app(port):

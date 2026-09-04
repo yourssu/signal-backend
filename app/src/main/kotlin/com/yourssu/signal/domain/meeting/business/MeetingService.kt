@@ -6,8 +6,13 @@ import com.yourssu.signal.domain.meeting.business.command.MeetingMemberCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
 import com.yourssu.signal.domain.meeting.business.dto.*
 import com.yourssu.signal.domain.meeting.implement.*
+import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.profile.implement.ProfileValidator
+import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
+import com.yourssu.signal.infrastructure.logging.Notification
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
@@ -20,6 +25,7 @@ class MeetingService(
     private val meetingMemberRepository: MeetingMemberRepository,
     private val meetingMatchRepository: MeetingMatchRepository,
     private val profileReader: ProfileReader,
+    private val adminAccessChecker: AdminAccessChecker,
     private val expirationManager: MeetingExpirationManager,
     private val clock: Clock,
 ) {
@@ -85,6 +91,7 @@ class MeetingService(
         )
         MeetingTeamValidator.validate(command.partySize, members)
         meetingMemberRepository.saveAll(members)
+        notifyCreatedRoomAfterCommit(room, profile, command.companions)
         return room.toResponse()
     }
 
@@ -152,6 +159,18 @@ class MeetingService(
         rollbackFor = [com.yourssu.signal.handler.Error::class],
         noRollbackFor = [RoomExpiredException::class],
     )
+    fun adminCancel(roomId: Long, secretKey: String) {
+        adminAccessChecker.validateAdminAccess(secretKey)
+        val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
+        val lockedNow = LocalDateTime.now(clock)
+        validateOpen(room, lockedNow)
+        meetingRoomRepository.save(room.cancel(lockedNow))
+    }
+
+    @Transactional(
+        rollbackFor = [com.yourssu.signal.handler.Error::class],
+        noRollbackFor = [RoomExpiredException::class],
+    )
     fun getResult(uuid: String, roomId: Long): MeetingResultResponse {
         val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
         validateMatched(room, LocalDateTime.now(clock))
@@ -162,6 +181,27 @@ class MeetingService(
             else -> throw MeetingResultForbiddenException()
         }
         return MeetingResultResponse(roomId, contact)
+    }
+
+    private fun notifyCreatedRoomAfterCommit(
+        room: MeetingRoom,
+        profile: Profile,
+        companions: List<MeetingMemberCommand>,
+    ) {
+        TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
+            override fun afterCommit() {
+                Notification.notifyCreatedMeetingRoom(
+                    roomId = room.id!!,
+                    slot = room.slot.name,
+                    invitation = room.invitation,
+                    expiresAt = room.expiresAt,
+                    profile = profile,
+                    companions = companions.joinToString(", ") {
+                        "${it.gender}/${it.birthYear}/${it.department}"
+                    },
+                )
+            }
+        })
     }
 
     private fun buildMembers(

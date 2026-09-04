@@ -21,6 +21,7 @@ class SignalHandler:
     PAY_NOTIFICATION_PREFIX = f'{NOTIFICATION_PREFIX} PayNotification'
     NO_FIRST_PURCHASED_TICKET_PREFIX = f'{NOTIFICATION_PREFIX} NoFirstPurchasedTicket'
     FALSE_CONTACT_REPORT_PREFIX = f'{NOTIFICATION_PREFIX} FalseContactReport'
+    CREATE_MEETING_ROOM_PREFIX = f'{NOTIFICATION_PREFIX} CreateMeetingRoom'
     
     def __init__(self, config, notifier):
         self.config = config
@@ -39,7 +40,8 @@ class SignalHandler:
             self.FAILED_BY_UNMATCHED_VERIFICATION_PREFIX: self.create_failed_issue_ticket_message_verification,
             self.PAY_NOTIFICATION_PREFIX: self.create_pay_notification_message,
             self.NO_FIRST_PURCHASED_TICKET_PREFIX: self.create_no_first_purchased_ticket_message,
-            self.FALSE_CONTACT_REPORT_PREFIX: self.create_false_contact_report_message
+            self.FALSE_CONTACT_REPORT_PREFIX: self.create_false_contact_report_message,
+            self.CREATE_MEETING_ROOM_PREFIX: self.create_meeting_room_message
         }
 
     def _get_kst_now(self):
@@ -132,6 +134,63 @@ class SignalHandler:
 
     *승인*: `{command}`"""
         self.notifier.send_admin_notification(message)
+
+    GENDER_LABELS = {'FEMALE': '여', 'MALE': '남'}
+
+    @classmethod
+    def _localize_genders(cls, value):
+        return re.sub(
+            '|'.join(cls.GENDER_LABELS),
+            lambda match: cls.GENDER_LABELS[match.group()],
+            value,
+        )
+
+    def create_meeting_room_message(self, line):
+        """미팅 방 생성 알림 및 초대 문구 정책 검사"""
+        (room_id, slot, invitation, expires_at, profile_id, nickname,
+         gender, birth_year, department, contact, companions) = line[line.find('&') + 1:].rstrip('\r\n').split('&', 10)
+        invitation, nickname, department, contact, companions = (
+            self._decode_create_profile_field(value)
+            for value in (invitation, nickname, department, contact, companions)
+        )
+        contact_display = (
+            f"https://www.instagram.com/{contact[1:]}"
+            if contact.startswith('@') else contact
+        )
+        environment = self.config.environment.upper()
+        command = f"/dev cancel {room_id}" if environment == "DEV" else f"/cancel {room_id}"
+        message = f"""🎪 *미팅 방 생성 - {environment} SERVER* 🎪
+    -  🆔 *방 ID*: {room_id} ({slot})
+    -  💌 *초대 문구*: {invitation}
+    -  ⌛ *만료*: {expires_at} KST
+    -  💖 *방장*: {profile_id} / {nickname} / {self._localize_genders(gender)} / {birth_year} / {department}
+    -  📞 *연락처*: {contact_display}
+    -  🧑‍🤝‍🧑 *동행*: {self._localize_genders(companions)}
+
+    *취소*: `{command}`"""
+        self.notifier.send_admin_notification(message)
+
+        try:
+            violation_result = openai_client.check_policy_violation({'introSentences': invitation})
+            if violation_result.get('violation', False):
+                reason = violation_result.get('reason', 'Policy violation detected by AI')
+                self.notifier.send_admin_notification(f"""<!channel> 🚨 *정책 위반 미팅 방 감지* 🚨
+    -  🆔 *방 ID*: {room_id}
+    -  🚨 *위반 사유*: {reason}
+    """)
+            else:
+                reason = violation_result.get('reason', '')
+                if reason and 'Policy check failed' in reason:
+                    self.notifier.send_admin_notification(f"""❌ *미팅 방 정책 검사 실패* ❌
+    -  🆔 *방 ID*: {room_id}
+    -  🚨 *실패 사유*: {reason}
+    -  ⚠️ *조치*: 수동 확인 필요
+    """)
+        except Exception as e:
+            self.notifier.send_admin_notification(f"""❌ *미팅 방 정책 검사 시스템 오류* ❌
+    -  🆔 *방 ID*: {room_id}
+    -  🚨 *오류 내용*: {str(e)}
+    """)
 
     def create_failed_profile_contact_message(self, line):
         """프로필 등록 실패 메시지"""

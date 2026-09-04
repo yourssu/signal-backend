@@ -409,6 +409,70 @@ class MeetingApiIntegrationTest {
         check(meetingMatchJpaRepository.countByRoomId(roomId) == 0L)
     }
 
+    @Test
+    fun `관리자 취소는 JWT 없이 어드민 키로만 동작하고 슬롯을 반환한다`() {
+        val creator = register()
+        profileRepository.save(profile(creator.uuid, "@admin-cancel"))
+        val roomId = createRoom(creator, "SLOT_1")
+
+        mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"secretKey":"test-admin-access-key"}"""
+        }.andExpect { status { isNoContent() } }
+
+        check(meetingRoomJpaRepository.findById(roomId).get().status == MeetingRoomStatus.CANCELLED)
+
+        val other = register()
+        profileRepository.save(profile(other.uuid, "@slot-reuse"))
+        createRoom(other, "SLOT_1")
+    }
+
+    @Test
+    fun `관리자 취소는 키가 틀리거나 비면 방을 건드리지 않고 거절한다`() {
+        val creator = register()
+        profileRepository.save(profile(creator.uuid, "@admin-cancel-denied"))
+        val roomId = createRoom(creator, "SLOT_2")
+
+        mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"secretKey":"wrong-key"}"""
+        }.andExpect { status { isForbidden() } }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"secretKey":""}"""
+        }.andExpect { status { isBadRequest() } }
+
+        check(meetingRoomJpaRepository.findById(roomId).get().status == MeetingRoomStatus.OPEN)
+    }
+
+    @Test
+    fun `관리자 취소는 없는 방과 이미 취소된 방을 기존 오류로 거절한다`() {
+        mockMvc.post("/api/meetings/rooms/999999/admin-cancel") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"secretKey":"test-admin-access-key"}"""
+        }.andExpect {
+            status { isNotFound() }
+            jsonPath("$.code") { value("MEETING_ROOM_NOT_FOUND") }
+        }
+
+        val creator = register()
+        profileRepository.save(profile(creator.uuid, "@admin-cancel-twice"))
+        val roomId = createRoom(creator, "SLOT_4")
+        mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"secretKey":"test-admin-access-key"}"""
+        }.andExpect { status { isNoContent() } }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"secretKey":"test-admin-access-key"}"""
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("ROOM_CANCELLED") }
+        }
+    }
+
     private fun createRoom(user: RegisteredUser, slot: String): Long {
         val body = mockMvc.post("/api/meetings/rooms") {
             bearer(user.accessToken)

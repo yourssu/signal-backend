@@ -100,6 +100,26 @@ class NotificationLogIntegrationTest : DescribeSpec({
             Notification.notifyIssueFailedTicketByUnMatchedVerification(SMSMessage(800, "unknown payer"))
             Notification.notifyPayDeposit(" payer name ", 123)
             Notification.notifyFalseContactReport(7, 9, "@false&contact\n", LocalDateTime.parse("2026-08-20T12:34:56"))
+            Notification.notifyCreatedMeetingRoom(
+                roomId = 12,
+                slot = "SLOT_3",
+                invitation = "술 & 안주\n좋아요",
+                expiresAt = LocalDateTime.parse("2026-08-20T22:10:03.597336"),
+                profile = Profile(
+                    id = 45,
+                    uuid = Uuid("meeting-uuid"),
+                    gender = Gender.MALE,
+                    department = "컴퓨터학부",
+                    birthYear = 2002,
+                    animal = Animal.DOG,
+                    contact = "@haru_ru",
+                    mbti = "ENFP",
+                    nickname = "하루하루",
+                    introSentences = listOf("소개"),
+                    school = "숭실대학교",
+                ),
+                companions = "MALE/2001/전자정보공학부, MALE/2003/경영학부",
+            )
             LoggerFactory.getLogger("com.yourssu.signal.application.Heartbeat").info("heartbeat")
 
             val eventLines = logDirectory.resolve("events/notification-events.log").readLines()
@@ -115,6 +135,7 @@ class NotificationLogIntegrationTest : DescribeSpec({
                 "IssueFailedTicketByUnMatchedVerification&unknown payer 800",
                 "PayNotification&payername 123",
                 "FalseContactReport&7&9&@false%26contact%u000a&2026-08-20T12:34:56",
+                "CreateMeetingRoom&12&SLOT_3&술 %26 안주%u000a좋아요&2026-08-20T22:10:03&45&하루하루&MALE&2002&컴퓨터학부&@haru_ru&MALE/2001/전자정보공학부, MALE/2003/경영학부",
             )
             eventLines.size shouldBe eventLines.distinct().size
 

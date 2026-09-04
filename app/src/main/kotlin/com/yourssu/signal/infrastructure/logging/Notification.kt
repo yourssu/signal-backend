@@ -4,6 +4,7 @@ import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.verification.implement.Verification
 import com.yourssu.signal.infrastructure.sms.SMSMessage
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val logger = KotlinLogging.logger("com.yourssu.signal.infrastructure.logging.Notification")
@@ -25,6 +26,29 @@ object Notification {
                     "&${escapeEventField(profile.introSentences.joinToString(","))}"
         }
         diagnosticLogger.info { "eventType=CREATE_PROFILE profileId=${profile.id} outcome=SUCCESS" }
+    }
+
+    fun notifyCreatedMeetingRoom(
+        roomId: Long,
+        slot: String,
+        invitation: String,
+        expiresAt: LocalDateTime,
+        profile: Profile,
+        companions: String,
+    ) {
+        logger.info {
+            "CreateMeetingRoom&$roomId&$slot" +
+                    "&${escapeEventField(invitation)}" +
+                    "&${expiresAt.truncatedTo(ChronoUnit.SECONDS)}" +
+                    "&${profile.id}" +
+                    "&${escapeEventField(profile.nickname)}" +
+                    "&${profile.gender}" +
+                    "&${profile.birthYear}" +
+                    "&${escapeEventField(profile.department)}" +
+                    "&${escapeEventField(profile.contact)}" +
+                    "&${escapeEventField(companions)}"
+        }
+        diagnosticLogger.info { "eventType=CREATE_MEETING_ROOM roomId=$roomId outcome=SUCCESS" }
     }
 
     fun notifyContactExceedsLimitWarning(contactLimitPolicy: Int) {

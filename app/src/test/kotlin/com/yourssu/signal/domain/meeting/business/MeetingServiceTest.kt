@@ -485,6 +485,33 @@ class MeetingServiceTest : DescribeSpec({
             verify(roomRepository).findByIdForUpdate(1L)
             verify(roomRepository, never()).findById(1L)
         }
+
+        it("매칭된 방은 방장과 신청자에게 양 팀 구성을 계속 보여준다") {
+            val members = listOf(
+                MeetingMember(roomId = 1L, teamSide = MeetingTeamSide.CREATOR, memberOrder = 0, userUuid = uuid, gender = Gender.MALE, birthYear = 2000, department = "컴퓨터학부"),
+                MeetingMember(roomId = 1L, teamSide = MeetingTeamSide.APPLICANT, memberOrder = 0, userUuid = applicant, gender = Gender.FEMALE, birthYear = 2001, department = "경영학부"),
+                MeetingMember(roomId = 1L, teamSide = MeetingTeamSide.APPLICANT, memberOrder = 1, userUuid = null, gender = Gender.FEMALE, birthYear = 2002, department = "경영학부"),
+            )
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.MATCHED))
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(members)
+
+            service.getRoom(uuid.value, 1L).members shouldHaveSize 3
+            service.getRoom(applicant.value, 1L).members.count { it.teamSide == MeetingTeamSide.APPLICANT } shouldBe 2
+        }
+
+        it("매칭된 방은 제3자에게 계속 409다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.MATCHED))
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+
+            shouldThrow<RoomAlreadyMatchedException> { service.getRoom("viewer", 1L) }
+        }
+
+        it("취소된 방은 방장에게도 409다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.CANCELLED))
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+
+            shouldThrow<RoomCancelledException> { service.getRoom(uuid.value, 1L) }
+        }
     }
 
     describe("방 신청") {

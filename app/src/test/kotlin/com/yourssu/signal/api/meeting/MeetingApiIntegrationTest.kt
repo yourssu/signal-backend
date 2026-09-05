@@ -124,6 +124,27 @@ class MeetingApiIntegrationTest {
             status { isOk() }
             jsonPath("$.result.counterpartContact") { value("@jwt_applicant") }
         }
+        mockMvc.get("/api/meetings/rooms/$roomId") {
+            bearer(creator.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.room.status") { value("MATCHED") }
+            jsonPath("$.result.members[?(@.teamSide == 'APPLICANT')].department") { value(org.hamcrest.Matchers.hasItem("글로벌미디어학부")) }
+            jsonPath("$.result.members[*].contact") { doesNotExist() }
+        }
+        mockMvc.get("/api/meetings/rooms/$roomId") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.members[?(@.teamSide == 'CREATOR')].department") { value(org.hamcrest.Matchers.hasItem("컴퓨터학부")) }
+        }
+        val bystander = register()
+        mockMvc.get("/api/meetings/rooms/$roomId") {
+            bearer(bystander.accessToken)
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("ROOM_ALREADY_MATCHED") }
+        }
         mockMvc.get("/api/meetings/rooms/$roomId/result") {
             bearer(applicant.accessToken)
         }.andExpect {

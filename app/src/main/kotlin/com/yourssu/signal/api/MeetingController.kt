@@ -81,7 +81,7 @@ class MeetingController(
 
     @Operation(
         summary = "미팅 방 상세 조회",
-        description = "미팅 방의 상태와 양쪽 팀 구성원을 조회합니다.",
+        description = "미팅 방의 상태와 양쪽 팀 구성원을 조회합니다. 열린 방은 누구나, 매칭된 방은 방장과 신청자만 조회할 수 있습니다.",
         security = [SecurityRequirement(name = "bearerAuth")],
     )
     @ApiResponses(
@@ -90,7 +90,7 @@ class MeetingController(
             OpenApiResponse(responseCode = "400", description = "방 ID 검증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "404", description = "방 없음 (code: MEETING_ROOM_NOT_FOUND)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
-            OpenApiResponse(responseCode = "409", description = "이미 매칭·취소·만료된 방 (code: ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "당사자가 아닌 매칭된 방, 취소·만료된 방 (code: ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
         ]
     )
     @GetMapping("/rooms/{roomId}")

@@ -108,12 +108,13 @@ class MeetingService(
         rollbackFor = [com.yourssu.signal.handler.Error::class],
         noRollbackFor = [RoomExpiredException::class],
     )
-    fun getRoom(@Suppress("UNUSED_PARAMETER") uuid: String, roomId: Long): MeetingRoomDetailResponse {
+    fun getRoom(uuid: String, roomId: Long): MeetingRoomDetailResponse {
         val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
-        validateOpen(room, LocalDateTime.now(clock))
+        val members = meetingMemberRepository.findAllByRoomId(roomId)
+        validateReadable(room, members, Uuid(uuid), LocalDateTime.now(clock))
         return MeetingRoomDetailResponse(
             room = room.toResponse(),
-            members = meetingMemberRepository.findAllByRoomId(roomId).map { it.toResponse() },
+            members = members.map { it.toResponse() },
         )
     }
 
@@ -262,6 +263,19 @@ class MeetingService(
     private fun matchedToday(uuid: Uuid, today: LocalDate): Boolean =
         meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, today) ||
             meetingRoomRepository.existsMatchedByCreatorUuidAndMatchedDate(uuid, today)
+
+    private fun validateReadable(room: MeetingRoom, members: List<MeetingMember>, requester: Uuid, now: LocalDateTime) {
+        expireIfDue(room, now)
+        when (room.status) {
+            MeetingRoomStatus.OPEN -> Unit
+            MeetingRoomStatus.MATCHED -> {
+                val participant = room.creatorUuid == requester || members.any { it.userUuid == requester }
+                if (!participant) throw RoomAlreadyMatchedException()
+            }
+            MeetingRoomStatus.CANCELLED -> throw RoomCancelledException()
+            MeetingRoomStatus.EXPIRED -> throw RoomExpiredException()
+        }
+    }
 
     private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
         expireIfDue(room, now)

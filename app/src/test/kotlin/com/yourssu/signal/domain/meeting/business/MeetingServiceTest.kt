@@ -7,9 +7,13 @@ import com.yourssu.signal.domain.meeting.business.command.MeetingMatchCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
 import com.yourssu.signal.domain.meeting.implement.*
 import com.yourssu.signal.domain.profile.implement.*
+import com.yourssu.signal.domain.profile.implement.exception.BirthYearViolatedException
 import com.yourssu.signal.domain.report.implement.ReportReader
+import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
+import com.yourssu.signal.domain.viewer.implement.exception.AdminPermissionDeniedException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.mockito.kotlin.*
@@ -17,6 +21,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.time.ZoneId
 
 class MeetingServiceTest : DescribeSpec({
@@ -26,9 +31,10 @@ class MeetingServiceTest : DescribeSpec({
     val profileReader = mock<ProfileReader>()
     val blacklistReader = mock<BlacklistReader>()
     val reportReader = mock<ReportReader>()
+    val adminAccessChecker = mock<AdminAccessChecker>()
     val expirationManager = mock<MeetingExpirationManager>()
     val clock = AdjustableClock(Instant.parse("2026-08-31T03:00:00Z"), ZoneId.of("Asia/Seoul"))
-    val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, expirationManager, clock)
+    val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager, clock)
     val uuid = Uuid("creator")
     val applicant = Uuid("applicant")
 
@@ -69,8 +75,15 @@ class MeetingServiceTest : DescribeSpec({
     )
 
     beforeEach {
-        reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, expirationManager)
+        reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager)
         clock.set(Instant.parse("2026-08-31T03:00:00Z"))
+        TransactionSynchronizationManager.initSynchronization()
+    }
+
+    afterEach {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization()
+        }
     }
 
     describe("보드 조회") {
@@ -248,6 +261,48 @@ class MeetingServiceTest : DescribeSpec({
             )
 
             verify(roomRepository).save(any())
+        }
+
+        it("커밋 이후에 생성 알림을 1회 발행하도록 등록한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument<MeetingRoom>(0).copy(id = 1L) }
+            whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
+
+            service.createRoom(
+                MeetingRoomCreateCommand(
+                    uuid.value,
+                    MeetingSlot.SLOT_1,
+                    "초대",
+                    listOf(MeetingMemberCommand(Gender.MALE, 2001, "경영학부")),
+                )
+            )
+
+            TransactionSynchronizationManager.getSynchronizations() shouldHaveSize 1
+        }
+
+        it("팀 구성 검증에 실패하면 생성 알림을 등록하지 않는다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument<MeetingRoom>(0).copy(id = 1L) }
+
+            shouldThrow<BirthYearViolatedException> {
+                service.createRoom(
+                    MeetingRoomCreateCommand(
+                        uuid.value,
+                        MeetingSlot.SLOT_1,
+                        "초대",
+                        listOf(MeetingMemberCommand(Gender.MALE, 1800, "경영학부")),
+                    )
+                )
+            }
+
+            verify(memberRepository, never()).saveAll(any())
+            TransactionSynchronizationManager.getSynchronizations().shouldBeEmpty()
         }
 
         it("오늘 매칭에 성공한 사용자는 방을 생성할 수 없다") {
@@ -514,6 +569,44 @@ class MeetingServiceTest : DescribeSpec({
 
             verify(roomRepository).save(check { it.status shouldBe MeetingRoomStatus.EXPIRED })
             verify(matchRepository, never()).save(any())
+        }
+    }
+
+    describe("관리자 방 취소") {
+        it("열린 방을 CANCELLED로 바꾸고 슬롯을 반환한다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(roomRepository.save(any())).thenAnswer { it.getArgument(0) }
+
+            service.adminCancel(1L, "secret")
+
+            verify(adminAccessChecker).validateAdminAccess("secret")
+            verify(roomRepository).save(check {
+                it.status shouldBe MeetingRoomStatus.CANCELLED
+                it.activeSlot shouldBe null
+            })
+        }
+
+        it("관리자 키가 틀리면 방을 조회하지 않고 거절한다") {
+            doAnswer { throw AdminPermissionDeniedException() }
+                .whenever(adminAccessChecker).validateAdminAccess("wrong")
+
+            shouldThrow<AdminPermissionDeniedException> { service.adminCancel(1L, "wrong") }
+
+            verify(roomRepository, never()).findByIdForUpdate(any())
+            verify(roomRepository, never()).save(any())
+        }
+
+        it("이미 매칭된 방은 기존 오류로 거절한다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.MATCHED))
+
+            shouldThrow<RoomAlreadyMatchedException> { service.adminCancel(1L, "secret") }
+            verify(roomRepository, never()).save(any())
+        }
+
+        it("없는 방은 MEETING_ROOM_NOT_FOUND로 거절한다") {
+            whenever(roomRepository.findByIdForUpdate(99L)).thenReturn(null)
+
+            shouldThrow<MeetingRoomNotFoundException> { service.adminCancel(99L, "secret") }
         }
     }
 

@@ -63,6 +63,16 @@ class ObserverRuntime:
         else:
             self.notifier.send_log_notification(message)
 
+    @staticmethod
+    def _matches_event_prefix(prefix, line):
+        """이벤트 본문에 담긴 문자열이 다른 이벤트의 프리픽스로 오인되지 않게 첫 출현만 인정한다."""
+        position = line.find(prefix)
+        if position == -1:
+            return False
+        if SignalHandler.NOTIFICATION_PREFIX in prefix:
+            return line.find(SignalHandler.NOTIFICATION_PREFIX) == position
+        return True
+
     def process_line(self, path, line):
         if "SIGNAL_HEARTBEAT" in line:
             self.last_heartbeat = time.time()
@@ -70,7 +80,7 @@ class ObserverRuntime:
         if handlers is None:
             return
         for prefix, handler in handlers.items():
-            if prefix in line:
+            if self._matches_event_prefix(prefix, line):
                 try:
                     handler(line)
                 except Exception as error:

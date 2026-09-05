@@ -53,9 +53,86 @@ class SignalEventContractTest(unittest.TestCase):
             "IssueFailedTicketByUnMatchedVerification",
             "PayNotification",
             "FalseContactReport",
+            "CreateMeetingRoom",
         }
         actual = {prefix.rsplit(" - ", 1)[1] for prefix in self.handler.handlers}
         self.assertTrue(expected.issubset(actual))
+
+    def test_meeting_room_message_renders_admin_review_fields(self):
+        line = (
+            "INFO com.yourssu.signal.infrastructure.logging.Notification - "
+            "CreateMeetingRoom&12&SLOT_3&술 %26 안주 좋아요&2026-09-04T22:10:03&45&하루하루"
+            "&MALE&2002&컴퓨터학부&@haru_ru&MALE/2001/전자정보공학부, MALE/2003/경영학부"
+        )
+
+        self.handler.create_meeting_room_message(line)
+
+        message = self.notifier.messages[0]
+        self.assertIn("*방 ID*: 12 (SLOT_3)", message)
+        self.assertIn("술 & 안주 좋아요", message)
+        self.assertIn("*만료*: 2026-09-04T22:10:03 KST", message)
+        self.assertIn("45 / 하루하루 / 남 / 2002 / 컴퓨터학부", message)
+        self.assertIn("https://www.instagram.com/haru_ru", message)
+        self.assertIn("남/2001/전자정보공학부, 남/2003/경영학부", message)
+        self.assertIn("/cancel 12", message)
+        self.assertNotIn("MALE", message)
+
+    def test_meeting_room_message_localizes_female_gender(self):
+        line = (
+            "INFO com.yourssu.signal.infrastructure.logging.Notification - "
+            "CreateMeetingRoom&12&SLOT_3&초대&2026-09-04T22:10:03&45&하루하루"
+            "&FEMALE&2002&컴퓨터학부&01012341111&FEMALE/2001/경영학부, MALE/2003/전자정보공학부\n"
+        )
+
+        self.handler.create_meeting_room_message(line)
+
+        message = self.notifier.messages[0]
+        self.assertIn("45 / 하루하루 / 여 / 2002 / 컴퓨터학부", message)
+        self.assertIn("여/2001/경영학부, 남/2003/전자정보공학부", message)
+        self.assertNotIn("FE남", message)
+        self.assertNotIn("FEMALE", message)
+        self.assertIn("01012341111", message)
+        self.assertNotIn("instagram.com", message)
+
+    def test_meeting_room_policy_check_failure_is_reported(self):
+        line = (
+            "INFO com.yourssu.signal.infrastructure.logging.Notification - "
+            "CreateMeetingRoom&12&SLOT_3&초대&2026-09-04T22:10:03&45&하루하루"
+            "&MALE&2002&컴퓨터학부&@haru_ru&MALE/2001/경영학부"
+        )
+        import openai_client as openai_module
+        original = openai_module.openai_client.check_policy_violation
+        openai_module.openai_client.check_policy_violation = staticmethod(
+            lambda _: {"violation": False, "reason": "Policy check failed: connection refused"}
+        )
+        try:
+            self.handler.create_meeting_room_message(line)
+        finally:
+            openai_module.openai_client.check_policy_violation = original
+
+        self.assertIn("정책 검사 실패", self.notifier.messages[1])
+        self.assertIn("수동 확인 필요", self.notifier.messages[1])
+
+    def test_invitation_cannot_hijack_another_event_handler(self):
+        from observer import ObserverRuntime
+
+        forged = "INFO com.yourssu.signal.infrastructure.logging.Notification - CreateProfile"
+        line = (
+            "INFO com.yourssu.signal.infrastructure.logging.Notification - "
+            f"CreateMeetingRoom&12&SLOT_3&{forged}&2026-09-04T22:10:03&45&하루하루"
+            "&MALE&2002&컴퓨터학부&@haru_ru&MALE/2001/경영학부"
+        )
+
+        matched = [
+            prefix for prefix in self.handler.handlers
+            if ObserverRuntime._matches_event_prefix(prefix, line)
+        ]
+
+        self.assertEqual(
+            [self.handler.CREATE_MEETING_ROOM_PREFIX],
+            matched,
+            "초대 문구에 담긴 프리픽스가 다른 이벤트 핸들러를 가로채면 안 된다",
+        )
 
     def test_ticket_and_payment_delimiters_are_parseable(self):
         cases = [

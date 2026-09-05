@@ -1,5 +1,6 @@
 package com.yourssu.signal.api
 
+import com.yourssu.signal.api.dto.meeting.MeetingAdminCancelRequest
 import com.yourssu.signal.api.dto.meeting.MeetingMatchRequest
 import com.yourssu.signal.api.dto.meeting.MeetingRoomCreateRequest
 import com.yourssu.signal.config.resolver.UserUuid
@@ -150,6 +151,29 @@ class MeetingController(
         @PathVariable @Positive roomId: Long,
     ): ResponseEntity<Void> {
         meetingService.cancel(uuid, roomId)
+        return ResponseEntity.noContent().build()
+    }
+
+    @Operation(
+        summary = "미팅 방 관리자 취소",
+        description = "관리자 비밀 키로 열린 미팅 방을 취소합니다. 방장의 당일 생성 기회는 복구되지 않습니다.",
+    )
+    @ApiResponses(
+        value = [
+            OpenApiResponse(responseCode = "204", description = "방 취소 성공"),
+            OpenApiResponse(responseCode = "400", description = "방 ID·비밀 키 검증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "403", description = "관리자 비밀 키 불일치 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "404", description = "방 없음 (code: MEETING_ROOM_NOT_FOUND)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "이미 매칭·취소·만료된 방 (code: ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+        ]
+    )
+    @PostMapping("/rooms/{roomId}/admin-cancel")
+    fun adminCancel(
+        @Parameter(description = "미팅 방 ID", example = "1", schema = Schema(minimum = "1"))
+        @PathVariable @Positive roomId: Long,
+        @Valid @RequestBody request: MeetingAdminCancelRequest,
+    ): ResponseEntity<Void> {
+        meetingService.adminCancel(roomId, request.secretKey)
         return ResponseEntity.noContent().build()
     }
 

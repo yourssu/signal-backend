@@ -2,23 +2,40 @@ package com.yourssu.signal.domain.profile.implement
 
 import com.yourssu.signal.domain.profile.implement.exception.AnimalGenderMismatchException
 import com.yourssu.signal.domain.profile.implement.exception.ContactFormatViolatedException
+import com.yourssu.signal.domain.profile.implement.exception.DummyContactException
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 
 class ProfileValidationPolicyTest : DescribeSpec({
     describe("연락처 형식 검증") {
-        context("010 다음 숫자가 2 또는 9이면") {
-            it("전화번호를 허용한다") {
+        context("010으로 시작하는 11자리이면") {
+            it("국번과 무관하게 전화번호를 허용한다") {
                 shouldNotThrowAny { ProfileValidator.validateContact("01020000000") }
-                shouldNotThrowAny { ProfileValidator.validateContact("01099999999") }
+                shouldNotThrowAny { ProfileValidator.validateContact("01019836282") }
+                shouldNotThrowAny { ProfileValidator.validateContact("01011119999") }
             }
         }
 
-        context("010 다음 숫자가 0 또는 1이면") {
+        context("010으로 시작하지 않거나 자릿수가 다르면") {
             it("전화번호를 거부한다") {
-                shouldThrow<ContactFormatViolatedException> { ProfileValidator.validateContact("01000000000") }
-                shouldThrow<ContactFormatViolatedException> { ProfileValidator.validateContact("01019999999") }
+                shouldThrow<ContactFormatViolatedException> { ProfileValidator.validateContact("01112345670") }
+                shouldThrow<ContactFormatViolatedException> { ProfileValidator.validateContact("0101983628") }
+            }
+        }
+
+        context("뒤 8자리가 모두 같은 숫자이면") {
+            it("더미 연락처로 거부한다") {
+                shouldThrow<DummyContactException> { ProfileValidator.validateContact("01000000000") }
+                shouldThrow<DummyContactException> { ProfileValidator.validateContact("01011111111") }
+                shouldThrow<DummyContactException> { ProfileValidator.validateContact("01099999999") }
+            }
+        }
+
+        context("뒤 8자리가 연속 수열이면") {
+            it("더미 연락처로 거부한다") {
+                shouldThrow<DummyContactException> { ProfileValidator.validateContact("01012345678") }
+                shouldThrow<DummyContactException> { ProfileValidator.validateContact("01098765432") }
             }
         }
 

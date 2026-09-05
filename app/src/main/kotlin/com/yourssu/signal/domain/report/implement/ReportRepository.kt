@@ -7,4 +7,5 @@ interface ReportRepository {
     fun exists(reporterUuid: Uuid, reportedProfileId: Long): Boolean
     fun getForUpdate(id: Long): Report
     fun approve(id: Long)
+    fun findApprovedContacts(): List<String>
 }

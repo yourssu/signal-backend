@@ -78,6 +78,7 @@ class MeetingServiceTest : DescribeSpec({
     beforeEach {
         reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager)
         whenever(matchRepository.findRoomIdByApplicantUuidAndMatchedDate(any(), any())).thenReturn(null)
+        whenever(profileReader.getNicknameByUuid(any())).thenReturn("방장")
         clock.set(Instant.parse("2026-08-31T03:00:00Z"))
         TransactionSynchronizationManager.initSynchronization()
     }
@@ -484,6 +485,14 @@ class MeetingServiceTest : DescribeSpec({
 
             verify(roomRepository).findByIdForUpdate(1L)
             verify(roomRepository, never()).findById(1L)
+        }
+
+        it("방 상세에 방장 프로필 닉네임을 담는다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+            whenever(profileReader.getNicknameByUuid(uuid)).thenReturn("송하영")
+
+            service.getRoom("viewer", 1L).room.creatorNickname shouldBe "송하영"
         }
 
         it("매칭된 방은 방장과 신청자에게 양 팀 구성을 계속 보여준다") {

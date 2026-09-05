@@ -101,7 +101,7 @@ class MeetingService(
         MeetingTeamValidator.validate(command.partySize, members)
         meetingMemberRepository.saveAll(members)
         notifyCreatedRoomAfterCommit(room, profile, command.companions)
-        return room.toResponse()
+        return room.toResponse(profile.nickname)
     }
 
     @Transactional(
@@ -113,7 +113,7 @@ class MeetingService(
         val members = meetingMemberRepository.findAllByRoomId(roomId)
         validateReadable(room, members, Uuid(uuid), LocalDateTime.now(clock))
         return MeetingRoomDetailResponse(
-            room = room.toResponse(),
+            room = room.toResponse(profileReader.getNicknameByUuid(room.creatorUuid)),
             members = members.map { it.toResponse() },
         )
     }
@@ -304,10 +304,11 @@ class MeetingService(
         }
     }
 
-    private fun MeetingRoom.toResponse() = MeetingRoomResponse(
+    private fun MeetingRoom.toResponse(creatorNickname: String) = MeetingRoomResponse(
         id = id!!,
         slot = slot,
         creatorAnimal = creatorAnimal,
+        creatorNickname = creatorNickname,
         partySize = partySize,
         invitation = invitation,
         status = status,

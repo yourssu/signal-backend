@@ -52,6 +52,7 @@ data class MeetingRoomResponse(
     val id: Long,
     val slot: MeetingSlot,
     val creatorAnimal: Animal,
+    val creatorNickname: String,
     val partySize: Int,
     val invitation: String,
     val status: MeetingRoomStatus,

@@ -99,6 +99,7 @@ class ReportMeetingOpenApiContractTest {
         roomResponse.path("creatorAnimal").path("enum").map { it.asText() }
             .shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
         roomResponse.path("creatorAnimal").path("example").asText() shouldBe "DOG"
+        roomResponse.path("creatorNickname").path("type").asText() shouldBe "string"
         schemas.path("MeetingRoomSummaryResponse").path("properties").path("creatorAnimal").path("enum")
             .map { it.asText() }.shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
         schemas.path("MeetingLatestMatchResponse").path("properties").path("creatorAnimal").path("enum")

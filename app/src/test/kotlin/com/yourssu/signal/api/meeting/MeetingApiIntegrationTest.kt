@@ -73,6 +73,7 @@ class MeetingApiIntegrationTest {
             status { isCreated() }
             jsonPath("$.result.status") { value("OPEN") }
             jsonPath("$.result.creatorAnimal") { value("DOG") }
+            jsonPath("$.result.creatorNickname") { value("방장-${creator.uuid.take(6)}") }
             jsonPath("$.result.expiresAt") { value(org.hamcrest.Matchers.endsWith("+09:00")) }
         }.andReturn().response.contentAsString
         val roomId = objectMapper.readTree(createdBody).path("result").path("id").asLong()
@@ -94,6 +95,7 @@ class MeetingApiIntegrationTest {
         }.andExpect {
             status { isOk() }
             jsonPath("$.result.room.creatorAnimal") { value("DOG") }
+            jsonPath("$.result.room.creatorNickname") { value("방장-${creator.uuid.take(6)}") }
         }
 
         mockMvc.post("/api/meetings/rooms/$roomId/matches") {

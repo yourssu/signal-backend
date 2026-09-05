@@ -81,7 +81,7 @@ class MeetingController(
 
     @Operation(
         summary = "미팅 방 상세 조회",
-        description = "미팅 방의 상태와 양쪽 팀 구성원을 조회합니다. 열린 방은 누구나, 매칭된 방은 방장과 신청자만 조회할 수 있습니다.",
+        description = "미팅 방의 상태, 방장 닉네임과 양쪽 팀 구성원을 조회합니다. 열린 방은 누구나, 매칭된 방은 방장과 신청자만 조회할 수 있습니다.",
         security = [SecurityRequirement(name = "bearerAuth")],
     )
     @ApiResponses(

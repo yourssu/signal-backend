@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.meeting.business.command.MeetingMemberCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingMatchCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
+import com.yourssu.signal.domain.meeting.business.dto.MeetingMyRoomResponse
 import com.yourssu.signal.domain.meeting.implement.*
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.exception.BirthYearViolatedException
@@ -76,6 +77,8 @@ class MeetingServiceTest : DescribeSpec({
 
     beforeEach {
         reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager)
+        whenever(matchRepository.findRoomIdByApplicantUuidAndMatchedDate(any(), any())).thenReturn(null)
+        whenever(profileReader.getNicknameByUuid(any())).thenReturn("방장")
         clock.set(Instant.parse("2026-08-31T03:00:00Z"))
         TransactionSynchronizationManager.initSynchronization()
     }
@@ -164,6 +167,68 @@ class MeetingServiceTest : DescribeSpec({
             result.latestMatch!!.matchedAt.toLocalDateTime() shouldBe matchedAt
             result.latestMatch!!.visibleUntil.toLocalDateTime() shouldBe matchedAt.plusSeconds(30)
             verify(profileReader, never()).getByUuid(uuid)
+        }
+
+        it("생성한 방이 열려 있으면 myRoom으로 OPEN 방장 정보를 반환한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(listOf(room()))
+            whenever(roomRepository.findOpenByCreatorUuid(eq(uuid), any())).thenReturn(room())
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe MeetingMyRoomResponse(1L, MeetingRoomStatus.OPEN, MeetingTeamSide.CREATOR)
+            verify(roomRepository, never()).findMatchedByCreatorUuidAndMatchedDate(any(), any())
+            verify(matchRepository, never()).findRoomIdByApplicantUuidAndMatchedDate(any(), any())
+        }
+
+        it("오늘 만든 방이 매칭됐으면 myRoom으로 MATCHED 방장 정보를 반환한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findOpenByCreatorUuid(eq(uuid), any())).thenReturn(null)
+            whenever(roomRepository.findMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(room(MeetingRoomStatus.MATCHED))
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe MeetingMyRoomResponse(1L, MeetingRoomStatus.MATCHED, MeetingTeamSide.CREATOR)
+            verify(matchRepository, never()).findRoomIdByApplicantUuidAndMatchedDate(any(), any())
+        }
+
+        it("오늘 신청해 매칭됐으면 myRoom으로 MATCHED 신청자 정보를 반환한다") {
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findOpenByCreatorUuid(eq(applicant), any())).thenReturn(null)
+            whenever(roomRepository.findMatchedByCreatorUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(null)
+            whenever(matchRepository.findRoomIdByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(7L)
+
+            val result = service.getBoard(applicant.value)
+
+            result.myRoom shouldBe MeetingMyRoomResponse(7L, MeetingRoomStatus.MATCHED, MeetingTeamSide.APPLICANT)
+        }
+
+        it("오늘 엮인 방이 없으면 myRoom은 null이다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe null
+        }
+
+        it("어제 매칭된 방은 날짜가 바뀌면 myRoom에서 빠진다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(room(MeetingRoomStatus.MATCHED))
+            clock.set(Instant.parse("2026-08-31T15:00:00Z"))
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe null
+            verify(roomRepository).findMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 9, 1))
+            verify(matchRepository).findRoomIdByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 9, 1))
         }
     }
 
@@ -420,6 +485,41 @@ class MeetingServiceTest : DescribeSpec({
 
             verify(roomRepository).findByIdForUpdate(1L)
             verify(roomRepository, never()).findById(1L)
+        }
+
+        it("방 상세에 방장 프로필 닉네임을 담는다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+            whenever(profileReader.getNicknameByUuid(uuid)).thenReturn("송하영")
+
+            service.getRoom("viewer", 1L).room.creatorNickname shouldBe "송하영"
+        }
+
+        it("매칭된 방은 방장과 신청자에게 양 팀 구성을 계속 보여준다") {
+            val members = listOf(
+                MeetingMember(roomId = 1L, teamSide = MeetingTeamSide.CREATOR, memberOrder = 0, userUuid = uuid, gender = Gender.MALE, birthYear = 2000, department = "컴퓨터학부"),
+                MeetingMember(roomId = 1L, teamSide = MeetingTeamSide.APPLICANT, memberOrder = 0, userUuid = applicant, gender = Gender.FEMALE, birthYear = 2001, department = "경영학부"),
+                MeetingMember(roomId = 1L, teamSide = MeetingTeamSide.APPLICANT, memberOrder = 1, userUuid = null, gender = Gender.FEMALE, birthYear = 2002, department = "경영학부"),
+            )
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.MATCHED))
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(members)
+
+            service.getRoom(uuid.value, 1L).members shouldHaveSize 3
+            service.getRoom(applicant.value, 1L).members.count { it.teamSide == MeetingTeamSide.APPLICANT } shouldBe 2
+        }
+
+        it("매칭된 방은 제3자에게 계속 409다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.MATCHED))
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+
+            shouldThrow<RoomAlreadyMatchedException> { service.getRoom("viewer", 1L) }
+        }
+
+        it("취소된 방은 방장에게도 409다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room(MeetingRoomStatus.CANCELLED))
+            whenever(memberRepository.findAllByRoomId(1L)).thenReturn(emptyList())
+
+            shouldThrow<RoomCancelledException> { service.getRoom(uuid.value, 1L) }
         }
     }
 

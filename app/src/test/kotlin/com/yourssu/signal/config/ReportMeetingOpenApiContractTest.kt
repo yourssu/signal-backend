@@ -2,6 +2,7 @@ package com.yourssu.signal.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.yourssu.signal.domain.meeting.implement.MeetingSlot
+import com.yourssu.signal.domain.meeting.implement.MeetingTeamSide
 import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.EgenTeto
 import com.yourssu.signal.domain.profile.implement.Gender
@@ -98,10 +99,15 @@ class ReportMeetingOpenApiContractTest {
         roomResponse.path("creatorAnimal").path("enum").map { it.asText() }
             .shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
         roomResponse.path("creatorAnimal").path("example").asText() shouldBe "DOG"
+        roomResponse.path("creatorNickname").path("type").asText() shouldBe "string"
         schemas.path("MeetingRoomSummaryResponse").path("properties").path("creatorAnimal").path("enum")
             .map { it.asText() }.shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
         schemas.path("MeetingLatestMatchResponse").path("properties").path("creatorAnimal").path("enum")
             .map { it.asText() }.shouldContainExactlyInAnyOrder(Animal.entries.map { it.name })
+        val myRoom = schemas.path("MeetingMyRoomResponse").path("properties")
+        myRoom.path("status").path("enum").map { it.asText() }.shouldContainExactlyInAnyOrder(listOf("OPEN", "MATCHED"))
+        myRoom.path("teamSide").path("enum").map { it.asText() }
+            .shouldContainExactlyInAnyOrder(MeetingTeamSide.entries.map { it.name })
         listOf("MeetingRoomResponse", "MeetingSlotResponse").forEach { schemaName ->
             schemas.path(schemaName).path("properties").path("slot").path("enum").map { it.asText() } shouldBe
                 MeetingSlot.selectableEntries.map { it.name }

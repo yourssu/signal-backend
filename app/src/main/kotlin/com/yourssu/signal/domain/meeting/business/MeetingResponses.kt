@@ -5,12 +5,21 @@ import com.yourssu.signal.domain.meeting.implement.MeetingSlot
 import com.yourssu.signal.domain.meeting.implement.MeetingTeamSide
 import com.yourssu.signal.domain.profile.implement.Animal
 import com.yourssu.signal.domain.profile.implement.Gender
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.OffsetDateTime
 
 data class MeetingBoardResponse(
     val creationEligibility: MeetingCreationEligibilityResponse,
     val slots: List<MeetingSlotResponse>,
     val latestMatch: MeetingLatestMatchResponse?,
+    val myRoom: MeetingMyRoomResponse?,
+)
+
+data class MeetingMyRoomResponse(
+    val roomId: Long,
+    @field:Schema(allowableValues = ["OPEN", "MATCHED"])
+    val status: MeetingRoomStatus,
+    val teamSide: MeetingTeamSide,
 )
 
 data class MeetingLatestMatchResponse(
@@ -43,6 +52,7 @@ data class MeetingRoomResponse(
     val id: Long,
     val slot: MeetingSlot,
     val creatorAnimal: Animal,
+    val creatorNickname: String,
     val partySize: Int,
     val invitation: String,
     val status: MeetingRoomStatus,

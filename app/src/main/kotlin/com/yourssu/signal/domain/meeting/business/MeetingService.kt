@@ -56,6 +56,7 @@ class MeetingService(
                 )
             },
             latestMatch = latestMatch?.toLatestMatchResponse(),
+            myRoom = findMyRoom(userUuid, queryNow),
         )
     }
 
@@ -100,19 +101,20 @@ class MeetingService(
         MeetingTeamValidator.validate(command.partySize, members)
         meetingMemberRepository.saveAll(members)
         notifyCreatedRoomAfterCommit(room, profile, command.companions)
-        return room.toResponse()
+        return room.toResponse(profile.nickname)
     }
 
     @Transactional(
         rollbackFor = [com.yourssu.signal.handler.Error::class],
         noRollbackFor = [RoomExpiredException::class],
     )
-    fun getRoom(@Suppress("UNUSED_PARAMETER") uuid: String, roomId: Long): MeetingRoomDetailResponse {
+    fun getRoom(uuid: String, roomId: Long): MeetingRoomDetailResponse {
         val room = meetingRoomRepository.findByIdForUpdate(roomId) ?: throw MeetingRoomNotFoundException()
-        validateOpen(room, LocalDateTime.now(clock))
+        val members = meetingMemberRepository.findAllByRoomId(roomId)
+        validateReadable(room, members, Uuid(uuid), LocalDateTime.now(clock))
         return MeetingRoomDetailResponse(
-            room = room.toResponse(),
-            members = meetingMemberRepository.findAllByRoomId(roomId).map { it.toResponse() },
+            room = room.toResponse(profileReader.getNicknameByUuid(room.creatorUuid)),
+            members = members.map { it.toResponse() },
         )
     }
 
@@ -249,9 +251,31 @@ class MeetingService(
         if (meetingRoomRepository.existsOpenByCreatorUuid(applicantUuid, now)) throw ActiveRoomExistsException()
     }
 
+    private fun findMyRoom(uuid: Uuid, now: LocalDateTime): MeetingMyRoomResponse? {
+        val today = now.toLocalDate()
+        val createdRoom = meetingRoomRepository.findOpenByCreatorUuid(uuid, now)
+            ?: meetingRoomRepository.findMatchedByCreatorUuidAndMatchedDate(uuid, today)
+        if (createdRoom != null) return MeetingMyRoomResponse(createdRoom.id!!, createdRoom.status, MeetingTeamSide.CREATOR)
+        val appliedRoomId = meetingMatchRepository.findRoomIdByApplicantUuidAndMatchedDate(uuid, today) ?: return null
+        return MeetingMyRoomResponse(appliedRoomId, MeetingRoomStatus.MATCHED, MeetingTeamSide.APPLICANT)
+    }
+
     private fun matchedToday(uuid: Uuid, today: LocalDate): Boolean =
         meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, today) ||
             meetingRoomRepository.existsMatchedByCreatorUuidAndMatchedDate(uuid, today)
+
+    private fun validateReadable(room: MeetingRoom, members: List<MeetingMember>, requester: Uuid, now: LocalDateTime) {
+        expireIfDue(room, now)
+        when (room.status) {
+            MeetingRoomStatus.OPEN -> Unit
+            MeetingRoomStatus.MATCHED -> {
+                val participant = room.creatorUuid == requester || members.any { it.userUuid == requester }
+                if (!participant) throw RoomAlreadyMatchedException()
+            }
+            MeetingRoomStatus.CANCELLED -> throw RoomCancelledException()
+            MeetingRoomStatus.EXPIRED -> throw RoomExpiredException()
+        }
+    }
 
     private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
         expireIfDue(room, now)
@@ -280,10 +304,11 @@ class MeetingService(
         }
     }
 
-    private fun MeetingRoom.toResponse() = MeetingRoomResponse(
+    private fun MeetingRoom.toResponse(creatorNickname: String) = MeetingRoomResponse(
         id = id!!,
         slot = slot,
         creatorAnimal = creatorAnimal,
+        creatorNickname = creatorNickname,
         partySize = partySize,
         invitation = invitation,
         status = status,

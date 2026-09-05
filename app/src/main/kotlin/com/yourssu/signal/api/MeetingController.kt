@@ -40,7 +40,7 @@ class MeetingController(
 ) {
     @Operation(
         summary = "미팅 보드 조회",
-        description = "생성 가능 여부, 7개 슬롯의 열린 방과 전체 방 중 최근 30초 이내 최신 매칭 안내를 조회합니다. 방 또는 최신 매칭이 없으면 해당 필드는 생략됩니다.",
+        description = "생성 가능 여부, 7개 슬롯의 열린 방, 전체 방 중 최근 30초 이내 최신 매칭 안내, 본인이 엮인 방(myRoom)을 조회합니다. myRoom은 본인이 만든 열린 방 또는 오늘 매칭된 방(status: OPEN, MATCHED / teamSide: CREATOR, APPLICANT)만 담습니다. 슬롯의 방, 최신 매칭, myRoom이 없으면 해당 필드는 null입니다.",
         security = [SecurityRequirement(name = "bearerAuth")],
     )
     @ApiResponses(
@@ -81,7 +81,7 @@ class MeetingController(
 
     @Operation(
         summary = "미팅 방 상세 조회",
-        description = "미팅 방의 상태와 양쪽 팀 구성원을 조회합니다.",
+        description = "미팅 방의 상태, 방장 닉네임과 양쪽 팀 구성원을 조회합니다. 열린 방은 누구나, 매칭된 방은 방장과 신청자만 조회할 수 있습니다.",
         security = [SecurityRequirement(name = "bearerAuth")],
     )
     @ApiResponses(
@@ -90,7 +90,7 @@ class MeetingController(
             OpenApiResponse(responseCode = "400", description = "방 ID 검증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "404", description = "방 없음 (code: MEETING_ROOM_NOT_FOUND)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
-            OpenApiResponse(responseCode = "409", description = "이미 매칭·취소·만료된 방 (code: ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "409", description = "당사자가 아닌 매칭된 방, 취소·만료된 방 (code: ROOM_ALREADY_MATCHED, ROOM_CANCELLED, ROOM_EXPIRED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
         ]
     )
     @GetMapping("/rooms/{roomId}")

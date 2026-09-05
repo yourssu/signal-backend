@@ -13,7 +13,9 @@ interface MeetingRoomRepository {
     fun findLatestMatchedAfter(since: LocalDateTime): MeetingRoom?
     fun existsByCreatorUuidAndCreationDate(creatorUuid: Uuid, creationDate: LocalDate): Boolean
     fun existsOpenByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): Boolean
+    fun findOpenByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): MeetingRoom?
     fun existsMatchedByCreatorUuidAndMatchedDate(creatorUuid: Uuid, matchedDate: LocalDate): Boolean
+    fun findMatchedByCreatorUuidAndMatchedDate(creatorUuid: Uuid, matchedDate: LocalDate): MeetingRoom?
     fun expireDueRooms(now: LocalDateTime): Int
     fun expireDueRoomInSlot(slot: MeetingSlot, now: LocalDateTime): Int
 }

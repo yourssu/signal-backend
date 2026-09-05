@@ -44,6 +44,13 @@ class MeetingMatchRepositoryImpl(
             endExclusive = matchedDate.plusDays(1).atStartOfDay(),
         )
 
+    override fun findRoomIdByApplicantUuidAndMatchedDate(applicantUuid: Uuid, matchedDate: LocalDate): Long? =
+        jpaRepository.findRoomIdsMatchedInPeriod(
+            applicantUuid = applicantUuid.value,
+            startInclusive = matchedDate.atStartOfDay(),
+            endExclusive = matchedDate.plusDays(1).atStartOfDay(),
+        ).firstOrNull()
+
     private fun MeetingMatchEntity.toDomain() = toDomain(
         creatorContact = dataCipher.decrypt(creatorContact),
         applicantContact = dataCipher.decrypt(applicantContact),
@@ -66,6 +73,20 @@ interface MeetingMatchJpaRepository : JpaRepository<MeetingMatchEntity, Long> {
         startInclusive: LocalDateTime,
         endExclusive: LocalDateTime,
     ): Boolean
+
+    @Query(
+        """
+        select m.roomId from MeetingMatchEntity m
+        where m.applicantUuid = :applicantUuid
+            and m.matchedAt >= :startInclusive and m.matchedAt < :endExclusive
+        order by m.id desc
+        """
+    )
+    fun findRoomIdsMatchedInPeriod(
+        applicantUuid: String,
+        startInclusive: LocalDateTime,
+        endExclusive: LocalDateTime,
+    ): List<Long>
 
     fun countByRoomId(roomId: Long): Long
 }

@@ -56,6 +56,7 @@ class MeetingService(
                 )
             },
             latestMatch = latestMatch?.toLatestMatchResponse(),
+            myRoom = findMyRoom(userUuid, queryNow),
         )
     }
 
@@ -247,6 +248,15 @@ class MeetingService(
     private fun validateParticipation(applicantUuid: Uuid, now: LocalDateTime) {
         if (matchedToday(applicantUuid, now.toLocalDate())) throw DailyMeetingLimitExceededException()
         if (meetingRoomRepository.existsOpenByCreatorUuid(applicantUuid, now)) throw ActiveRoomExistsException()
+    }
+
+    private fun findMyRoom(uuid: Uuid, now: LocalDateTime): MeetingMyRoomResponse? {
+        val today = now.toLocalDate()
+        val createdRoom = meetingRoomRepository.findOpenByCreatorUuid(uuid, now)
+            ?: meetingRoomRepository.findMatchedByCreatorUuidAndMatchedDate(uuid, today)
+        if (createdRoom != null) return MeetingMyRoomResponse(createdRoom.id!!, createdRoom.status, MeetingTeamSide.CREATOR)
+        val appliedRoomId = meetingMatchRepository.findRoomIdByApplicantUuidAndMatchedDate(uuid, today) ?: return null
+        return MeetingMyRoomResponse(appliedRoomId, MeetingRoomStatus.MATCHED, MeetingTeamSide.APPLICANT)
     }
 
     private fun matchedToday(uuid: Uuid, today: LocalDate): Boolean =

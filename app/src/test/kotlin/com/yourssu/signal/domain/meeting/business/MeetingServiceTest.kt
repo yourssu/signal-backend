@@ -5,6 +5,7 @@ import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.meeting.business.command.MeetingMemberCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingMatchCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
+import com.yourssu.signal.domain.meeting.business.dto.MeetingMyRoomResponse
 import com.yourssu.signal.domain.meeting.implement.*
 import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.exception.BirthYearViolatedException
@@ -76,6 +77,7 @@ class MeetingServiceTest : DescribeSpec({
 
     beforeEach {
         reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager)
+        whenever(matchRepository.findRoomIdByApplicantUuidAndMatchedDate(any(), any())).thenReturn(null)
         clock.set(Instant.parse("2026-08-31T03:00:00Z"))
         TransactionSynchronizationManager.initSynchronization()
     }
@@ -164,6 +166,68 @@ class MeetingServiceTest : DescribeSpec({
             result.latestMatch!!.matchedAt.toLocalDateTime() shouldBe matchedAt
             result.latestMatch!!.visibleUntil.toLocalDateTime() shouldBe matchedAt.plusSeconds(30)
             verify(profileReader, never()).getByUuid(uuid)
+        }
+
+        it("생성한 방이 열려 있으면 myRoom으로 OPEN 방장 정보를 반환한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(listOf(room()))
+            whenever(roomRepository.findOpenByCreatorUuid(eq(uuid), any())).thenReturn(room())
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe MeetingMyRoomResponse(1L, MeetingRoomStatus.OPEN, MeetingTeamSide.CREATOR)
+            verify(roomRepository, never()).findMatchedByCreatorUuidAndMatchedDate(any(), any())
+            verify(matchRepository, never()).findRoomIdByApplicantUuidAndMatchedDate(any(), any())
+        }
+
+        it("오늘 만든 방이 매칭됐으면 myRoom으로 MATCHED 방장 정보를 반환한다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findOpenByCreatorUuid(eq(uuid), any())).thenReturn(null)
+            whenever(roomRepository.findMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(room(MeetingRoomStatus.MATCHED))
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe MeetingMyRoomResponse(1L, MeetingRoomStatus.MATCHED, MeetingTeamSide.CREATOR)
+            verify(matchRepository, never()).findRoomIdByApplicantUuidAndMatchedDate(any(), any())
+        }
+
+        it("오늘 신청해 매칭됐으면 myRoom으로 MATCHED 신청자 정보를 반환한다") {
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findOpenByCreatorUuid(eq(applicant), any())).thenReturn(null)
+            whenever(roomRepository.findMatchedByCreatorUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(null)
+            whenever(matchRepository.findRoomIdByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
+                .thenReturn(7L)
+
+            val result = service.getBoard(applicant.value)
+
+            result.myRoom shouldBe MeetingMyRoomResponse(7L, MeetingRoomStatus.MATCHED, MeetingTeamSide.APPLICANT)
+        }
+
+        it("오늘 엮인 방이 없으면 myRoom은 null이다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe null
+        }
+
+        it("어제 매칭된 방은 날짜가 바뀌면 myRoom에서 빠진다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+            whenever(roomRepository.findMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
+                .thenReturn(room(MeetingRoomStatus.MATCHED))
+            clock.set(Instant.parse("2026-08-31T15:00:00Z"))
+
+            val result = service.getBoard(uuid.value)
+
+            result.myRoom shouldBe null
+            verify(roomRepository).findMatchedByCreatorUuidAndMatchedDate(uuid, LocalDate.of(2026, 9, 1))
+            verify(matchRepository).findRoomIdByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 9, 1))
         }
     }
 

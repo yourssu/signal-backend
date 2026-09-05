@@ -8,4 +8,5 @@ interface MeetingMatchRepository {
     fun findByRoomId(roomId: Long): MeetingMatch?
     fun findAllByApplicantUuid(applicantUuid: Uuid): List<MeetingMatch>
     fun existsByApplicantUuidAndMatchedDate(applicantUuid: Uuid, matchedDate: LocalDate): Boolean
+    fun findRoomIdByApplicantUuidAndMatchedDate(applicantUuid: Uuid, matchedDate: LocalDate): Long?
 }

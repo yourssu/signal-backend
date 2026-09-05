@@ -536,6 +536,89 @@ class MeetingApiIntegrationTest {
         }
     }
 
+    @Test
+    fun `보드는 본인이 엮인 방을 myRoom으로 알려주고 구경꾼에게는 null이다`() {
+        val creator = register()
+        val applicant = register()
+        val bystander = register()
+        profileRepository.save(profile(creator.uuid, "@myroom_creator"))
+        profileRepository.save(profile(applicant.uuid, "@myroom_applicant"))
+        profileRepository.save(profile(bystander.uuid, "@myroom_bystander"))
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(creator.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.myRoom") { value(null) }
+        }
+
+        val roomId = createRoom(creator, "SLOT_5")
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(creator.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.myRoom.roomId") { value(roomId) }
+            jsonPath("$.result.myRoom.status") { value("OPEN") }
+            jsonPath("$.result.myRoom.teamSide") { value("CREATOR") }
+        }
+        mockMvc.get("/api/meetings/board") {
+            bearer(bystander.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.myRoom") { value(null) }
+        }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@myroom_applicant")
+        }.andExpect { status { isCreated() } }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(creator.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.myRoom.roomId") { value(roomId) }
+            jsonPath("$.result.myRoom.status") { value("MATCHED") }
+            jsonPath("$.result.myRoom.teamSide") { value("CREATOR") }
+            jsonPath("$.result.myRoom.contact") { doesNotExist() }
+        }
+        mockMvc.get("/api/meetings/board") {
+            bearer(applicant.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.myRoom.roomId") { value(roomId) }
+            jsonPath("$.result.myRoom.status") { value("MATCHED") }
+            jsonPath("$.result.myRoom.teamSide") { value("APPLICANT") }
+        }
+        mockMvc.get("/api/meetings/board") {
+            bearer(bystander.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.myRoom") { value(null) }
+        }
+    }
+
+    @Test
+    fun `취소한 방은 myRoom에서 사라진다`() {
+        val creator = register()
+        profileRepository.save(profile(creator.uuid, "@myroom_cancel"))
+        val roomId = createRoom(creator, "SLOT_6")
+
+        mockMvc.post("/api/meetings/rooms/$roomId/cancel") {
+            bearer(creator.accessToken)
+        }.andExpect { status { isNoContent() } }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(creator.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.reason") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+            jsonPath("$.result.myRoom") { value(null) }
+        }
+    }
+
     private fun createRoom(user: RegisteredUser, slot: String): Long {
         val body = mockMvc.post("/api/meetings/rooms") {
             bearer(user.accessToken)

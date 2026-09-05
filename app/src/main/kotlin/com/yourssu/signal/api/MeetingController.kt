@@ -40,7 +40,7 @@ class MeetingController(
 ) {
     @Operation(
         summary = "미팅 보드 조회",
-        description = "생성 가능 여부, 7개 슬롯의 열린 방과 전체 방 중 최근 30초 이내 최신 매칭 안내를 조회합니다. 방 또는 최신 매칭이 없으면 해당 필드는 생략됩니다.",
+        description = "생성 가능 여부, 7개 슬롯의 열린 방, 전체 방 중 최근 30초 이내 최신 매칭 안내, 본인이 엮인 방(myRoom)을 조회합니다. myRoom은 본인이 만든 열린 방 또는 오늘 매칭된 방(status: OPEN, MATCHED / teamSide: CREATOR, APPLICANT)만 담습니다. 슬롯의 방, 최신 매칭, myRoom이 없으면 해당 필드는 null입니다.",
         security = [SecurityRequirement(name = "bearerAuth")],
     )
     @ApiResponses(

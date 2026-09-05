@@ -57,6 +57,13 @@ class MeetingRoomRepositoryImpl(
     override fun existsOpenByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): Boolean =
         jpaRepository.existsByCreatorUuidAndStatusAndExpiresAtAfter(creatorUuid.value, MeetingRoomStatus.OPEN, now)
 
+    override fun findOpenByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): MeetingRoom? =
+        jpaRepository.findFirstByCreatorUuidAndStatusAndExpiresAtAfterOrderByIdDesc(
+            creatorUuid.value,
+            MeetingRoomStatus.OPEN,
+            now,
+        )?.toDomain()
+
     override fun existsMatchedByCreatorUuidAndMatchedDate(creatorUuid: Uuid, matchedDate: LocalDate): Boolean =
         jpaRepository.existsMatchedInPeriod(
             creatorUuid = creatorUuid.value,
@@ -64,6 +71,14 @@ class MeetingRoomRepositoryImpl(
             startInclusive = matchedDate.atStartOfDay(),
             endExclusive = matchedDate.plusDays(1).atStartOfDay(),
         )
+
+    override fun findMatchedByCreatorUuidAndMatchedDate(creatorUuid: Uuid, matchedDate: LocalDate): MeetingRoom? =
+        jpaRepository.findMatchedInPeriod(
+            creatorUuid = creatorUuid.value,
+            status = MeetingRoomStatus.MATCHED,
+            startInclusive = matchedDate.atStartOfDay(),
+            endExclusive = matchedDate.plusDays(1).atStartOfDay(),
+        ).firstOrNull()?.toDomain()
 
     override fun expireDueRooms(now: LocalDateTime): Int =
         jpaRepository.expireDueRooms(MeetingRoomStatus.OPEN, MeetingRoomStatus.EXPIRED, now)
@@ -101,6 +116,12 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
         expiresAt: LocalDateTime,
     ): Boolean
 
+    fun findFirstByCreatorUuidAndStatusAndExpiresAtAfterOrderByIdDesc(
+        creatorUuid: String,
+        status: MeetingRoomStatus,
+        expiresAt: LocalDateTime,
+    ): MeetingRoomEntity?
+
     @Query(
         """
         select case when count(r) > 0 then true else false end from MeetingRoomEntity r
@@ -114,6 +135,21 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
         startInclusive: LocalDateTime,
         endExclusive: LocalDateTime,
     ): Boolean
+
+    @Query(
+        """
+        select r from MeetingRoomEntity r
+        where r.creatorUuid = :creatorUuid and r.status = :status
+            and r.matchedAt >= :startInclusive and r.matchedAt < :endExclusive
+        order by r.id desc
+        """
+    )
+    fun findMatchedInPeriod(
+        creatorUuid: String,
+        status: MeetingRoomStatus,
+        startInclusive: LocalDateTime,
+        endExclusive: LocalDateTime,
+    ): List<MeetingRoomEntity>
 
     fun findFirstByStatusAndMatchedAtGreaterThanOrderByMatchedAtDescIdDesc(
         status: MeetingRoomStatus,

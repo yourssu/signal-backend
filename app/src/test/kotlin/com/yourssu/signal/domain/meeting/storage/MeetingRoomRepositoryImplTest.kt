@@ -156,6 +156,30 @@ class MeetingRoomRepositoryImplTest {
         assertFalse(repository.existsOpenByCreatorUuid(Uuid("matched-creator"), now))
     }
 
+    @Test
+    fun `방장의 당일 매칭 성사 이력만 조회한다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val open = repository.save(room("matched-creator", MeetingSlot.SLOT_1, now))
+        repository.save(open.match(now.plusMinutes(10)))
+        repository.save(room("open-creator", MeetingSlot.SLOT_2, now))
+
+        assertTrue(repository.existsMatchedByCreatorUuidAndMatchedDate(Uuid("matched-creator"), LocalDate.of(2026, 8, 31)))
+        assertFalse(repository.existsMatchedByCreatorUuidAndMatchedDate(Uuid("matched-creator"), LocalDate.of(2026, 9, 1)))
+        assertFalse(repository.existsMatchedByCreatorUuidAndMatchedDate(Uuid("open-creator"), LocalDate.of(2026, 8, 31)))
+    }
+
+    @Test
+    fun `취소되거나 만료된 방은 매칭 성사 이력이 아니다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val cancelled = repository.save(room("cancel-creator", MeetingSlot.SLOT_3, now))
+        repository.save(cancelled.cancel(now.plusMinutes(5)))
+        val due = repository.save(room("expire-creator", MeetingSlot.SLOT_4, now.minusHours(2)))
+        repository.save(due.expire(now))
+
+        assertFalse(repository.existsMatchedByCreatorUuidAndMatchedDate(Uuid("cancel-creator"), LocalDate.of(2026, 8, 31)))
+        assertFalse(repository.existsMatchedByCreatorUuidAndMatchedDate(Uuid("expire-creator"), LocalDate.of(2026, 8, 31)))
+    }
+
     private fun room(creator: String, slot: MeetingSlot, createdAt: LocalDateTime) = MeetingRoom(
         slot = slot,
         activeSlot = slot,

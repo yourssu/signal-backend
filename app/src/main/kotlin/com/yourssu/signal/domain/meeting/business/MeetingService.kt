@@ -1,13 +1,16 @@
 package com.yourssu.signal.domain.meeting.business
 
+import com.yourssu.signal.domain.blacklist.implement.BlacklistReader
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.meeting.business.command.MeetingMatchCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingMemberCommand
 import com.yourssu.signal.domain.meeting.business.command.MeetingRoomCreateCommand
 import com.yourssu.signal.domain.meeting.business.dto.*
 import com.yourssu.signal.domain.meeting.implement.*
+import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.profile.implement.ProfileValidator
+import com.yourssu.signal.domain.report.implement.ReportReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Clock
@@ -20,6 +23,8 @@ class MeetingService(
     private val meetingMemberRepository: MeetingMemberRepository,
     private val meetingMatchRepository: MeetingMatchRepository,
     private val profileReader: ProfileReader,
+    private val blacklistReader: BlacklistReader,
+    private val reportReader: ReportReader,
     private val expirationManager: MeetingExpirationManager,
     private val clock: Clock,
 ) {
@@ -31,8 +36,10 @@ class MeetingService(
         val latestMatch = meetingRoomRepository.findLatestMatchedAfter(queryNow.minusSeconds(MATCH_NOTICE_SECONDS))
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
+            profileReader.findIdByUuid(userUuid) in blacklistReader.getAllBlacklistIds() -> MEETING_BLOCKED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
-            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
+            matchedToday(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
+            meetingRoomRepository.existsOpenByCreatorUuid(userUuid, queryNow) -> ACTIVE_ROOM_EXISTS
             else -> null
         }
         return MeetingBoardResponse(
@@ -54,14 +61,16 @@ class MeetingService(
         if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
         }
-        if (meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.now(clock))) {
+        if (matchedToday(uuid, LocalDate.now(clock))) {
             throw DailyMeetingLimitExceededException()
         }
         val now = LocalDateTime.now(clock)
+        if (meetingRoomRepository.existsOpenByCreatorUuid(uuid, now)) throw ActiveRoomExistsException()
         meetingRoomRepository.expireDueRoomInSlot(command.slot, now)
         if (meetingRoomRepository.findOpenBySlot(command.slot, now) != null) throw SlotAlreadyOccupiedException()
 
         val profile = profileReader.getByUuid(uuid)
+        if (isBlocked(profile, reportReader.findApprovedContacts())) throw MeetingBlockedException()
         val room = meetingRoomRepository.save(
             MeetingRoom(
                 slot = command.slot,
@@ -112,6 +121,7 @@ class MeetingService(
         ProfileValidator.validateContact(command.contact)
         val applicantUuid = Uuid(command.uuid)
         if (applicantUuid == room.creatorUuid) throw SelfMatchNotAllowedException()
+        validateNotBlocked(applicantUuid, command.contact)
         validateParticipation(applicantUuid, lockedNow)
         val applicantMembers = buildMembers(
             roomId = room.id!!,
@@ -182,13 +192,27 @@ class MeetingService(
         )
     }
 
+    private fun validateNotBlocked(applicantUuid: Uuid, contact: String) {
+        val reportedContacts = reportReader.findApprovedContacts()
+        val blockedByProfile = profileReader.existsByUuid(applicantUuid) &&
+            isBlocked(profileReader.getByUuid(applicantUuid), reportedContacts)
+        if (blockedByProfile || reportedContacts.containsContact(contact)) throw MeetingBlockedException()
+    }
+
+    private fun isBlocked(profile: Profile, reportedContacts: List<String>): Boolean =
+        blacklistReader.existsByProfileId(profile.id!!) || reportedContacts.containsContact(profile.contact)
+
+    private fun List<String>.containsContact(contact: String): Boolean =
+        any { it.equals(contact, ignoreCase = true) }
+
     private fun validateParticipation(applicantUuid: Uuid, now: LocalDateTime) {
-        val today = now.toLocalDate()
-        val alreadyUsedToday = meetingRoomRepository.existsByCreatorUuidAndCreationDate(applicantUuid, today) ||
-            meetingMatchRepository.existsByApplicantUuidAndMatchedDate(applicantUuid, today)
-        if (alreadyUsedToday) throw DailyMeetingLimitExceededException()
+        if (matchedToday(applicantUuid, now.toLocalDate())) throw DailyMeetingLimitExceededException()
         if (meetingRoomRepository.existsOpenByCreatorUuid(applicantUuid, now)) throw ActiveRoomExistsException()
     }
+
+    private fun matchedToday(uuid: Uuid, today: LocalDate): Boolean =
+        meetingMatchRepository.existsByApplicantUuidAndMatchedDate(uuid, today) ||
+            meetingRoomRepository.existsMatchedByCreatorUuidAndMatchedDate(uuid, today)
 
     private fun validateOpen(room: MeetingRoom, now: LocalDateTime) {
         expireIfDue(room, now)
@@ -253,5 +277,7 @@ class MeetingService(
         const val PROFILE_REQUIRED = "PROFILE_REQUIRED"
         const val DAILY_CREATION_LIMIT_EXCEEDED = "DAILY_CREATION_LIMIT_EXCEEDED"
         const val DAILY_MEETING_LIMIT_EXCEEDED = "DAILY_MEETING_LIMIT_EXCEEDED"
+        const val MEETING_BLOCKED = "MEETING_BLOCKED"
+        const val ACTIVE_ROOM_EXISTS = "ACTIVE_ROOM_EXISTS"
     }
 }

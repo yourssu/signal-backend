@@ -409,6 +409,69 @@ class MeetingApiIntegrationTest {
         check(meetingMatchJpaRepository.countByRoomId(roomId) == 0L)
     }
 
+    @Test
+    fun `방을 만들었지만 매칭되지 않은 사용자는 같은 날 다른 방에 참여할 수 있다`() {
+        val host = register()
+        val otherHost = register()
+        profileRepository.save(profile(host.uuid, "@unmatched_host"))
+        profileRepository.save(profile(otherHost.uuid, "@unmatched_other_host"))
+        val ownRoomId = createRoom(host, "SLOT_1")
+
+        mockMvc.post("/api/meetings/rooms/$ownRoomId/cancel") {
+            bearer(host.accessToken)
+        }.andExpect { status { isNoContent() } }
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+        }
+
+        val otherRoomId = createRoom(otherHost, "SLOT_3")
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@unmatched_host")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+            jsonPath("$.result.counterpartContact") { value("@unmatched_other_host") }
+        }
+
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@unmatched_host")
+        }.andExpect { status { isConflict() } }
+    }
+
+    @Test
+    fun `열린 방을 가진 사용자는 날짜가 바뀌어도 방을 더 만들 수 없다`() {
+        val host = register()
+        profileRepository.save(profile(host.uuid, "@active_room_host"))
+        openRoom(host.uuid, MeetingSlot.SLOT_5, LocalDate.now(ZoneId.of("Asia/Seoul")).minusDays(1))
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(host.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.canCreate") { value(false) }
+            jsonPath("$.result.creationEligibility.reason") { value("ACTIVE_ROOM_EXISTS") }
+        }
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_6")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("ACTIVE_ROOM_EXISTS") }
+        }
+    }
+
     private fun createRoom(user: RegisteredUser, slot: String): Long {
         val body = mockMvc.post("/api/meetings/rooms") {
             bearer(user.accessToken)

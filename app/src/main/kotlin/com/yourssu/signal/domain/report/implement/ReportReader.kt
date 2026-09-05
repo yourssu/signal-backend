@@ -7,4 +7,5 @@ import org.springframework.stereotype.Component
 class ReportReader(private val repository: ReportRepository) {
     fun exists(reporterUuid: Uuid, reportedProfileId: Long) = repository.exists(reporterUuid, reportedProfileId)
     fun getForUpdate(id: Long) = repository.getForUpdate(id)
+    fun findApprovedContacts(): List<String> = repository.findApprovedContacts()
 }

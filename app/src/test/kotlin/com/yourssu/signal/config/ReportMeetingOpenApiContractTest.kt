@@ -139,8 +139,10 @@ class ReportMeetingOpenApiContractTest {
             .map { it.asText() }
             .shouldContainExactlyInAnyOrder(
                 "PROFILE_REQUIRED",
+                "MEETING_BLOCKED",
                 "DAILY_CREATION_LIMIT_EXCEEDED",
                 "DAILY_MEETING_LIMIT_EXCEEDED",
+                "ACTIVE_ROOM_EXISTS",
             )
 
         val genderParameter = document.path("paths").path("/api/profiles/genders/{gender}/count").path("get")
@@ -162,9 +164,9 @@ class ReportMeetingOpenApiContractTest {
             "/api/reports" to ("post" to setOf("201", "400", "401", "403", "404", "409")),
             "/api/reports/{reportId}/approve" to ("post" to setOf("200", "400", "403", "404", "409")),
             "/api/meetings/board" to ("get" to setOf("200", "401")),
-            "/api/meetings/rooms" to ("post" to setOf("201", "400", "401", "409")),
+            "/api/meetings/rooms" to ("post" to setOf("201", "400", "401", "403", "409")),
             "/api/meetings/rooms/{roomId}" to ("get" to setOf("200", "400", "401", "404", "409")),
-            "/api/meetings/rooms/{roomId}/matches" to ("post" to setOf("201", "400", "401", "404", "409")),
+            "/api/meetings/rooms/{roomId}/matches" to ("post" to setOf("201", "400", "401", "403", "404", "409")),
             "/api/meetings/rooms/{roomId}/cancel" to ("post" to setOf("204", "400", "401", "403", "404", "409")),
             "/api/meetings/rooms/{roomId}/result" to ("get" to setOf("200", "400", "401", "403", "404", "409")),
         ).forEach { (path, methodAndCodes) ->

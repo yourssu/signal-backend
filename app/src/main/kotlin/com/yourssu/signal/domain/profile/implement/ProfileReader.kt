@@ -16,6 +16,8 @@ class ProfileReader(
 
     fun getNicknameByUuid(uuid: Uuid): String = profileRepository.getNicknameByUuid(uuid)
 
+    fun findIdByUuid(uuid: Uuid): Long? = profileRepository.findIdByUuid(uuid)
+
     fun existsByUuid(uuid: Uuid): Boolean {
         return profileRepository.existsByUuid(uuid)
     }

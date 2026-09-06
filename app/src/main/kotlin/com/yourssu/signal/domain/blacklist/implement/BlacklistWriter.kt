@@ -2,6 +2,8 @@ package com.yourssu.signal.domain.blacklist.implement
 
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Component
 class BlacklistWriter(
@@ -10,19 +12,31 @@ class BlacklistWriter(
     @Transactional
     fun save(blacklist: Blacklist): Blacklist {
         val savedBlacklist = blacklistRepository.save(blacklist)
-        blacklistRepository.updateCache()
+        updateCacheAfterCompletion()
         return savedBlacklist
     }
 
     @Transactional
     fun updateToAdminBlacklist(profileId: Long) {
         blacklistRepository.updateToAdminBlacklist(profileId)
-        blacklistRepository.updateCache()
+        updateCacheAfterCompletion()
     }
 
     @Transactional
     fun deleteByProfileId(profileId: Long) {
         blacklistRepository.deleteByProfileId(profileId)
-        blacklistRepository.updateCache()
+        updateCacheAfterCompletion()
+    }
+
+    private fun updateCacheAfterCompletion() {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            blacklistRepository.updateCache()
+            return
+        }
+        TransactionSynchronizationManager.registerSynchronization(object : TransactionSynchronization {
+            override fun afterCompletion(status: Int) {
+                blacklistRepository.updateCache()
+            }
+        })
     }
 }

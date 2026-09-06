@@ -128,7 +128,7 @@ class ProfileServiceTest : DescribeSpec({
                     whenever(profileWriter.createProfile(any())).thenReturn(createTestProfile(id = 2L, uuid = "new-uuid"))
                 }
 
-                it("기존 프로필을 관리자 blacklist로 등록하고 최초 한 번만 경고한다") {
+                it("기존 프로필을 개인 blacklist로 숨기고 최초 한 번만 경고한다") {
                     val oldProfile = createTestProfile(id = 1L, uuid = "old-uuid", contact = "@duplicate_contact")
                     whenever(profileReader.findByContact("@duplicate_contact")).thenReturn(listOf(oldProfile))
                     whenever(blacklistReader.existsByProfileId(1L)).thenReturn(false)
@@ -138,7 +138,7 @@ class ProfileServiceTest : DescribeSpec({
 
                     verify(blacklistWriter).save(check {
                         it.profileId shouldBe 1L
-                        it.createdByAdmin shouldBe true
+                        it.createdByAdmin shouldBe false
                     })
                     verify(profileNotifier).notifyDetailedContactExceedsLimitWarning(
                         "@duplicate_contact", 2L, listOf(1L), 2, 5
@@ -161,22 +161,22 @@ class ProfileServiceTest : DescribeSpec({
                     verify(blacklistWriter, never()).updateToAdminBlacklist(any())
                 }
 
-                it("개인 blacklist였던 기존 프로필은 관리자 blacklist로 승격한다") {
+                it("개인 blacklist였던 기존 프로필은 그대로 둔다") {
                     val oldProfile = createTestProfile(id = 1L, uuid = "old-uuid", contact = "@duplicate_contact")
                     whenever(profileReader.findByContact("@duplicate_contact")).thenReturn(listOf(oldProfile))
                     whenever(blacklistReader.existsByProfileId(1L)).thenReturn(true)
-                    whenever(blacklistReader.isAddedByAdmin(1L)).thenReturn(false)
                     whenever(contactNotificationDeduplicator.shouldNotify("@duplicate_contact", ContactNotificationType.WARNING)).thenReturn(true)
 
                     profileService.createProfile(command)
 
-                    verify(blacklistWriter).updateToAdminBlacklist(1L)
+                    verify(blacklistWriter, never()).updateToAdminBlacklist(any())
+                    verify(blacklistWriter, never()).save(any())
                     verify(profileNotifier).notifyDetailedContactExceedsLimitWarning(
                         "@duplicate_contact", 2L, listOf(1L), 2, 5
                     )
                 }
 
-                it("경고 임계값 미만이면 관리자 차단만 하고 경고하지 않는다") {
+                it("경고 임계값 미만이면 숨김만 하고 경고하지 않는다") {
                     val oldProfile = createTestProfile(id = 1L, uuid = "old-uuid", contact = "@duplicate_contact")
                     whenever(policy.contactLimitWarning).thenReturn(2)
                     whenever(profileReader.findByContact("@duplicate_contact")).thenReturn(listOf(oldProfile))
@@ -194,9 +194,8 @@ class ProfileServiceTest : DescribeSpec({
                     whenever(policy.contactLimitWarning).thenReturn(2)
                     whenever(profileReader.findByContact("@duplicate_contact"))
                         .thenReturn(listOf(first), listOf(first, second), listOf(first, second))
-                    whenever(blacklistReader.isAddedByAdmin(1L)).thenReturn(true)
-                    whenever(blacklistReader.isAddedByAdmin(2L)).thenReturn(false, true)
-                    whenever(blacklistReader.existsByProfileId(2L)).thenReturn(false)
+                    whenever(blacklistReader.existsByProfileId(1L)).thenReturn(true)
+                    whenever(blacklistReader.existsByProfileId(2L)).thenReturn(false, true)
                     whenever(contactNotificationDeduplicator.shouldNotify("@duplicate_contact", ContactNotificationType.WARNING))
                         .thenReturn(true, false, false)
 
@@ -208,16 +207,15 @@ class ProfileServiceTest : DescribeSpec({
                     verify(profileNotifier, never()).notifyFailedProfileContactExceedsLimit(any())
                 }
 
-                it("연락처 제한에 걸린 요청을 반복해도 관리자 차단은 유지하고 경고는 총 한 번만 보낸다") {
+                it("연락처 제한에 걸린 요청을 반복해도 숨김은 유지하고 경고는 총 한 번만 보낸다") {
                     val first = createTestProfile(id = 1L, uuid = "first-uuid", contact = "@duplicate_contact")
                     val second = createTestProfile(id = 2L, uuid = "second-uuid", contact = "@duplicate_contact")
                     whenever(policy.contactLimit).thenReturn(2)
                     whenever(policy.contactLimitWarning).thenReturn(2)
                     whenever(profileReader.findByContact("@duplicate_contact"))
                         .thenReturn(listOf(first, second))
-                    whenever(blacklistReader.isAddedByAdmin(1L)).thenReturn(true)
-                    whenever(blacklistReader.isAddedByAdmin(2L)).thenReturn(false, true)
-                    whenever(blacklistReader.existsByProfileId(2L)).thenReturn(false)
+                    whenever(blacklistReader.existsByProfileId(1L)).thenReturn(true)
+                    whenever(blacklistReader.existsByProfileId(2L)).thenReturn(false, true)
                     whenever(contactNotificationDeduplicator.shouldNotify("@duplicate_contact", ContactNotificationType.FAILURE))
                         .thenReturn(true, false)
 
@@ -233,7 +231,7 @@ class ProfileServiceTest : DescribeSpec({
                     verify(profileWriter, never()).createProfile(any())
                 }
 
-                it("세 번 반복해도 경고는 한 번만 보내고 앞서 생성된 프로필은 모두 관리자 차단한다") {
+                it("세 번 반복해도 경고는 한 번만 보내고 앞서 생성된 프로필은 모두 숨긴다") {
                     val first = createTestProfile(id = 1L, uuid = "first-uuid", contact = "@duplicate_contact")
                     val second = createTestProfile(id = 2L, uuid = "second-uuid", contact = "@duplicate_contact")
                     val third = createTestProfile(id = 3L, uuid = "third-uuid", contact = "@duplicate_contact")
@@ -241,7 +239,6 @@ class ProfileServiceTest : DescribeSpec({
                         .thenReturn(emptyList(), listOf(first), listOf(first, second))
                     whenever(profileWriter.createProfile(any())).thenReturn(first, second, third)
                     whenever(blacklistReader.existsByProfileId(1L)).thenReturn(false, true)
-                    whenever(blacklistReader.isAddedByAdmin(1L)).thenReturn(false, true)
                     whenever(blacklistReader.existsByProfileId(2L)).thenReturn(false)
                     whenever(contactNotificationDeduplicator.shouldNotify("@duplicate_contact", ContactNotificationType.WARNING))
                         .thenReturn(true, false)

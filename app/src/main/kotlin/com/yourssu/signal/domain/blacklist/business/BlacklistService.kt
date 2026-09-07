@@ -12,7 +12,7 @@ import com.yourssu.signal.domain.blacklist.implement.exception.BlacklistAlreadyE
 import com.yourssu.signal.domain.common.implement.Uuid
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.stereotype.Service
 
 @Service
@@ -62,6 +62,7 @@ class BlacklistService(
         return BlacklistResponse.from(blacklist)
     }
 
+    @Transactional(rollbackFor = [com.yourssu.signal.handler.Error::class])
     fun removeMyBlacklist(uuid: String) {
         val profile = profileReader.getByUuid(Uuid(uuid))
         if (!blacklistReader.existsByProfileId(profile.id!!)) {
@@ -71,5 +72,12 @@ class BlacklistService(
             throw AdminBlacklistCannotBeRemovedException()
         }
         blacklistWriter.deleteByProfileId(profile.id)
+        hideOtherProfilesWithSameContact(profile.id, profile.contact)
+    }
+
+    private fun hideOtherProfilesWithSameContact(profileId: Long, contact: String) {
+        profileReader.findByContact(contact)
+            .filter { it.id != profileId && !blacklistReader.existsByProfileId(it.id!!) }
+            .forEach { blacklistWriter.save(Blacklist(profileId = it.id!!, createdByAdmin = false)) }
     }
 }

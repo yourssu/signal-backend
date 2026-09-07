@@ -126,7 +126,8 @@ class SignalHandler:
         contact = self._decode_create_profile_field(contact)
         environment = self.config.environment.upper()
         command = f"/dev report {report_id}" if environment == "DEV" else f"/report {report_id}"
-        message = f"""📣 *허위 연락처 신고 접수 - {environment} SERVER* 📣
+        mention = "<!channel> " if environment == "PROD" else ""
+        message = f"""{mention}📣 *허위 연락처 신고 접수 - {environment} SERVER* 📣
     -  🆔 *신고 ID*: {report_id}
     -  👤 *대상 프로필 ID*: {profile_id}
     -  📞 *대상 연락처*: {contact}

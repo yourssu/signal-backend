@@ -22,7 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
+import io.kotest.matchers.shouldBe
 import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,6 +44,7 @@ class MeetingApiIntegrationTest {
     @Autowired lateinit var meetingRoomRepository: MeetingRoomRepository
     @Autowired lateinit var meetingMemberJpaRepository: MeetingMemberJpaRepository
     @Autowired lateinit var meetingMatchJpaRepository: MeetingMatchJpaRepository
+    @Autowired lateinit var blacklistJpaRepository: com.yourssu.signal.domain.blacklist.storage.BlacklistJpaRepository
 
     @BeforeEach
     fun cleanMeetingData() {
@@ -620,6 +623,74 @@ class MeetingApiIntegrationTest {
         }.andExpect {
             status { isOk() }
             jsonPath("$.result.myRoom") { value(null) }
+        }
+    }
+
+    @Test
+    fun `프로필을 직접 비공개한 사용자는 방을 만들 수 있고 관리자 블랙리스트는 거절된다`() {
+        val hidden = register()
+        profileRepository.save(profile(hidden.uuid, "@self_hidden_creator"))
+        mockMvc.post("/api/blacklists/me") {
+            bearer(hidden.accessToken)
+        }.andExpect { status { isCreated() } }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(hidden.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.canCreate") { value(true) }
+        }
+        createRoom(hidden, "SLOT_7")
+
+        val banned = register()
+        val bannedProfile = profileRepository.save(profile(banned.uuid, "@admin_banned_creator"))
+        mockMvc.post("/api/blacklists") {
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"profileId":${bannedProfile.id},"secretKey":"test-admin-access-key"}"""
+        }.andExpect { status { isCreated() } }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(banned.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.reason") { value("MEETING_BLOCKED") }
+        }
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(banned.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_1")
+        }.andExpect {
+            status { isForbidden() }
+            jsonPath("$.code") { value("MEETING_BLOCKED") }
+        }
+    }
+
+    @Test
+    fun `중복 연락처로 숨겨진 프로필을 본인이 공개하면 같은 연락처의 다른 프로필이 숨겨진다`() {
+        val old = register()
+        val oldProfile = profileRepository.save(profile(old.uuid, "@dup_unhide"))
+        val fresh = register()
+        mockMvc.post("/api/profiles") {
+            bearer(fresh.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = """{"gender":"MALE","department":"컴퓨터학부","birthYear":2002,"animal":"DOG","contact":"@dup_unhide","mbti":"ENFP","nickname":"새계정","introSentences":["안녕하세요"],"school":"숭실대학교"}"""
+        }.andExpect { status { isCreated() } }
+        val freshProfileId = profileRepository.getByUuid(Uuid(fresh.uuid)).id!!
+
+        blacklistJpaRepository.findAll().single { it.profileId == oldProfile.id }.createdByAdmin shouldBe false
+        blacklistJpaRepository.findAll().none { it.profileId == freshProfileId } shouldBe true
+
+        mockMvc.delete("/api/blacklists/me") {
+            bearer(old.accessToken)
+        }.andExpect { status { isNoContent() } }
+
+        blacklistJpaRepository.findAll().none { it.profileId == oldProfile.id } shouldBe true
+        blacklistJpaRepository.findAll().single { it.profileId == freshProfileId }.createdByAdmin shouldBe false
+        mockMvc.get("/api/blacklists") {
+            bearer(fresh.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.isBlacklisted") { value(true) }
         }
     }
 

@@ -41,7 +41,7 @@ class MeetingService(
         val latestMatch = meetingRoomRepository.findLatestMatchedAfter(queryNow.minusSeconds(MATCH_NOTICE_SECONDS))
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
-            profileReader.findIdByUuid(userUuid) in blacklistReader.getAllBlacklistIds() -> MEETING_BLOCKED
+            profileReader.findIdByUuid(userUuid)?.let { blacklistReader.isAddedByAdmin(it) } == true -> MEETING_BLOCKED
             meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
             matchedToday(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
             meetingRoomRepository.existsOpenByCreatorUuid(userUuid, queryNow) -> ACTIVE_ROOM_EXISTS
@@ -241,7 +241,7 @@ class MeetingService(
     }
 
     private fun isBlocked(profile: Profile, reportedContacts: List<String>): Boolean =
-        blacklistReader.existsByProfileId(profile.id!!) || reportedContacts.containsContact(profile.contact)
+        blacklistReader.isAddedByAdmin(profile.id!!) || reportedContacts.containsContact(profile.contact)
 
     private fun List<String>.containsContact(contact: String): Boolean =
         any { it.equals(contact, ignoreCase = true) }

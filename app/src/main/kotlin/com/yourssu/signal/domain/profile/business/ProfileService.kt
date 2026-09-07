@@ -63,10 +63,8 @@ class ProfileService(
 
         existingProfiles.forEach { profile ->
             val profileId = profile.id!!
-            when {
-                blacklistReader.isAddedByAdmin(profileId) -> Unit
-                blacklistReader.existsByProfileId(profileId) -> blacklistWriter.updateToAdminBlacklist(profileId)
-                else -> blacklistWriter.save(Blacklist(profileId = profileId, createdByAdmin = true))
+            if (!blacklistReader.existsByProfileId(profileId)) {
+                blacklistWriter.save(Blacklist(profileId = profileId, createdByAdmin = false))
             }
         }
     }

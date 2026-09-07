@@ -107,10 +107,10 @@ class MeetingServiceTest : DescribeSpec({
             verify(roomRepository).findAllOpen(LocalDateTime.of(2026, 8, 31, 12, 0, 2))
         }
 
-        it("블랙리스트에 등록됐으면 MEETING_BLOCKED 생성 불가 사유를 반환한다") {
+        it("관리자 블랙리스트에 등록됐으면 MEETING_BLOCKED 생성 불가 사유를 반환한다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.findIdByUuid(uuid)).thenReturn(5L)
-            whenever(blacklistReader.getAllBlacklistIds()).thenReturn(setOf(5L))
+            whenever(blacklistReader.isAddedByAdmin(5L)).thenReturn(true)
             whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
 
             val result = service.getBoard(uuid.value)
@@ -118,6 +118,18 @@ class MeetingServiceTest : DescribeSpec({
             result.creationEligibility.canCreate shouldBe false
             result.creationEligibility.reason shouldBe MeetingService.MEETING_BLOCKED
             verify(profileReader, never()).getByUuid(uuid)
+        }
+
+        it("프로필을 직접 비공개한 사용자는 보드에서 생성 가능하다") {
+            whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
+            whenever(profileReader.findIdByUuid(uuid)).thenReturn(5L)
+            whenever(blacklistReader.isAddedByAdmin(5L)).thenReturn(false)
+            whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
+
+            val result = service.getBoard(uuid.value)
+
+            result.creationEligibility.canCreate shouldBe true
+            verify(blacklistReader, never()).getAllBlacklistIds()
         }
 
         it("오늘 매칭에 성공했으면 DAILY_MEETING_LIMIT_EXCEEDED 생성 불가 사유를 반환한다") {
@@ -264,12 +276,12 @@ class MeetingServiceTest : DescribeSpec({
             verify(expirationManager, never()).expireDueRooms(any())
         }
 
-        it("블랙리스트에 등록된 사용자는 방을 생성할 수 없다") {
+        it("관리자 블랙리스트에 등록된 사용자는 방을 생성할 수 없다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 7L))
             whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
-            whenever(blacklistReader.existsByProfileId(7L)).thenReturn(true)
+            whenever(blacklistReader.isAddedByAdmin(7L)).thenReturn(true)
 
             shouldThrow<MeetingBlockedException> {
                 service.createRoom(
@@ -289,7 +301,7 @@ class MeetingServiceTest : DescribeSpec({
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 8L).copy(contact = "@reported"))
             whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
-            whenever(blacklistReader.existsByProfileId(8L)).thenReturn(false)
+            whenever(blacklistReader.isAddedByAdmin(8L)).thenReturn(false)
             whenever(reportReader.findApprovedContacts()).thenReturn(listOf("@Reported"))
 
             shouldThrow<MeetingBlockedException> {
@@ -305,13 +317,13 @@ class MeetingServiceTest : DescribeSpec({
             verify(roomRepository, never()).save(any())
         }
 
-        it("중복 연락처 정리로 블랙리스트에 오른 프로필과 같은 연락처여도 신고 이력이 없으면 방을 생성한다") {
+        it("프로필을 직접 비공개한 사용자는 방을 생성할 수 있다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 11L))
             whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
-            whenever(blacklistReader.existsByProfileId(11L)).thenReturn(false)
-            whenever(blacklistReader.getAllBlacklistIds()).thenReturn(setOf(10L))
+            whenever(blacklistReader.existsByProfileId(11L)).thenReturn(true)
+            whenever(blacklistReader.isAddedByAdmin(11L)).thenReturn(false)
             whenever(reportReader.findApprovedContacts()).thenReturn(emptyList())
             whenever(roomRepository.save(any())).thenAnswer { it.getArgument<MeetingRoom>(0).copy(id = 1L) }
             whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
@@ -541,14 +553,27 @@ class MeetingServiceTest : DescribeSpec({
             verify(matchRepository, never()).save(any())
         }
 
-        it("블랙리스트에 등록된 사용자는 방에 신청할 수 없다") {
+        it("관리자 블랙리스트에 등록된 사용자는 방에 신청할 수 없다") {
+            whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
+            whenever(profileReader.existsByUuid(applicant)).thenReturn(true)
+            whenever(profileReader.getByUuid(applicant)).thenReturn(profile(applicant, id = 9L))
+            whenever(blacklistReader.isAddedByAdmin(9L)).thenReturn(true)
+
+            shouldThrow<MeetingBlockedException> { service.match(matchCommand()) }
+            verify(matchRepository, never()).save(any())
+        }
+
+        it("프로필을 직접 비공개한 사용자는 방에 신청할 수 있다") {
             whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
             whenever(profileReader.existsByUuid(applicant)).thenReturn(true)
             whenever(profileReader.getByUuid(applicant)).thenReturn(profile(applicant, id = 9L))
             whenever(blacklistReader.existsByProfileId(9L)).thenReturn(true)
+            whenever(blacklistReader.isAddedByAdmin(9L)).thenReturn(false)
+            whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
+            whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
+            whenever(matchRepository.save(any())).thenAnswer { it.getArgument(0) }
 
-            shouldThrow<MeetingBlockedException> { service.match(matchCommand()) }
-            verify(matchRepository, never()).save(any())
+            service.match(matchCommand()).roomId shouldBe 1L
         }
 
         it("프로필이 없어도 승인된 신고의 연락처로 신청하면 거절한다") {

@@ -90,7 +90,7 @@ class ProfileRepositoryConcurrencyTest {
         secondRequest.get(5, TimeUnit.SECONDS)
 
         blacklistJpaRepository.findAll().count { it.profileId == existingProfile.id } shouldBe 1
-        blacklistJpaRepository.findAll().single { it.profileId == existingProfile.id }.createdByAdmin shouldBe true
+        blacklistJpaRepository.findAll().single { it.profileId == existingProfile.id }.createdByAdmin shouldBe false
     }
 
     private fun command(uuid: String, contact: String, nickname: String) = ProfileCreatedCommand(

@@ -186,6 +186,15 @@ class SignalEventContractTest(unittest.TestCase):
         self.assertIn("*접수 시각*: 2026-08-20T12:34:56 KST", message)
         self.assertIn("*승인*: `/report 7`", message)
 
+    def test_prod_report_mentions_channel(self):
+        self.handler.config.environment = "prod"
+        payload = "FalseContactReport&7&123&01012345678&2026-08-20T12:34:56"
+
+        self.handler.create_false_contact_report_message(payload)
+
+        self.assertTrue(self.notifier.messages[-1].startswith("<!channel> 📣"))
+        self.assertIn("PROD SERVER", self.notifier.messages[-1])
+
     def test_dev_report_uses_dev_approval_command(self):
         self.handler.config.environment = "dev"
         payload = "FalseContactReport&7&123&01012345678&2026-08-20T12:34:56"

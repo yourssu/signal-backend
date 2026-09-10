@@ -183,7 +183,13 @@ validate_preflight
 previous_image_id=$(docker inspect --format '{{.Image}}' "$SPRING_CONTAINER" 2>/dev/null || true)
 
 echo "Logging in to Amazon ECR Public..."
-aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+if aws ecr-public get-login-password --region us-east-1 \
+  | docker login --username AWS --password-stdin public.ecr.aws; then
+  echo "ECR Public login succeeded."
+else
+  echo "ECR Public login skipped; pulling anonymously." >&2
+  docker logout public.ecr.aws >/dev/null 2>&1 || true
+fi
 echo "Pulling deployment image..."
 docker pull "$IMAGE_NAME"
 target_image_id=$(docker image inspect --format '{{.Id}}' "$IMAGE_NAME")

@@ -207,7 +207,7 @@ jobs:
           echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
           echo "OPENAI_MODEL=$OPENAI_MODEL" >> .env
           echo "OPENAI_PROMPT=$OPENAI_PROMPT" >> .env
-          echo "OPENAI_POLICY_PROMPT=$OPENAI_POLICY_PROMPT" >> .env
+          echo "OPENAI_POLICY_PROMPT=\"$OPENAI_POLICY_PROMPT\"" >> .env
           echo "USER_INPUT_LIMIT=$USER_INPUT_LIMIT" >> .env
           
           echo "PROJECT_NAME=$PROJECT_NAME" >> .env
@@ -241,8 +241,8 @@ jobs:
           scp -i yourssu.pem .env ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
           scp -i yourssu.pem observer/script/docker-deploy.sh observer/script/supervise.sh ubuntu@$HOST_URL:/home/ubuntu/$PROJECT_NAME-api/
           
-          # Make the script executable
-          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh /home/ubuntu/$PROJECT_NAME-api/supervise.sh"
+          # Make the script executable and restrict the env file
+          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x /home/ubuntu/$PROJECT_NAME-api/docker-deploy.sh /home/ubuntu/$PROJECT_NAME-api/supervise.sh && chmod 600 /home/ubuntu/$PROJECT_NAME-api/.env"
           
           # Execute the deployment script
           ssh -i yourssu.pem ubuntu@$HOST_URL "cd /home/ubuntu/$PROJECT_NAME-api && \

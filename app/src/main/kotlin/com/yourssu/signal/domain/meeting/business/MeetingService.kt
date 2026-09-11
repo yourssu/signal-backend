@@ -139,6 +139,10 @@ class MeetingService(
             companions = command.companions,
         )
         MeetingTeamValidator.validate(room.partySize, applicantMembers)
+        MeetingTeamValidator.validateGenderComposition(
+            meetingMemberRepository.findAllByRoomId(room.id).filter { it.teamSide == MeetingTeamSide.CREATOR },
+            applicantMembers,
+        )
         val creatorContact = profileReader.getByUuid(room.creatorUuid).contact
         val meetingMatch = meetingMatchRepository.save(
             MeetingMatch(

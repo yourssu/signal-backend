@@ -17,6 +17,52 @@ class MeetingTeamValidatorTest : DescribeSpec({
         department = "컴퓨터학부",
     )
 
+    fun team(side: MeetingTeamSide, vararg genders: Gender) = genders.mapIndexed { index, gender ->
+        member(index).copy(
+            teamSide = side,
+            userUuid = if (index == 0) Uuid("representative") else null,
+            gender = gender,
+        )
+    }
+
+    describe("팀 성별 구성") {
+        it("동성으로만 구성된 방에는 이성으로만 구성된 팀이 신청할 수 있다") {
+            shouldNotThrowAny {
+                MeetingTeamValidator.validateGenderComposition(
+                    team(MeetingTeamSide.CREATOR, Gender.MALE, Gender.MALE),
+                    team(MeetingTeamSide.APPLICANT, Gender.FEMALE, Gender.FEMALE),
+                )
+            }
+        }
+
+        it("동성으로만 구성된 방에 같은 성별 팀은 신청할 수 없다") {
+            shouldThrow<SameGenderMatchNotAllowedException> {
+                MeetingTeamValidator.validateGenderComposition(
+                    team(MeetingTeamSide.CREATOR, Gender.FEMALE, Gender.FEMALE),
+                    team(MeetingTeamSide.APPLICANT, Gender.FEMALE, Gender.FEMALE),
+                )
+            }
+        }
+
+        it("동성으로만 구성된 방에 혼성 팀은 신청할 수 없다") {
+            shouldThrow<SameGenderMatchNotAllowedException> {
+                MeetingTeamValidator.validateGenderComposition(
+                    team(MeetingTeamSide.CREATOR, Gender.MALE, Gender.MALE),
+                    team(MeetingTeamSide.APPLICANT, Gender.FEMALE, Gender.MALE),
+                )
+            }
+        }
+
+        it("혼성으로 구성된 방에는 성별 구성과 관계없이 신청할 수 있다") {
+            shouldNotThrowAny {
+                MeetingTeamValidator.validateGenderComposition(
+                    team(MeetingTeamSide.CREATOR, Gender.MALE, Gender.FEMALE),
+                    team(MeetingTeamSide.APPLICANT, Gender.MALE, Gender.MALE),
+                )
+            }
+        }
+    }
+
     describe("팀 구성") {
         it("대표 한 명과 인원수보다 한 명 적은 동행만 허용한다") {
             shouldNotThrowAny { MeetingTeamValidator.validate(3, listOf(member(0), member(1), member(2))) }

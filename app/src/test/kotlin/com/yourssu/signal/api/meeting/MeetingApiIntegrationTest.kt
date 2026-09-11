@@ -205,6 +205,41 @@ class MeetingApiIntegrationTest {
     }
 
     @Test
+    fun `동성으로만 구성된 방에 같은 성별 팀이 신청하면 400을 응답한다`() {
+        val creator = register()
+        val applicant = register()
+        profileRepository.save(profile(creator.uuid, "@same_gender_creator"))
+        val createdBody = mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_5")
+        }.andExpect { status { isCreated() } }
+            .andReturn().response.contentAsString
+        val roomId = objectMapper.readTree(createdBody).path("result").path("id").asLong()
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = """
+                {
+                  "representative":{"gender":"MALE","birthYear":2000,"department":"글로벌미디어학부"},
+                  "contact":"@same_gender_applicant",
+                  "companions":[{"gender":"MALE","birthYear":2001,"department":"경영학부"}]
+                }
+            """.trimIndent()
+        }.andExpect {
+            status { isBadRequest() }
+            jsonPath("$.code") { value("SAME_GENDER_MATCH_NOT_ALLOWED") }
+        }
+
+        mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+            bearer(applicant.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@opposite_gender_applicant")
+        }.andExpect { status { isCreated() } }
+    }
+
+    @Test
     fun `매칭 요청 검증 실패는 400을 응답한다`() {
         val creator = register()
         val applicant = register()

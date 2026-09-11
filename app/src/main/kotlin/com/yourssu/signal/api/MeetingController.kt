@@ -111,7 +111,7 @@ class MeetingController(
     @ApiResponses(
         value = [
             OpenApiResponse(responseCode = "201", description = "매칭 성공"),
-            OpenApiResponse(responseCode = "400", description = "방 ID·팀 인원·참여자·연락처 검증 실패 및 더미 연락처 거절 (code: INVALID_COMPANION_COUNT, INVALID_MEETING_MEMBER)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
+            OpenApiResponse(responseCode = "400", description = "방 ID·팀 인원·참여자·연락처 검증 실패 및 더미 연락처 거절 (code: INVALID_COMPANION_COUNT, INVALID_MEETING_MEMBER, SAME_GENDER_MATCH_NOT_ALLOWED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "401", description = "인증 실패 (code 없음)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "403", description = "블랙리스트 등록 사용자 (code: MEETING_BLOCKED)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),
             OpenApiResponse(responseCode = "404", description = "방 없음 (code: MEETING_ROOM_NOT_FOUND)", content = [Content(schema = Schema(implementation = ErrorResponse::class))]),

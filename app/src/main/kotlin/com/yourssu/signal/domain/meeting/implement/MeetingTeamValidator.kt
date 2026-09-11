@@ -3,6 +3,15 @@ package com.yourssu.signal.domain.meeting.implement
 import com.yourssu.signal.domain.profile.implement.ProfileValidator
 
 object MeetingTeamValidator {
+    fun validateGenderComposition(creatorMembers: List<MeetingMember>, applicantMembers: List<MeetingMember>) {
+        val creatorGenders = creatorMembers.map { it.gender }.toSet()
+        if (creatorGenders.size != 1) return
+        val applicantGenders = applicantMembers.map { it.gender }.toSet()
+        if (applicantGenders != setOf(creatorGenders.first().opposite())) {
+            throw SameGenderMatchNotAllowedException()
+        }
+    }
+
     fun validate(partySize: Int, members: List<MeetingMember>) {
         if (members.size != partySize || members.count { it.memberOrder == 0 } != 1) {
             throw InvalidCompanionCountException()

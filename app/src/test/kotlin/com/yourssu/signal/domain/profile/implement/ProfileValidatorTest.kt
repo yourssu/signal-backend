@@ -8,7 +8,6 @@ import com.yourssu.signal.domain.profile.implement.exception.NicknameLengthViola
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
-import java.time.LocalDate
 
 class ProfileValidatorTest : DescribeSpec({
     
@@ -210,19 +209,18 @@ class ProfileValidatorTest : DescribeSpec({
             
             context("유효한 출생년도일 때") {
                 
-                context("1900년이면") {
+                context("1985년이면") {
                     it("예외를 발생시키지 않는다") {
                         shouldNotThrowAny {
-                            ProfileValidator.validateBirthYear(1900)
+                            ProfileValidator.validateBirthYear(1985)
                         }
                     }
                 }
                 
-                context("현재 년도면") {
+                context("2008년이면") {
                     it("예외를 발생시키지 않는다") {
-                        val currentYear = LocalDate.now().year
                         shouldNotThrowAny {
-                            ProfileValidator.validateBirthYear(currentYear)
+                            ProfileValidator.validateBirthYear(2008)
                         }
                     }
                 }
@@ -246,10 +244,10 @@ class ProfileValidatorTest : DescribeSpec({
             
             context("유효하지 않은 출생년도일 때") {
                 
-                context("1899년이면") {
+                context("1984년이면") {
                     it("BirthYearViolatedException을 발생시킨다") {
                         shouldThrow<BirthYearViolatedException> {
-                            ProfileValidator.validateBirthYear(1899)
+                            ProfileValidator.validateBirthYear(1984)
                         }
                     }
                 }
@@ -262,11 +260,10 @@ class ProfileValidatorTest : DescribeSpec({
                     }
                 }
                 
-                context("현재 년도보다 1년 큰 년도면") {
+                context("2009년이면") {
                     it("BirthYearViolatedException을 발생시킨다") {
-                        val nextYear = LocalDate.now().year + 1
                         shouldThrow<BirthYearViolatedException> {
-                            ProfileValidator.validateBirthYear(nextYear)
+                            ProfileValidator.validateBirthYear(2009)
                         }
                     }
                 }

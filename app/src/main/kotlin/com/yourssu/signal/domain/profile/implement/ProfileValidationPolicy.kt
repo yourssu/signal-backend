@@ -1,11 +1,10 @@
 package com.yourssu.signal.domain.profile.implement
 
-import java.time.LocalDate
-
 object ProfileValidationPolicy {
     const val MIN_DEPARTMENT_LENGTH = 1
     const val MAX_DEPARTMENT_LENGTH = 20
-    const val MIN_BIRTH_YEAR = 1900L
+    const val MIN_BIRTH_YEAR = 1985L
+    const val MAX_BIRTH_YEAR = 2008L
     const val MIN_NICKNAME_LENGTH = 1
     const val MAX_NICKNAME_LENGTH = 15
     const val MIN_INTRO_SENTENCES_SIZE = 0
@@ -19,7 +18,7 @@ object ProfileValidationPolicy {
     val maleAnimals = setOf(Animal.BEAR, Animal.DEER, Animal.DINOSAUR, Animal.DOG, Animal.CAT, Animal.WOLF)
     val femaleAnimals = setOf(Animal.FOX, Animal.RABBIT, Animal.TURTLE, Animal.DOG, Animal.CAT, Animal.HAMSTER)
 
-    fun maximumBirthYear(): Int = LocalDate.now().year
+    fun maximumBirthYear(): Int = MAX_BIRTH_YEAR.toInt()
 
     fun isValidContact(contact: String): Boolean = Regex(CONTACT_PATTERN).matches(contact)
 

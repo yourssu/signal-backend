@@ -51,8 +51,8 @@ class MeetingRoomRepositoryImpl(
             since,
         )?.toDomain()
 
-    override fun existsByCreatorUuidAndCreationLimitDate(creatorUuid: Uuid, creationDate: LocalDate): Boolean =
-        jpaRepository.existsByCreatorUuidAndCreationLimitDate(creatorUuid.value, creationDate)
+    override fun existsByCreatorUuidAndCreationDate(creatorUuid: Uuid, creationDate: LocalDate): Boolean =
+        jpaRepository.existsByCreatorUuidAndCreationDate(creatorUuid.value, creationDate)
 
     override fun existsOpenByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): Boolean =
         jpaRepository.existsByCreatorUuidAndStatusAndExpiresAtAfter(creatorUuid.value, MeetingRoomStatus.OPEN, now)
@@ -63,14 +63,6 @@ class MeetingRoomRepositoryImpl(
             MeetingRoomStatus.OPEN,
             now,
         )?.toDomain()
-
-    override fun expireDueRoomByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): Int =
-        jpaRepository.expireDueRoomByCreatorUuid(
-            creatorUuid.value,
-            MeetingRoomStatus.OPEN,
-            MeetingRoomStatus.EXPIRED,
-            now,
-        )
 
     override fun existsMatchedByCreatorUuidAndMatchedDate(creatorUuid: Uuid, matchedDate: LocalDate): Boolean =
         jpaRepository.existsMatchedInPeriod(
@@ -116,7 +108,7 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
     )
     fun findAllOpen(status: MeetingRoomStatus, now: LocalDateTime): List<MeetingRoomEntity>
 
-    fun existsByCreatorUuidAndCreationLimitDate(creatorUuid: String, creationLimitDate: LocalDate): Boolean
+    fun existsByCreatorUuidAndCreationDate(creatorUuid: String, creationDate: LocalDate): Boolean
 
     fun existsByCreatorUuidAndStatusAndExpiresAtAfter(
         creatorUuid: String,
@@ -170,7 +162,6 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
         update MeetingRoomEntity r
         set r.status = :expiredStatus,
             r.activeSlot = null,
-            r.creationLimitDate = null,
             r.expiredAt = :now,
             r.updatedTime = :now
         where r.status = :openStatus and r.expiresAt <= :now
@@ -188,26 +179,6 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
         update MeetingRoomEntity r
         set r.status = :expiredStatus,
             r.activeSlot = null,
-            r.creationLimitDate = null,
-            r.expiredAt = :now,
-            r.updatedTime = :now
-        where r.creatorUuid = :creatorUuid and r.status = :openStatus and r.expiresAt <= :now
-        """
-    )
-    fun expireDueRoomByCreatorUuid(
-        creatorUuid: String,
-        openStatus: MeetingRoomStatus,
-        expiredStatus: MeetingRoomStatus,
-        now: LocalDateTime,
-    ): Int
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(
-        """
-        update MeetingRoomEntity r
-        set r.status = :expiredStatus,
-            r.activeSlot = null,
-            r.creationLimitDate = null,
             r.expiredAt = :now,
             r.updatedTime = :now
         where r.activeSlot = :slot and r.status = :openStatus and r.expiresAt <= :now
@@ -222,5 +193,5 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
 
     fun countBySlot(slot: MeetingSlot): Long
     fun countByActiveSlot(activeSlot: MeetingSlot): Long
-    fun countByCreatorUuidAndCreationLimitDate(creatorUuid: String, creationLimitDate: LocalDate): Long
+    fun countByCreatorUuidAndCreationDate(creatorUuid: String, creationDate: LocalDate): Long
 }

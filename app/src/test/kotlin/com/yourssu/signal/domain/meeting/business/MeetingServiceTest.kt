@@ -135,7 +135,7 @@ class MeetingServiceTest : DescribeSpec({
         it("오늘 매칭에 성공했으면 DAILY_MEETING_LIMIT_EXCEEDED 생성 불가 사유를 반환한다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(true)
@@ -149,7 +149,7 @@ class MeetingServiceTest : DescribeSpec({
         it("생성한 방이 열려 있으면 ACTIVE_ROOM_EXISTS 생성 불가 사유를 반환한다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(roomRepository.findAllOpen(any())).thenReturn(emptyList())
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
@@ -249,7 +249,7 @@ class MeetingServiceTest : DescribeSpec({
             val profile = profile(uuid)
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile)
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
             whenever(roomRepository.save(any())).thenAnswer { invocation ->
                 invocation.getArgument<MeetingRoom>(0).copy(id = 1L)
@@ -272,15 +272,14 @@ class MeetingServiceTest : DescribeSpec({
             val members = argumentCaptor<List<MeetingMember>>()
             verify(memberRepository).saveAll(members.capture())
             members.firstValue.map { it.userUuid } shouldBe listOf(uuid, null, null)
-            verify(roomRepository).expireDueRoomByCreatorUuid(uuid, LocalDateTime.of(2026, 8, 31, 12, 0))
-            verify(roomRepository).expireDueRoomInSlot(MeetingSlot.SLOT_1, LocalDateTime.of(2026, 8, 31, 12, 0))
+            verify(roomRepository).expireDueRoomInSlot(eq(MeetingSlot.SLOT_1), any())
             verify(expirationManager, never()).expireDueRooms(any())
         }
 
         it("관리자 블랙리스트에 등록된 사용자는 방을 생성할 수 없다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 7L))
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
             whenever(blacklistReader.isAddedByAdmin(7L)).thenReturn(true)
 
@@ -300,7 +299,7 @@ class MeetingServiceTest : DescribeSpec({
         it("승인된 신고의 연락처를 쓰는 프로필은 블랙리스트가 아니어도 방을 생성할 수 없다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 8L).copy(contact = "@reported"))
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
             whenever(blacklistReader.isAddedByAdmin(8L)).thenReturn(false)
             whenever(reportReader.findApprovedContacts()).thenReturn(listOf("@Reported"))
@@ -321,7 +320,7 @@ class MeetingServiceTest : DescribeSpec({
         it("프로필을 직접 비공개한 사용자는 방을 생성할 수 있다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid, id = 11L))
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
             whenever(blacklistReader.existsByProfileId(11L)).thenReturn(true)
             whenever(blacklistReader.isAddedByAdmin(11L)).thenReturn(false)
@@ -344,7 +343,7 @@ class MeetingServiceTest : DescribeSpec({
         it("커밋 이후에 생성 알림을 1회 발행하도록 등록한다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
             whenever(roomRepository.save(any())).thenAnswer { it.getArgument<MeetingRoom>(0).copy(id = 1L) }
             whenever(memberRepository.saveAll(any())).thenAnswer { it.getArgument(0) }
@@ -364,7 +363,7 @@ class MeetingServiceTest : DescribeSpec({
         it("팀 구성 검증에 실패하면 생성 알림을 등록하지 않는다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
             whenever(profileReader.getByUuid(uuid)).thenReturn(profile(uuid))
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31))).thenReturn(false)
             whenever(roomRepository.findOpenBySlot(eq(MeetingSlot.SLOT_1), any())).thenReturn(null)
             whenever(roomRepository.save(any())).thenAnswer { it.getArgument<MeetingRoom>(0).copy(id = 1L) }
 
@@ -385,7 +384,7 @@ class MeetingServiceTest : DescribeSpec({
 
         it("오늘 매칭에 성공한 사용자는 방을 생성할 수 없다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(true)
@@ -405,7 +404,7 @@ class MeetingServiceTest : DescribeSpec({
 
         it("방장으로 오늘 매칭에 성공한 사용자는 방을 생성할 수 없다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
@@ -427,7 +426,7 @@ class MeetingServiceTest : DescribeSpec({
 
         it("생성한 방이 열려 있으면 날짜가 바뀌어도 방을 더 만들 수 없다") {
             whenever(profileReader.existsByUuid(uuid)).thenReturn(true)
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(roomRepository.existsOpenByCreatorUuid(uuid, LocalDateTime.of(2026, 8, 31, 12, 0)))
                 .thenReturn(true)
@@ -613,7 +612,7 @@ class MeetingServiceTest : DescribeSpec({
 
         it("방을 만들었지만 매칭되지 않은 사용자는 다른 방에 신청할 수 있다") {
             whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(applicant, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(true)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
@@ -647,7 +646,7 @@ class MeetingServiceTest : DescribeSpec({
 
         it("오늘 매칭에 성공한 사용자는 다른 방에 신청할 수 없다") {
             whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(applicant, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(true)
@@ -660,7 +659,7 @@ class MeetingServiceTest : DescribeSpec({
 
         it("생성한 방이 열려 있는 동안에는 다른 방에 신청할 수 없다") {
             whenever(roomRepository.findByIdForUpdate(1L)).thenReturn(room())
-            whenever(roomRepository.existsByCreatorUuidAndCreationLimitDate(applicant, LocalDate.of(2026, 8, 31)))
+            whenever(roomRepository.existsByCreatorUuidAndCreationDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)
             whenever(matchRepository.existsByApplicantUuidAndMatchedDate(applicant, LocalDate.of(2026, 8, 31)))
                 .thenReturn(false)

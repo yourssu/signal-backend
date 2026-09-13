@@ -510,6 +510,117 @@ class MeetingApiIntegrationTest {
     }
 
     @Test
+    fun `자연 만료된 방의 생성자는 같은 날 재생성할 수 없지만 다른 방에 참여할 수 있다`() {
+        val host = register()
+        val otherHost = register()
+        profileRepository.save(profile(host.uuid, "@expired_host"))
+        profileRepository.save(profile(otherHost.uuid, "@expired_other_host"))
+        expiredRoom(host.uuid, MeetingSlot.SLOT_1)
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+        }
+
+        val otherRoomId = createRoom(otherHost, "SLOT_3")
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@expired_host")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+        }
+    }
+
+    @Test
+    fun `같은 사용자가 서로 다른 방에 동시에 신청해도 한 번만 매칭된다`() {
+        val firstHost = register()
+        val secondHost = register()
+        val applicant = register()
+        profileRepository.save(profile(firstHost.uuid, "@first_host"))
+        profileRepository.save(profile(secondHost.uuid, "@second_host"))
+        val roomIds = listOf(createRoom(firstHost, "SLOT_1"), createRoom(secondHost, "SLOT_2"))
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+
+        try {
+            val responses = roomIds.map { roomId ->
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+                        bearer(applicant.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = matchBody("@concurrent_applicant")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                }
+            }
+            check(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            val results = responses.map { it.get(10, TimeUnit.SECONDS) }
+
+            check(results.count { it.status == 201 } == 1)
+            check(results.single { it.status != 201 }.let {
+                it.status == 409 && objectMapper.readTree(it.body).path("code").asText() == "DAILY_MEETING_LIMIT_EXCEEDED"
+            })
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `같은 사용자의 방 생성과 다른 방 신청이 동시에 오면 하나만 성공한다`() {
+        val host = register()
+        val user = register()
+        profileRepository.save(profile(host.uuid, "@concurrent_host"))
+        profileRepository.save(profile(user.uuid, "@create_match_user"))
+        val roomId = createRoom(host, "SLOT_1")
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+
+        try {
+            val responses = listOf(
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms") {
+                        bearer(user.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = roomCreateBody("SLOT_2")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                },
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+                        bearer(user.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = matchBody("@create_match_user")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                },
+            )
+            check(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            val results = responses.map { it.get(10, TimeUnit.SECONDS) }
+
+            check(results.count { it.status == 201 } == 1)
+            check(results.single { it.status != 201 }.let {
+                it.status == 409 && objectMapper.readTree(it.body).path("code").asText() in
+                    setOf("DAILY_MEETING_LIMIT_EXCEEDED", "ACTIVE_ROOM_EXISTS")
+            })
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
     fun `열린 방을 가진 사용자는 날짜가 바뀌어도 방을 더 만들 수 없다`() {
         val host = register()
         profileRepository.save(profile(host.uuid, "@active_room_host"))
@@ -536,7 +647,9 @@ class MeetingApiIntegrationTest {
     @Test
     fun `관리자 취소는 JWT 없이 어드민 키로만 동작하고 슬롯을 반환한다`() {
         val creator = register()
-        profileRepository.save(profile(creator.uuid, "@admin-cancel"))
+        val otherCreator = register()
+        profileRepository.save(profile(creator.uuid, "@admin_cancel"))
+        profileRepository.save(profile(otherCreator.uuid, "@admin_cancel_other"))
         val roomId = createRoom(creator, "SLOT_1")
 
         mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
@@ -545,6 +658,25 @@ class MeetingApiIntegrationTest {
         }.andExpect { status { isNoContent() } }
 
         check(meetingRoomJpaRepository.findById(roomId).get().status == MeetingRoomStatus.CANCELLED)
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+        }
+
+        val otherRoomId = createRoom(otherCreator, "SLOT_3")
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@admin_cancel")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+        }
 
         val other = register()
         profileRepository.save(profile(other.uuid, "@slot-reuse"))

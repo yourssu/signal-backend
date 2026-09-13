@@ -11,6 +11,7 @@ import com.yourssu.signal.domain.profile.implement.Profile
 import com.yourssu.signal.domain.profile.implement.ProfileReader
 import com.yourssu.signal.domain.profile.implement.ProfileValidator
 import com.yourssu.signal.domain.report.implement.ReportReader
+import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
 import com.yourssu.signal.infrastructure.logging.Notification
 import org.springframework.transaction.support.TransactionSynchronization
@@ -31,6 +32,7 @@ class MeetingService(
     private val reportReader: ReportReader,
     private val adminAccessChecker: AdminAccessChecker,
     private val expirationManager: MeetingExpirationManager,
+    private val userReader: UserReader,
     private val clock: Clock,
 ) {
     fun getBoard(uuid: String): MeetingBoardResponse {
@@ -63,6 +65,7 @@ class MeetingService(
     @Transactional(rollbackFor = [com.yourssu.signal.handler.Error::class])
     fun createRoom(command: MeetingRoomCreateCommand): MeetingRoomResponse {
         val uuid = Uuid(command.uuid)
+        userReader.lockByUuid(uuid)
         if (!profileReader.existsByUuid(uuid)) throw ProfileRequiredException()
         if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
@@ -129,6 +132,7 @@ class MeetingService(
         ProfileValidator.validateContact(command.contact)
         val applicantUuid = Uuid(command.uuid)
         if (applicantUuid == room.creatorUuid) throw SelfMatchNotAllowedException()
+        userReader.lockByUuid(applicantUuid)
         validateNotBlocked(applicantUuid, command.contact)
         validateParticipation(applicantUuid, lockedNow)
         val applicantMembers = buildMembers(

@@ -11,6 +11,7 @@ import com.yourssu.signal.domain.profile.implement.*
 import com.yourssu.signal.domain.profile.implement.exception.BirthYearViolatedException
 import com.yourssu.signal.domain.report.implement.ReportReader
 import com.yourssu.signal.domain.viewer.implement.AdminAccessChecker
+import com.yourssu.signal.domain.user.implement.UserReader
 import com.yourssu.signal.domain.viewer.implement.exception.AdminPermissionDeniedException
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
@@ -34,8 +35,9 @@ class MeetingServiceTest : DescribeSpec({
     val reportReader = mock<ReportReader>()
     val adminAccessChecker = mock<AdminAccessChecker>()
     val expirationManager = mock<MeetingExpirationManager>()
+    val userReader = mock<UserReader>()
     val clock = AdjustableClock(Instant.parse("2026-08-31T03:00:00Z"), ZoneId.of("Asia/Seoul"))
-    val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager, clock)
+    val service = MeetingService(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager, userReader, clock)
     val uuid = Uuid("creator")
     val applicant = Uuid("applicant")
 
@@ -76,7 +78,7 @@ class MeetingServiceTest : DescribeSpec({
     )
 
     beforeEach {
-        reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager)
+        reset(roomRepository, memberRepository, matchRepository, profileReader, blacklistReader, reportReader, adminAccessChecker, expirationManager, userReader)
         whenever(matchRepository.findRoomIdByApplicantUuidAndMatchedDate(any(), any())).thenReturn(null)
         whenever(profileReader.getNicknameByUuid(any())).thenReturn("방장")
         clock.set(Instant.parse("2026-08-31T03:00:00Z"))

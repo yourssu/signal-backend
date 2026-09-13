@@ -148,39 +148,39 @@ class ProfileTest : DescribeSpec({
             
             context("출생년도가 유효하지 않을 때") {
                 
-                context("출생년도가 1900년 미만이면") {
+                context("출생년도가 1985년 미만이면") {
                     it("BirthYearViolatedException을 발생시킨다") {
                         shouldThrow<BirthYearViolatedException> {
-                            createValidProfile(birthYear = 1899)
+                            createValidProfile(birthYear = 1984)
                         }
                     }
                 }
                 
-                context("출생년도가 현재 년도보다 크면") {
+                context("출생년도가 2008년보다 크면") {
                     it("BirthYearViolatedException을 발생시킨다") {
                         shouldThrow<BirthYearViolatedException> {
-                            createValidProfile(birthYear = 2027)
+                            createValidProfile(birthYear = 2009)
                         }
                     }
                 }
                 
-                context("출생년도가 1900년이면") {
+                context("출생년도가 1985년이면") {
                     it("Profile 객체가 정상 생성된다") {
                         // given & when
-                        val profile = createValidProfile(birthYear = 1900)
+                        val profile = createValidProfile(birthYear = 1985)
                         
                         // then
-                        profile.birthYear shouldBe 1900
+                        profile.birthYear shouldBe 1985
                     }
                 }
                 
-                context("출생년도가 현재 년도면") {
+                context("출생년도가 2008년이면") {
                     it("Profile 객체가 정상 생성된다") {
                         // given & when
-                        val profile = createValidProfile(birthYear = 2024)
+                        val profile = createValidProfile(birthYear = 2008)
                         
                         // then
-                        profile.birthYear shouldBe 2024
+                        profile.birthYear shouldBe 2008
                     }
                 }
             }

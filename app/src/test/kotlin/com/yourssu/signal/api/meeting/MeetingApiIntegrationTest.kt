@@ -205,6 +205,39 @@ class MeetingApiIntegrationTest {
     }
 
     @Test
+    fun `동일 사용자의 서로 다른 슬롯 동시 생성은 하나만 성공한다`() {
+        val user = register()
+        profileRepository.save(profile(user.uuid, "@creator_race"))
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+
+        try {
+            val responses = listOf("SLOT_6", "SLOT_7").map { slot ->
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms") {
+                        bearer(user.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = roomCreateBody(slot)
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                }
+            }
+            check(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            val results = responses.map { it.get(10, TimeUnit.SECONDS) }
+
+            check(results.count { it.status == 201 } == 1)
+            val conflict = results.single { it.status != 201 }
+            check(conflict.status == 409)
+            check(objectMapper.readTree(conflict.body).path("code").asText() == "DAILY_CREATION_LIMIT_EXCEEDED")
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
     fun `동성으로만 구성된 방에 같은 성별 팀이 신청하면 400을 응답한다`() {
         val creator = register()
         val applicant = register()

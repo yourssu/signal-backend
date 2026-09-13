@@ -42,7 +42,7 @@ class MeetingService(
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             profileReader.findIdByUuid(userUuid)?.let { blacklistReader.isAddedByAdmin(it) } == true -> MEETING_BLOCKED
-            meetingRoomRepository.existsByCreatorUuidAndCreationLimitDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
+            meetingRoomRepository.existsByCreatorUuidAndCreationDateExceptExpired(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
             matchedToday(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
             meetingRoomRepository.existsOpenByCreatorUuid(userUuid, queryNow) -> ACTIVE_ROOM_EXISTS
             else -> null
@@ -63,10 +63,10 @@ class MeetingService(
     @Transactional(rollbackFor = [com.yourssu.signal.handler.Error::class])
     fun createRoom(command: MeetingRoomCreateCommand): MeetingRoomResponse {
         val uuid = Uuid(command.uuid)
-        if (!profileReader.existsByUuid(uuid)) throw ProfileRequiredException()
+        if (!profileReader.lockByUuid(uuid)) throw ProfileRequiredException()
         val now = LocalDateTime.now(clock)
         meetingRoomRepository.expireDueRoomByCreatorUuid(uuid, now)
-        if (meetingRoomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.now(clock))) {
+        if (meetingRoomRepository.existsByCreatorUuidAndCreationDateExceptExpired(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
         }
         if (matchedToday(uuid, LocalDate.now(clock))) {

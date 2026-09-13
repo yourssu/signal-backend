@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.meeting.storage
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.meeting.implement.DailyCreationLimitExceededException
 import com.yourssu.signal.domain.meeting.implement.MeetingRoom
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
@@ -60,16 +59,6 @@ class MeetingRoomRepositoryImplTest {
     }
 
     @Test
-    fun `같은 생성자는 같은 한국 날짜에 방을 하나만 저장할 수 있다`() {
-        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
-        repository.save(room("daily-creator", MeetingSlot.SLOT_3, now))
-
-        assertThrows(DailyCreationLimitExceededException::class.java) {
-            repository.save(room("daily-creator", MeetingSlot.SLOT_4, now.plusHours(1)))
-        }
-    }
-
-    @Test
     fun `자연 만료된 방은 같은 날짜의 생성 기회를 복구한다`() {
         val now = LocalDateTime.of(2026, 8, 31, 12, 0)
         val first = repository.save(room("expired-retry-creator", MeetingSlot.SLOT_3, now))
@@ -88,12 +77,8 @@ class MeetingRoomRepositoryImplTest {
         val matched = repository.save(room("matched-limit-creator", MeetingSlot.SLOT_4, now))
         repository.save(matched.match(now.plusMinutes(10)))
 
-        assertThrows(DailyCreationLimitExceededException::class.java) {
-            repository.save(room("cancelled-limit-creator", MeetingSlot.SLOT_5, now.plusHours(1)))
-        }
-        assertThrows(DailyCreationLimitExceededException::class.java) {
-            repository.save(room("matched-limit-creator", MeetingSlot.SLOT_6, now.plusHours(1)))
-        }
+        assertTrue(repository.existsByCreatorUuidAndCreationDateExceptExpired(Uuid("cancelled-limit-creator"), LocalDate.from(now)))
+        assertTrue(repository.existsByCreatorUuidAndCreationDateExceptExpired(Uuid("matched-limit-creator"), LocalDate.from(now)))
     }
 
     @Test

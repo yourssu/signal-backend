@@ -70,6 +70,33 @@ class MeetingRoomRepositoryImplTest {
     }
 
     @Test
+    fun `자연 만료된 방은 같은 날짜의 생성 기회를 복구한다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val first = repository.save(room("expired-retry-creator", MeetingSlot.SLOT_3, now))
+
+        repository.save(first.expire(now.plusHours(1)))
+        val second = repository.save(room("expired-retry-creator", MeetingSlot.SLOT_4, now.plusHours(1)))
+
+        assertNotNull(second.id)
+    }
+
+    @Test
+    fun `취소되거나 매칭된 방은 같은 날짜의 생성 기회를 복구하지 않는다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val cancelled = repository.save(room("cancelled-limit-creator", MeetingSlot.SLOT_3, now))
+        repository.save(cancelled.cancel(now.plusMinutes(10)))
+        val matched = repository.save(room("matched-limit-creator", MeetingSlot.SLOT_4, now))
+        repository.save(matched.match(now.plusMinutes(10)))
+
+        assertThrows(DailyCreationLimitExceededException::class.java) {
+            repository.save(room("cancelled-limit-creator", MeetingSlot.SLOT_5, now.plusHours(1)))
+        }
+        assertThrows(DailyCreationLimitExceededException::class.java) {
+            repository.save(room("matched-limit-creator", MeetingSlot.SLOT_6, now.plusHours(1)))
+        }
+    }
+
+    @Test
     fun `만료 대상 방은 상태를 변경하고 활성 슬롯을 반환한다`() {
         val now = LocalDateTime.of(2026, 8, 31, 12, 0)
         val due = repository.save(room("expired-creator", MeetingSlot.SLOT_5, now.minusHours(2)))
@@ -83,6 +110,9 @@ class MeetingRoomRepositoryImplTest {
         assertNull(expired.activeSlot)
         assertEquals(now, expired.expiredAt)
         assertEquals(listOf(MeetingSlot.SLOT_6), repository.findAllOpen(now).map { it.slot })
+
+        val retried = repository.save(room("expired-creator", MeetingSlot.SLOT_7, now))
+        assertNotNull(retried.id)
     }
 
     @Test
@@ -97,6 +127,19 @@ class MeetingRoomRepositoryImplTest {
         assertNull(repository.findById(due.id!!)!!.activeSlot)
         assertEquals(MeetingRoomStatus.OPEN, repository.findById(otherDue.id!!)!!.status)
         assertEquals(MeetingSlot.SLOT_4, repository.findById(otherDue.id!!)!!.activeSlot)
+    }
+
+    @Test
+    fun `생성자의 만료 방만 상태를 변경하고 생성 기회를 복구한다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val due = repository.save(room("creator-expired", MeetingSlot.SLOT_3, now.minusHours(2)))
+        val otherDue = repository.save(room("other-creator-expired", MeetingSlot.SLOT_4, now.minusHours(2)))
+
+        assertEquals(1, repository.expireDueRoomByCreatorUuid(Uuid("creator-expired"), now))
+
+        assertEquals(MeetingRoomStatus.EXPIRED, repository.findById(due.id!!)!!.status)
+        assertEquals(MeetingRoomStatus.OPEN, repository.findById(otherDue.id!!)!!.status)
+        assertNotNull(repository.save(room("creator-expired", MeetingSlot.SLOT_5, now)).id)
     }
 
     @Test

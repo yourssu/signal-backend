@@ -87,7 +87,7 @@ class MeetingRepositoryConcurrencyTest {
             start.countDown()
 
             assertEquals(1, results.count { it.get(10, TimeUnit.SECONDS) })
-            assertEquals(1, jpaRepository.countByCreatorUuidAndCreationDate("creator-race", LocalDate.from(now)))
+            assertEquals(1, jpaRepository.countByCreatorUuidAndCreationLimitDate("creator-race", LocalDate.from(now)))
         } finally {
             executor.shutdownNow()
         }

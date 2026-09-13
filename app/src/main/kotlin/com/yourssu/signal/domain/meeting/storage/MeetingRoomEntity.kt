@@ -25,7 +25,7 @@ import java.time.LocalDateTime
         UniqueConstraint(name = "uk_meeting_room_active_slot", columnNames = ["active_slot"]),
         UniqueConstraint(
             name = "uk_meeting_room_creator_date",
-            columnNames = ["creator_uuid", "creation_date"],
+            columnNames = ["creator_uuid", "creation_limit_date"],
         ),
     ],
 )
@@ -62,6 +62,9 @@ class MeetingRoomEntity(
     @Column(name = "creation_date", nullable = false)
     val creationDate: LocalDate,
 
+    @Column(name = "creation_limit_date")
+    val creationLimitDate: LocalDate?,
+
     @Column(name = "expires_at", nullable = false)
     val expiresAt: LocalDateTime,
 
@@ -87,6 +90,7 @@ class MeetingRoomEntity(
             invitation = room.invitation,
             status = room.status,
             creationDate = room.creationDate,
+            creationLimitDate = room.creationDate.takeUnless { room.status == MeetingRoomStatus.EXPIRED },
             expiresAt = room.expiresAt,
             matchedAt = room.matchedAt,
             cancelledAt = room.cancelledAt,

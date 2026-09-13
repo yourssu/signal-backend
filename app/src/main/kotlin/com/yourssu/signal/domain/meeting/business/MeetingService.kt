@@ -42,7 +42,7 @@ class MeetingService(
         val reason = when {
             !profileReader.existsByUuid(userUuid) -> PROFILE_REQUIRED
             profileReader.findIdByUuid(userUuid)?.let { blacklistReader.isAddedByAdmin(it) } == true -> MEETING_BLOCKED
-            meetingRoomRepository.existsByCreatorUuidAndCreationDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
+            meetingRoomRepository.existsByCreatorUuidAndCreationLimitDate(userUuid, LocalDate.now(clock)) -> DAILY_CREATION_LIMIT_EXCEEDED
             matchedToday(userUuid, LocalDate.now(clock)) -> DAILY_MEETING_LIMIT_EXCEEDED
             meetingRoomRepository.existsOpenByCreatorUuid(userUuid, queryNow) -> ACTIVE_ROOM_EXISTS
             else -> null
@@ -64,13 +64,14 @@ class MeetingService(
     fun createRoom(command: MeetingRoomCreateCommand): MeetingRoomResponse {
         val uuid = Uuid(command.uuid)
         if (!profileReader.existsByUuid(uuid)) throw ProfileRequiredException()
-        if (meetingRoomRepository.existsByCreatorUuidAndCreationDate(uuid, LocalDate.now(clock))) {
+        val now = LocalDateTime.now(clock)
+        meetingRoomRepository.expireDueRoomByCreatorUuid(uuid, now)
+        if (meetingRoomRepository.existsByCreatorUuidAndCreationLimitDate(uuid, LocalDate.now(clock))) {
             throw DailyCreationLimitExceededException()
         }
         if (matchedToday(uuid, LocalDate.now(clock))) {
             throw DailyMeetingLimitExceededException()
         }
-        val now = LocalDateTime.now(clock)
         if (meetingRoomRepository.existsOpenByCreatorUuid(uuid, now)) throw ActiveRoomExistsException()
         meetingRoomRepository.expireDueRoomInSlot(command.slot, now)
         if (meetingRoomRepository.findOpenBySlot(command.slot, now) != null) throw SlotAlreadyOccupiedException()

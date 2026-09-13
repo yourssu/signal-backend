@@ -534,6 +534,30 @@ class MeetingApiIntegrationTest {
     }
 
     @Test
+    fun `자연 만료된 방은 보드와 생성 API에서 당일 생성 기회를 복구한다`() {
+        val host = register()
+        profileRepository.save(profile(host.uuid, "@expired_retry_host"))
+        expiredRoom(host.uuid, MeetingSlot.SLOT_5)
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_6")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.slot") { value("SLOT_6") }
+        }
+
+        mockMvc.get("/api/meetings/board") {
+            bearer(host.accessToken)
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.result.creationEligibility.canCreate") { value(false) }
+            jsonPath("$.result.creationEligibility.reason") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+        }
+    }
+
+    @Test
     fun `관리자 취소는 JWT 없이 어드민 키로만 동작하고 슬롯을 반환한다`() {
         val creator = register()
         profileRepository.save(profile(creator.uuid, "@admin-cancel"))

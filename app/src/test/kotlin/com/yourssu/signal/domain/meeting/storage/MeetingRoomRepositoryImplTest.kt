@@ -70,6 +70,15 @@ class MeetingRoomRepositoryImplTest {
     }
 
     @Test
+    fun `생성 제한은 날짜가 바뀌면 초기화된다`() {
+        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
+        val first = repository.save(room("next-day-creator", MeetingSlot.SLOT_3, now))
+        repository.save(first.expire(now.plusHours(1)))
+
+        assertNotNull(repository.save(room("next-day-creator", MeetingSlot.SLOT_4, now.plusDays(1))).id)
+    }
+
+    @Test
     fun `만료 대상 방은 상태를 변경하고 활성 슬롯을 반환한다`() {
         val now = LocalDateTime.of(2026, 8, 31, 12, 0)
         val due = repository.save(room("expired-creator", MeetingSlot.SLOT_5, now.minusHours(2)))

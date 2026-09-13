@@ -510,6 +510,34 @@ class MeetingApiIntegrationTest {
     }
 
     @Test
+    fun `자연 만료된 방의 생성자는 같은 날 재생성할 수 없지만 다른 방에 참여할 수 있다`() {
+        val host = register()
+        val otherHost = register()
+        profileRepository.save(profile(host.uuid, "@expired_host"))
+        profileRepository.save(profile(otherHost.uuid, "@expired_other_host"))
+        expiredRoom(host.uuid, MeetingSlot.SLOT_1)
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+        }
+
+        val otherRoomId = createRoom(otherHost, "SLOT_3")
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(host.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@expired_host")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+        }
+    }
+
+    @Test
     fun `열린 방을 가진 사용자는 날짜가 바뀌어도 방을 더 만들 수 없다`() {
         val host = register()
         profileRepository.save(profile(host.uuid, "@active_room_host"))
@@ -536,7 +564,9 @@ class MeetingApiIntegrationTest {
     @Test
     fun `관리자 취소는 JWT 없이 어드민 키로만 동작하고 슬롯을 반환한다`() {
         val creator = register()
-        profileRepository.save(profile(creator.uuid, "@admin-cancel"))
+        val otherCreator = register()
+        profileRepository.save(profile(creator.uuid, "@admin_cancel"))
+        profileRepository.save(profile(otherCreator.uuid, "@admin_cancel_other"))
         val roomId = createRoom(creator, "SLOT_1")
 
         mockMvc.post("/api/meetings/rooms/$roomId/admin-cancel") {
@@ -545,6 +575,25 @@ class MeetingApiIntegrationTest {
         }.andExpect { status { isNoContent() } }
 
         check(meetingRoomJpaRepository.findById(roomId).get().status == MeetingRoomStatus.CANCELLED)
+
+        mockMvc.post("/api/meetings/rooms") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = roomCreateBody("SLOT_2")
+        }.andExpect {
+            status { isConflict() }
+            jsonPath("$.code") { value("DAILY_CREATION_LIMIT_EXCEEDED") }
+        }
+
+        val otherRoomId = createRoom(otherCreator, "SLOT_3")
+        mockMvc.post("/api/meetings/rooms/$otherRoomId/matches") {
+            bearer(creator.accessToken)
+            contentType = MediaType.APPLICATION_JSON
+            content = matchBody("@admin_cancel")
+        }.andExpect {
+            status { isCreated() }
+            jsonPath("$.result.status") { value("MATCHED") }
+        }
 
         val other = register()
         profileRepository.save(profile(other.uuid, "@slot-reuse"))

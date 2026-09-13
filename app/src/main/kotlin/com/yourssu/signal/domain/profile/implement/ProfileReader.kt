@@ -14,8 +14,6 @@ class ProfileReader(
         return profile.copy(introSentences = introSentences)
     }
 
-    fun lockByUuid(uuid: Uuid) = profileRepository.lockByUuid(uuid)
-
     fun getNicknameByUuid(uuid: Uuid): String = profileRepository.getNicknameByUuid(uuid)
 
     fun findIdByUuid(uuid: Uuid): Long? = profileRepository.findIdByUuid(uuid)

@@ -35,6 +35,8 @@ class ProfileRepositoryImpl(
             ?: throw ProfileNotFoundException())
     }
 
+    override fun lockByUuid(uuid: Uuid): Boolean = profileJpaRepository.findLockedByUuid(uuid.value) != null
+
     override fun getNicknameByUuid(uuid: Uuid): String = jpaQueryFactory
         .select(profileEntity.nickname)
         .from(profileEntity)
@@ -118,5 +120,8 @@ class ProfileRepositoryImpl(
 }
 
 interface ProfileJpaRepository : JpaRepository<ProfileEntity, Long> {
+    @org.springframework.data.jpa.repository.Lock(LockModeType.PESSIMISTIC_WRITE)
+    fun findLockedByUuid(uuid: String): ProfileEntity?
+
     fun countByEgenTeto(egenTeto: EgenTeto): Long
 }

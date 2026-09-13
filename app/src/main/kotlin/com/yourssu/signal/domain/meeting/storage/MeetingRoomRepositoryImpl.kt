@@ -1,7 +1,6 @@
 package com.yourssu.signal.domain.meeting.storage
 
 import com.yourssu.signal.domain.common.implement.Uuid
-import com.yourssu.signal.domain.meeting.implement.DailyCreationLimitExceededException
 import com.yourssu.signal.domain.meeting.implement.MeetingRoom
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomRepository
 import com.yourssu.signal.domain.meeting.implement.MeetingRoomStatus
@@ -27,8 +26,6 @@ class MeetingRoomRepositoryImpl(
         when {
             MeetingConstraintClassifier.matches(exception, MeetingConstraintClassifier.ACTIVE_SLOT) ->
                 throw SlotAlreadyOccupiedException()
-            MeetingConstraintClassifier.matches(exception, MeetingConstraintClassifier.CREATOR_DATE) ->
-                throw DailyCreationLimitExceededException()
             else -> throw exception
         }
     }
@@ -51,8 +48,12 @@ class MeetingRoomRepositoryImpl(
             since,
         )?.toDomain()
 
-    override fun existsByCreatorUuidAndCreationDate(creatorUuid: Uuid, creationDate: LocalDate): Boolean =
-        jpaRepository.existsByCreatorUuidAndCreationDate(creatorUuid.value, creationDate)
+    override fun existsByCreatorUuidAndCreationDateExceptExpired(creatorUuid: Uuid, creationDate: LocalDate): Boolean =
+        jpaRepository.existsByCreatorUuidAndCreationDateAndStatusNot(
+            creatorUuid.value,
+            creationDate,
+            MeetingRoomStatus.EXPIRED,
+        )
 
     override fun existsOpenByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): Boolean =
         jpaRepository.existsByCreatorUuidAndStatusAndExpiresAtAfter(creatorUuid.value, MeetingRoomStatus.OPEN, now)
@@ -63,6 +64,14 @@ class MeetingRoomRepositoryImpl(
             MeetingRoomStatus.OPEN,
             now,
         )?.toDomain()
+
+    override fun expireDueRoomByCreatorUuid(creatorUuid: Uuid, now: LocalDateTime): Int =
+        jpaRepository.expireDueRoomByCreatorUuid(
+            creatorUuid.value,
+            MeetingRoomStatus.OPEN,
+            MeetingRoomStatus.EXPIRED,
+            now,
+        )
 
     override fun existsMatchedByCreatorUuidAndMatchedDate(creatorUuid: Uuid, matchedDate: LocalDate): Boolean =
         jpaRepository.existsMatchedInPeriod(
@@ -108,7 +117,11 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
     )
     fun findAllOpen(status: MeetingRoomStatus, now: LocalDateTime): List<MeetingRoomEntity>
 
-    fun existsByCreatorUuidAndCreationDate(creatorUuid: String, creationDate: LocalDate): Boolean
+    fun existsByCreatorUuidAndCreationDateAndStatusNot(
+        creatorUuid: String,
+        creationDate: LocalDate,
+        status: MeetingRoomStatus,
+    ): Boolean
 
     fun existsByCreatorUuidAndStatusAndExpiresAtAfter(
         creatorUuid: String,
@@ -168,6 +181,24 @@ interface MeetingRoomJpaRepository : JpaRepository<MeetingRoomEntity, Long> {
         """
     )
     fun expireDueRooms(
+        openStatus: MeetingRoomStatus,
+        expiredStatus: MeetingRoomStatus,
+        now: LocalDateTime,
+    ): Int
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+        """
+        update MeetingRoomEntity r
+        set r.status = :expiredStatus,
+            r.activeSlot = null,
+            r.expiredAt = :now,
+            r.updatedTime = :now
+        where r.creatorUuid = :creatorUuid and r.status = :openStatus and r.expiresAt <= :now
+        """
+    )
+    fun expireDueRoomByCreatorUuid(
+        creatorUuid: String,
         openStatus: MeetingRoomStatus,
         expiredStatus: MeetingRoomStatus,
         now: LocalDateTime,

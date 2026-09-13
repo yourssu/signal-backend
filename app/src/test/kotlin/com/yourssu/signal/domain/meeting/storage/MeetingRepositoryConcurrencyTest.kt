@@ -65,35 +65,6 @@ class MeetingRepositoryConcurrencyTest {
     }
 
     @Test
-    fun `동일 생성자의 서로 다른 슬롯 동시 생성도 하나만 성공한다`() {
-        val now = LocalDateTime.of(2026, 8, 31, 12, 0)
-        val ready = CountDownLatch(2)
-        val start = CountDownLatch(1)
-        val executor = Executors.newFixedThreadPool(2)
-        try {
-            val slots = listOf(MeetingSlot.SLOT_6, MeetingSlot.SLOT_7)
-            val results = slots.map { slot ->
-                executor.submit<Boolean> {
-                    ready.countDown()
-                    start.await()
-                    runCatching {
-                        transactionTemplate.executeWithoutResult {
-                            repository.save(room("creator-race", slot, now))
-                        }
-                    }.isSuccess
-                }
-            }
-            ready.await(5, TimeUnit.SECONDS)
-            start.countDown()
-
-            assertEquals(1, results.count { it.get(10, TimeUnit.SECONDS) })
-            assertEquals(1, jpaRepository.countByCreatorUuidAndCreationDate("creator-race", LocalDate.from(now)))
-        } finally {
-            executor.shutdownNow()
-        }
-    }
-
-    @Test
     fun `동일 방 동시 매칭은 방 잠금으로 하나만 성공한다`() {
         val now = LocalDateTime.of(2026, 8, 31, 12, 0)
         val room = repository.save(room("match-creator", MeetingSlot.SLOT_7, now))

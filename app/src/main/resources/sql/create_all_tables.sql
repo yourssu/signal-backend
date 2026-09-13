@@ -244,7 +244,6 @@ CREATE TABLE meeting_room (
     updated_time DATETIME(6) NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uk_meeting_room_active_slot (active_slot),
-    UNIQUE KEY uk_meeting_room_creator_date (creator_uuid, creation_date),
     INDEX idx_meeting_room_board (status, expires_at),
     INDEX idx_meeting_room_latest_match (status, matched_at, id),
     INDEX idx_meeting_room_creator_uuid (creator_uuid)

@@ -23,10 +23,6 @@ import java.time.LocalDateTime
     name = "meeting_room",
     uniqueConstraints = [
         UniqueConstraint(name = "uk_meeting_room_active_slot", columnNames = ["active_slot"]),
-        UniqueConstraint(
-            name = "uk_meeting_room_creator_date",
-            columnNames = ["creator_uuid", "creation_date"],
-        ),
     ],
 )
 class MeetingRoomEntity(

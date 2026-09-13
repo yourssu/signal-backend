@@ -10,4 +10,6 @@ class UserReader(
     fun getByUuid(uuid: Uuid): User {
         return userRepository.getByUuid(uuid)
     }
+
+    fun lockByUuid(uuid: Uuid) = userRepository.lockByUuid(uuid)
 }

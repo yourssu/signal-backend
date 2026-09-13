@@ -538,6 +538,89 @@ class MeetingApiIntegrationTest {
     }
 
     @Test
+    fun `같은 사용자가 서로 다른 방에 동시에 신청해도 한 번만 매칭된다`() {
+        val firstHost = register()
+        val secondHost = register()
+        val applicant = register()
+        profileRepository.save(profile(firstHost.uuid, "@first_host"))
+        profileRepository.save(profile(secondHost.uuid, "@second_host"))
+        val roomIds = listOf(createRoom(firstHost, "SLOT_1"), createRoom(secondHost, "SLOT_2"))
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+
+        try {
+            val responses = roomIds.map { roomId ->
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+                        bearer(applicant.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = matchBody("@concurrent_applicant")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                }
+            }
+            check(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            val results = responses.map { it.get(10, TimeUnit.SECONDS) }
+
+            check(results.count { it.status == 201 } == 1)
+            check(results.single { it.status != 201 }.let {
+                it.status == 409 && objectMapper.readTree(it.body).path("code").asText() == "DAILY_MEETING_LIMIT_EXCEEDED"
+            })
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
+    fun `같은 사용자의 방 생성과 다른 방 신청이 동시에 오면 하나만 성공한다`() {
+        val host = register()
+        val user = register()
+        profileRepository.save(profile(host.uuid, "@concurrent_host"))
+        profileRepository.save(profile(user.uuid, "@create_match_user"))
+        val roomId = createRoom(host, "SLOT_1")
+        val ready = CountDownLatch(2)
+        val start = CountDownLatch(1)
+        val executor = Executors.newFixedThreadPool(2)
+
+        try {
+            val responses = listOf(
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms") {
+                        bearer(user.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = roomCreateBody("SLOT_2")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                },
+                executor.submit<ApiResult> {
+                    ready.countDown()
+                    start.await(5, TimeUnit.SECONDS)
+                    mockMvc.post("/api/meetings/rooms/$roomId/matches") {
+                        bearer(user.accessToken)
+                        contentType = MediaType.APPLICATION_JSON
+                        content = matchBody("@create_match_user")
+                    }.andReturn().response.let { ApiResult(it.status, it.contentAsString) }
+                },
+            )
+            check(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            val results = responses.map { it.get(10, TimeUnit.SECONDS) }
+
+            check(results.count { it.status == 201 } == 1)
+            check(results.single { it.status != 201 }.let {
+                it.status == 409 && objectMapper.readTree(it.body).path("code").asText() in
+                    setOf("DAILY_MEETING_LIMIT_EXCEEDED", "ACTIVE_ROOM_EXISTS")
+            })
+        } finally {
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
     fun `열린 방을 가진 사용자는 날짜가 바뀌어도 방을 더 만들 수 없다`() {
         val host = register()
         profileRepository.save(profile(host.uuid, "@active_room_host"))

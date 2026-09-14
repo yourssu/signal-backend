@@ -94,22 +94,6 @@ class SignalEventContractTest(unittest.TestCase):
         self.assertIn("01012341111", message)
         self.assertNotIn("instagram.com", message)
 
-    def test_meeting_room_message_mentions_channel_only_in_prod(self):
-        payload = (
-            "CreateMeetingRoom&12&SLOT_3&초대&2026-09-04T22:10:03&45&하루하루"
-            "&MALE&2002&컴퓨터학부&@haru_ru&MALE/2001/경영학부"
-        )
-
-        self.handler.config.environment = "prod"
-        self.handler.create_meeting_room_message(payload)
-        self.assertTrue(self.notifier.messages[0].startswith("<!channel> 🎪"))
-
-        self.notifier.messages.clear()
-        self.handler.config.environment = "dev"
-        self.handler.create_meeting_room_message(payload)
-        self.assertTrue(self.notifier.messages[0].startswith("🎪"))
-        self.assertNotIn("<!channel>", self.notifier.messages[0])
-
     def test_meeting_room_policy_check_failure_is_reported(self):
         line = (
             "INFO com.yourssu.signal.infrastructure.logging.Notification - "

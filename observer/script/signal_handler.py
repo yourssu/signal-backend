@@ -160,7 +160,8 @@ class SignalHandler:
         )
         environment = self.config.environment.upper()
         command = f"/dev cancel {room_id}" if environment == "DEV" else f"/cancel {room_id}"
-        message = f"""🎪 *미팅 방 생성 - {environment} SERVER* 🎪
+        mention = "<!channel> " if environment == "PROD" else ""
+        message = f"""{mention}🎪 *미팅 방 생성 - {environment} SERVER* 🎪
     -  🆔 *방 ID*: {room_id} ({slot})
     -  💌 *초대 문구*: {invitation}
     -  ⌛ *만료*: {expires_at} KST
